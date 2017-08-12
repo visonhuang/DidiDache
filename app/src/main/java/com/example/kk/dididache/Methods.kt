@@ -1,5 +1,6 @@
 package com.example.kk.dididache
 
+import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
 
@@ -27,6 +28,6 @@ fun Any.showToast(msg: Any, gravity: Int = Gravity.BOTTOM or Gravity.CENTER) {
 
 val Any.Tagg: String
     get() {
-        val tag = this.javaClass.name.split("\\.")
-        return tag[tag.size - 1]+"===="
+        val tag = this.javaClass.name.split(".")
+        return tag[tag.size - 1].replace("$","->")+"===="
     }

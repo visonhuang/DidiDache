@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context="com.example.kk.dididache.ui.MainActivity">
 
+    <Button
+        android:id="@+id/gotoMyLoc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:text="我的位置"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.baidu.mapapi.map.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"

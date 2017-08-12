@@ -12,20 +12,22 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import com.baidu.location.BDLocation
-import com.baidu.location.BDLocationListener
-import com.baidu.location.LocationClient
-import com.baidu.location.LocationClientOption
-import com.baidu.mapapi.map.MapStatus
-import com.baidu.mapapi.map.MapStatusUpdateFactory
-import com.baidu.mapapi.map.MyLocationConfiguration
-import com.baidu.mapapi.map.MyLocationData
+import android.view.LayoutInflater
+import android.view.animation.LinearInterpolator
+import com.baidu.location.*
+import com.baidu.mapapi.map.*
+import com.baidu.mapapi.map.BaiduMap.OnMapStatusChangeListener
 import com.baidu.mapapi.model.LatLng
 
 import com.example.kk.dididache.R
 import com.example.kk.dididache.Tagg
+import com.example.kk.dididache.model.Http
 import com.example.kk.dididache.showToast
 import kotlinx.android.synthetic.main.activity_main.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.jetbrains.anko.imageView
+import org.jetbrains.anko.verticalLayout
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
     //定位相关
@@ -36,16 +38,48 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var curPoint: LatLng = LatLng(0.0, 0.0)//当前经纬度
         get() = LatLng(locData?.latitude ?: 0.0, locData?.longitude ?: 0.0)
     private var locData: MyLocationData? = null//坐标信息
-    private var curDirection = 0
+    private var curDirection = 0//当前方向
     private var lastX: Double = 0.0
     private var isFirstLoc = true
+    private var heatMap: HeatMap? = null
+        set(value) {
+            field?.removeHeatMap()
+            field = value
+            map.addHeatMap(field)//自动添加
+        }
+    //地图状态变化监听器
+    private var mapStateChangeListener: OnMapStatusChangeListener = object : OnMapStatusChangeListener {
+        override fun onMapStatusChangeStart(p0: MapStatus?) {
+            Log.d(Tagg, "地图状态开始改变")
+        }
 
+        override fun onMapStatusChange(p0: MapStatus?) {
+            Log.d(Tagg, "地图状态改变中")
+        }
+
+        override fun onMapStatusChangeFinish(p0: MapStatus?) {
+            Log.d(Tagg, "地图状态改变结束")
+            //Http.getInstance().getCarsUnderBounds(map.mapStatus.bound)
+        }
+    }
+    private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
+        override fun onMapClick(p0: LatLng?) {
+            val view = LayoutInflater.from(this@MainActivity).inflate(R.layout.news_item, null, false)
+            map.showInfoWindow(InfoWindow(view, p0, 200))
+        }
+
+        override fun onMapPoiClick(p0: MapPoi?): Boolean {
+            return true
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        EventBus.getDefault().register(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //initLoc()//初始化定位
         requsetPermission()//请求权限
+
     }
 
     //SensorEventListener
@@ -55,7 +89,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     //SensorEventListener
     override fun onSensorChanged(p0: SensorEvent) {
-        Log.d(Tagg, "传感器数据变化")
         val x = p0.values[SensorManager.DATA_X].toDouble()
         if (Math.abs(x - lastX) > 1.0) {
             curDirection = x.toInt()
@@ -103,8 +136,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    //定位监听器
-    inner class MyLocationListener : BDLocationListener {
+    //定位监听器,还可以对热点监听等等
+    inner class MyLocationListener : BDAbstractLocationListener() {
+
         override fun onReceiveLocation(p0: BDLocation?) {
             Log.d(Tagg, "收到定位,${p0?.latitude} and ${p0?.longitude}")
             Log.d(Tagg, "地图边界,北${map.mapStatus.bound.northeast} and 南${map.mapStatus.bound.northeast}")
@@ -120,31 +154,51 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             map.setMyLocationData(locData)
             if (isFirstLoc) {
                 isFirstLoc = false
-                map.animateMapStatus(MapStatusUpdateFactory.newMapStatus(
-                        MapStatus.Builder()
-                                .target(LatLng(p0.latitude, p0.longitude))
-                                .zoom(18.0F).build()))
+                backToMyLoc(18.0F)
+                Http.getInstance().getCarsUnderBounds(map.mapStatus.bound)
             }
         }
     }
 
+    //初始化定位
     private fun initLoc() {
         //注册定位监听器
-        try {
-            map.isMyLocationEnabled = true
-            locClient.registerLocationListener(locationListener)
-            val option = LocationClientOption()
-            option.isOpenGps = true//开gps
-            option.coorType = "bd09ll"//设置坐标类型
-            option.scanSpan = 1000//扫描速度
-            locClient.locOption = option
-            locClient.start()
-            Log.d(Tagg, "开启定位")
-            map.setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.COMPASS, true, null))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        map.isMyLocationEnabled = true
+        locClient.registerLocationListener(locationListener)
+        val option = LocationClientOption()
+        option.isOpenGps = true//开gps
+        option.coorType = "bd09ll"//设置坐标类型
+        option.scanSpan = 1000//扫描速度
+        locClient.locOption = option
+        locClient.start()
+        Log.d(Tagg, "开启定位")
+        map.setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, null))
+        initMap()//初始化地图
+        initView()//初始化视图
+    }
 
+    //初始化视图
+    private fun initView() {
+        gotoMyLoc.setOnClickListener { backToMyLoc(map.mapStatus.zoom) }
+    }
+
+    private fun initMap() {
+        map.setOnMapStatusChangeListener(mapStateChangeListener)//地图状态变化监听
+        map.setOnMapClickListener(onMapClickListener)//地图点击监听
+    }
+
+    //回到定位位置
+    private fun backToMyLoc(zoom: Float) {
+        map.animateMapStatus(MapStatusUpdateFactory.newMapStatus(
+                MapStatus.Builder()
+                        .target(LatLng(curPoint.latitude, curPoint.longitude))
+                        .zoom(zoom).build()))
+    }
+
+    @Subscribe
+    fun addHeatMap(list: ArrayList<LatLng>) {
+        Log.d(Tagg, "$list")
+        heatMap = HeatMap.Builder().data(list).build()
     }
 
     override fun onResume() {
@@ -156,6 +210,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onDestroy() {
+        locClient.stop()// 退出时销毁定位
+        map.isMyLocationEnabled = false// 关闭定位图层
         mapView.onDestroy()
         super.onDestroy()
     }
@@ -166,8 +222,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onStop() {
-        //取消注册传感器监听
-        senorManager.unregisterListener(this)
+        senorManager.unregisterListener(this)//取消注册传感器监听
+        EventBus.getDefault().unregister(this)//取消订阅
         super.onStop()
     }
 
