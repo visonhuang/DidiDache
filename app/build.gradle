@@ -38,7 +38,7 @@ android {
         compile "org.jetbrains.anko:anko:0.10.1"
         compile 'org.greenrobot:eventbus:3.0.0'
         compile 'com.squareup.okhttp3:okhttp:3.8.1'
-        compile 'com.ohmerhe.kolley:kolley:0.3.0'
+        compile 'com.orhanobut:logger:2.1.1'
     }
 }
 dependencies {

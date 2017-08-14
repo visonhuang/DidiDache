@@ -10,7 +10,7 @@ import android.widget.Toast
 
 fun Any.inUiThread(run: () -> Unit) = App.mainThreadHandler.post(run)
 
-fun Any.showToast(msg: Any, gravity: Int = Gravity.BOTTOM or Gravity.CENTER) {
+fun Any.showToast(msg: Any) {
 
     inUiThread {
         if (null == App.mtoast || msg.toString() !== App.mMsg!!.toString()) {
@@ -19,7 +19,6 @@ fun Any.showToast(msg: Any, gravity: Int = Gravity.BOTTOM or Gravity.CENTER) {
             } else {
                 App.mtoast!!.setText(msg.toString())
             }
-            App.mtoast?.setGravity(gravity, 0, 0)
             App.mMsg = msg
         }
         App.mtoast?.show()
