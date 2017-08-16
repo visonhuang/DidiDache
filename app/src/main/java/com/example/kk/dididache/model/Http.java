@@ -34,7 +34,7 @@ public class Http {
     private static Http http;
     private static OkHttpClient client;
     private static Dispatcher dispatcher;
-    private static int TAG_HEATPOINTS = 1;//请求热力点的tag
+    public static int TAG_HEATPOINTS = 1;//请求热力点的tag
 
     public static Http getInstance() {
         if (http == null) http = new Http();
@@ -44,17 +44,21 @@ public class Http {
     }
 
     //请求热力点
-    public void getHeatPoints(LatLngBounds bounds) {
+    public void getHeatPoints(final HeatInfo info) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 LatLongList latLngs;
+                MediaType mediaType = MediaType.parse("application/json");
+                Logger.json(new Gson().toJson(info));
+                RequestBody body = RequestBody.create(mediaType, new Gson().toJson(info));
                 Request request = new Request.Builder()
-                        .tag(TAG_HEATPOINTS)
-                        .url("http://192.168.1.114:8080/gps/find")
+                        .url("http://192.168.1.114:8080/gps/getdataforandroid")
+                        .post(body)
                         .addHeader("content-type", "application/json")
                         .addHeader("cache-control", "no-cache")
                         .build();
+
                 try {
                     //接收数据
                     Response response = client.newCall(request).execute();
@@ -72,6 +76,15 @@ public class Http {
 
             }
         }).start();
+    }
+
+    //请求某个坐标下一段时间内出租车变化情况
+    public void getTaxiCountByTime(TaxiCountInfo info) {
+        ArrayList<TaxiCount> list = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            list.add(new TaxiCount(new Random().nextInt(100)));
+        }
+        EventBus.getDefault().post(list);
     }
 
     //取消请求
@@ -93,6 +106,7 @@ public class Http {
             }
         }
     }
+
 
     private static double nextDouble(final double min, final double max) {
         return min + ((max - min) * new Random().nextDouble());

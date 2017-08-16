@@ -1,12 +1,15 @@
 package com.example.kk.dididache.ui
 
 import android.Manifest
+import android.app.ActivityOptions
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -15,14 +18,16 @@ import com.baidu.location.*
 import com.baidu.mapapi.map.*
 import com.baidu.mapapi.map.BaiduMap.OnMapStatusChangeListener
 import com.baidu.mapapi.model.LatLng
-import com.example.kk.dididache.R
-import com.example.kk.dididache.Tagg
+import com.example.kk.dididache.*
+import com.example.kk.dididache.model.ChartDialog
+import com.example.kk.dididache.model.HeatInfo
+import com.example.kk.dididache.model.Http
 import com.example.kk.dididache.model.LatLongList
-import com.example.kk.dididache.showToast
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import java.util.*
 
 class MainActivity : BaseActivity(), SensorEventListener {
     //定位相关
@@ -42,6 +47,7 @@ class MainActivity : BaseActivity(), SensorEventListener {
             field = value
             map.addHeatMap(field)//自动添加
         }
+    private var chartDialog: ChartDialog? = null
 
     //地图状态变化监听器
     private var mapStateChangeListener: OnMapStatusChangeListener = object : OnMapStatusChangeListener {
@@ -60,6 +66,7 @@ class MainActivity : BaseActivity(), SensorEventListener {
     }
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
         override fun onMapClick(p0: LatLng?) {
+            chartDialog?.show()
         }
 
         override fun onMapPoiClick(p0: MapPoi?): Boolean {
@@ -72,9 +79,6 @@ class MainActivity : BaseActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         requsetPermission()//请求权限
-        //initLoc()//初始化定位
-
-
     }
 
     //SensorEventListener
@@ -152,7 +156,24 @@ class MainActivity : BaseActivity(), SensorEventListener {
                     .longitude(p0.longitude)
                     .build()
             map.setMyLocationData(locData)
-//            if (isFirstLoc) {
+
+            /***********/
+
+            if (HeatInfo.lastTime == null) {
+                Logger.d("kong")
+                val lastTime = Calendar.getInstance()
+                lastTime.set(2017, 2, 28, 0, 0, 1)
+                HeatInfo.lastTime = lastTime.toStr()
+            }
+            val newTime = HeatInfo.lastTime!!.toCalender()
+            newTime.add(Calendar.SECOND, 30)
+            val info: HeatInfo = HeatInfo(HeatInfo.lastTime!!, newTime.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest)
+            Http.getInstance().cancelCall(Http.TAG_HEATPOINTS)
+            Http.getInstance().getHeatPoints(info)
+            HeatInfo.lastTime = newTime.toStr()
+            /***********/
+
+            //            if (isFirstLoc) {
 //                isFirstLoc = false
 //                backToMyLoc(18.0F)
 //                Http.getInstance().getCarsUnderBounds(map.mapStatus.bound)
@@ -176,17 +197,40 @@ class MainActivity : BaseActivity(), SensorEventListener {
         val option = LocationClientOption()
         option.isOpenGps = true//开gps
         option.coorType = "bd09ll"//设置坐标类型
-        option.scanSpan = 1000//扫描速度
+        option.scanSpan = 5000//扫描速度
         locClient.locOption = option
         locClient.start()
         Logger.i("开启定位")
-        map.setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, null))
+        map.setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, BitmapDescriptorFactory.fromResource(R.drawable.my_location_point)))
         initView()//初始化视图
     }
 
     //初始化视图
     private fun initView() {
         gotoMyLoc.setOnClickListener { backToMyLoc(18.0F) }
+        chartDialog = ChartDialog(this@MainActivity) {
+            onDismiss { showToast("消失了") }
+            onCancel { showToast("取消") }
+            onChartClick {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, chart, "chartTransition").toBundle())
+                } else {
+                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    this@MainActivity.startActivity(intent)
+                }
+            }
+
+            onDetail {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, chart, "chartTransition").toBundle())
+                } else {
+                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    this@MainActivity.startActivity(intent)
+                }
+            }
+        }
     }
 
     private fun initMap() {
@@ -212,7 +256,6 @@ class MainActivity : BaseActivity(), SensorEventListener {
     fun addHeatMap(list: LatLongList) {
         Log.d(Tagg, "$list")
         heatMap = HeatMap.Builder().data(list.option).build()
-        Log.d("asdasdasdada", System.currentTimeMillis().toString())
     }
 
     override fun onResume() {
@@ -239,6 +282,14 @@ class MainActivity : BaseActivity(), SensorEventListener {
         senorManager.unregisterListener(this)//取消注册传感器监听
         EventBus.getDefault().unregister(this)//取消订阅
         super.onStop()
+    }
+
+    override fun onBackPressed() {
+        if (chartDialog!!.isShowing) {
+            chartDialog?.dismiss()
+        } else {
+            super.onBackPressed()
+        }
     }
 
 }

@@ -7,33 +7,257 @@
     tools:context="com.example.kk.dididache.ui.MainActivity">
 
     <android.support.v7.widget.CardView
+        android:id="@+id/timeCardView"
         android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#c9ffffff"
+        android:layout_height="46dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginStart="12dp"
+        app:cardBackgroundColor="#f5ffffff"
+        app:layout_constraintBottom_toBottomOf="@+id/mapView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/timeButton"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="11dp"
+                android:layout_marginStart="11dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/round_shape_blue"
+                android:text="查 询 时 间"
+                android:textColor="#4f4f4f"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/gotoMyLoc"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/timeCardView"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:translationZ="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/my_location" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/freshTime"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/gotoMyLoc"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:translationZ="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/gotoMyLoc"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/refresh_time" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/openUnusual"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/freshTime"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/unusualImageView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:translationZ="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/open_unusual" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/queryPath"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/openUnusual"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:translationZ="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/unusualImageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/query_path" />
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
+        android:layout_height="53dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="36dp"
+        app:cardBackgroundColor="#f5ffffff"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/mapView" >
+        app:layout_constraintTop_toTopOf="@+id/mapView">
 
-        <AutoCompleteTextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:hint="在城市内搜索"
-            android:paddingLeft="8dp" />
-        </android.support.v7.widget.CardView>
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingRight="7dp">
 
-    <Button
-        android:id="@+id/gotoMyLoc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:text="我的位置"
+            <AutoCompleteTextView
+                android:id="@+id/searchTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="在城市内搜索"
+                android:paddingLeft="11dp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="29dp"
+                android:background="#cadcfd" />
+
+            <ImageView
+                android:layout_width="29dp"
+                android:layout_height="29dp"
+                android:paddingLeft="8dp"
+                android:src="@drawable/magnifier" />
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/chartContainer"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:translationZ="5dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/scrim"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="24dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/scrim">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/underChartLinear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/chart">
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="此处有异常，"
+                    android:textColor="@android:color/holo_red_dark"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/chart" />
+
+                <TextView
+                    android:id="@+id/underChartTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="点击查看详情"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toEndOf="@+id/textView2"
+                    app:layout_constraintTop_toBottomOf="@+id/chart" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@android:color/holo_red_light"
+                android:text=" 取 消"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/detailButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@android:color/holo_green_dark"
+                android:text="查看详情"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <com.github.mikephil.charting.charts.CombinedChart
+                android:id="@+id/chart"
+                android:layout_width="0dp"
+                android:layout_height="200dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:transitionName="chartTransition"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+
+    </android.support.v7.widget.CardView>
+
+    <View
+        android:id="@+id/scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99323232"
+        android:translationZ="6dp"
+        android:visibility="gone" />
+
 
     <com.baidu.mapapi.map.MapView
         android:id="@+id/mapView"
@@ -47,4 +271,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
 </android.support.constraint.ConstraintLayout>
