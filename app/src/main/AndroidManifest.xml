@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.kk.dididache">
@@ -33,7 +33,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         >
         <meta-data
-            tools:replace="android:value"
+         
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="uhNczLLpDpfuND4lXtHK45KYAPFFXT6u"
             tools:replace="android:value" />
