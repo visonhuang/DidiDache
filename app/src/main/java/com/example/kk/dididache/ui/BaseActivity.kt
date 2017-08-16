@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import java.util.logging.Logger
 
 /**
  * Created by 小吉哥哥 on 2017/8/14.
