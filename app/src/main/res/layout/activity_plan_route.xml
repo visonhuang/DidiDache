@@ -34,11 +34,12 @@
         app:cardBackgroundColor="#c9ffffff"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/mapView" >
+        app:layout_constraintTop_toTopOf="@+id/mapView"
+        android:onClick="searchButtonProcess">
 
         <AutoCompleteTextView
             android:id="@+id/end_node"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
             android:hint="在城市内搜索"

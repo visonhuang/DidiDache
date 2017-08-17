@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -19,7 +20,9 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -48,6 +51,9 @@ import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.example.kk.dididache.R;
+import com.example.kk.dididache.util.DrivingRouteOverlay;
+import com.example.kk.dididache.util.OverlayManager;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,28 +61,43 @@ import java.util.List;
 public class RoutePlanActivity extends AppCompatActivity
         implements OnGetSuggestionResultListener, OnGetRoutePlanResultListener {
 
-    private AutoCompleteTextView startNodeText;
-    private AutoCompleteTextView endNodeText;
-
     Button mBtnPre = null; // 上一个节点
     Button mBtnNext = null; // 下一个节点
     int nodeIndex = -1; // 节点索引,供浏览节点时使用
     RouteLine route = null;
-//    OverlayManager routeOverlay = null;
+    OverlayManager routeOverlay = null;
     private TextView popupText = null; //泡泡view
     MapView mMapView = null;    // 地图View
     BaiduMap mBaidumap = null;
     RoutePlanSearch mSearch = null;
     DrivingRouteResult nowResultdrive = null;
-    String startNodeStr = "天安门";
-    String endNodeStr = "百度科技园";
+    PlanNode stNode;
+    PlanNode enNode;
+    LatLng stLatLng;
+    LatLng enLatLng;
+
+    private SuggestionSearch mSuggestionSearch = null;
+    private List<String> stSuggest;
+    private List<String> enSuggest;
+    private List<SuggestionResult.SuggestionInfo> stInfoList;
+    private List<SuggestionResult.SuggestionInfo> enInfoList;
+    private AutoCompleteTextView startNodeText;
+    private AutoCompleteTextView endNodeText;
+    private ArrayAdapter<String> startAdapter;
+    private ArrayAdapter<String> endAdapter;
+    private static final int START_NODE_TEXT = 1;
+    private static final int END_NODE_TEXT = 2;
+    private static int NODE_TEXT = START_NODE_TEXT;
+    private static final int ITEM_SELECTED = 1;
+    private static final int ITEM_NO_SELECTED = 2;
+    private static int START_IS_SELECTED = ITEM_NO_SELECTED;
+    private static int END_IS_SELECTED = ITEM_NO_SELECTED;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plan_route);
-        startNodeText = (AutoCompleteTextView) findViewById(R.id.start_node);
-        endNodeText = (AutoCompleteTextView) findViewById(R.id.end_node);
         mMapView = (MapView) findViewById(R.id.map);
         mBaidumap = mMapView.getMap();
         mBtnPre = (Button) findViewById(R.id.pre);
@@ -86,6 +107,137 @@ public class RoutePlanActivity extends AppCompatActivity
         // 初始化搜索模块，注册事件监听
         mSearch = RoutePlanSearch.newInstance();
         mSearch.setOnGetRoutePlanResultListener(this);
+
+        startNodeText = (AutoCompleteTextView) findViewById(R.id.start_node);
+        endNodeText = (AutoCompleteTextView) findViewById(R.id.end_node);
+        mSuggestionSearch = SuggestionSearch.newInstance();
+        mSuggestionSearch.setOnGetSuggestionResultListener(this);
+
+        startAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line);
+        startNodeText.setAdapter(startAdapter);
+
+        endAdapter = new ArrayAdapter<String>(this,
+
+                android.R.layout.simple_dropdown_item_1line);
+        endNodeText.setAdapter(endAdapter);
+
+        /**
+         * 当输入关键字变化时，动态更新建议列表
+         */
+        startNodeText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1,
+                                          int arg2, int arg3) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2,
+                                      int arg3) {
+                if (cs.length() <= 0) {
+                    return;
+                }
+
+                /**
+                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
+                 */
+                mSuggestionSearch
+                        .requestSuggestion((new SuggestionSearchOption())
+                                .keyword(cs.toString()).city("广州").citylimit(true));
+            }
+        });
+
+        startNodeText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    NODE_TEXT = START_NODE_TEXT;
+                    return;
+                }
+            }
+        });
+
+        startNodeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                stLatLng = stInfoList.get(position).pt;
+                START_IS_SELECTED = ITEM_SELECTED;
+                Toast.makeText(RoutePlanActivity.this, "onItemClick", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        startNodeText.setOnDismissListener(new AutoCompleteTextView.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                if(START_IS_SELECTED != ITEM_SELECTED){
+                    startNodeText.setText("");
+                }
+                START_IS_SELECTED = ITEM_NO_SELECTED;
+            }
+        });
+
+        endNodeText.setOnDismissListener(new AutoCompleteTextView.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                if(END_IS_SELECTED != ITEM_SELECTED){
+                    endNodeText.setText("");
+                }
+                END_IS_SELECTED = ITEM_NO_SELECTED;
+            }
+        });
+
+        endNodeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                enLatLng = enInfoList.get(position).pt;
+                END_IS_SELECTED = ITEM_SELECTED;
+            }
+
+        });
+
+        endNodeText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1,
+                                          int arg2, int arg3) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2,
+                                      int arg3) {
+                if (cs.length() <= 0) {
+                    return;
+                }
+
+                /**
+                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
+                 */
+                mSuggestionSearch
+                        .requestSuggestion((new SuggestionSearchOption())
+                                .keyword(cs.toString()).city("广州").citylimit(true));
+            }
+        });
+
+        endNodeText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    NODE_TEXT = END_NODE_TEXT;
+                    return;
+                }
+            }
+        });
     }
 
     /**
@@ -104,11 +256,14 @@ public class RoutePlanActivity extends AppCompatActivity
         mBaidumap.clear();
         // 处理搜索按钮响应
         // 设置起终点信息，对于tranist search 来说，城市名无意义
-        PlanNode stNode = PlanNode.withCityNameAndPlaceName("北京", startNodeStr);
-        PlanNode enNode = PlanNode.withCityNameAndPlaceName("北京", endNodeStr);
-
-        PlanNode stMassNode = PlanNode.withCityNameAndPlaceName("北京", "天安门");
-        PlanNode enMassNode = PlanNode.withCityNameAndPlaceName("上海", "东方明珠");
+        if(stLatLng == null){
+            Logger.d("stLatLng == null");
+        }
+        if(enLatLng == null){
+            Logger.d("enLatLng == null");
+        }
+        stNode = PlanNode.withLocation(stLatLng);
+        enNode = PlanNode.withLocation(enLatLng);
         mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode).to(enNode));
     }
 
@@ -174,6 +329,31 @@ public class RoutePlanActivity extends AppCompatActivity
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
             Toast.makeText(RoutePlanActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
+        if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
+            // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
+            result.getSuggestAddrInfo();
+            return;
+        }
+        if(result.error == SearchResult.ERRORNO.NO_ERROR){
+            nodeIndex = -1;
+
+            if(result.getRouteLines().size() >= 1){
+                nowResultdrive = result;
+
+                route = nowResultdrive.getRouteLines().get(0);
+                DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
+                mBaidumap.setOnMarkerClickListener(overlay);
+                routeOverlay = overlay;
+                overlay.setData(nowResultdrive.getRouteLines().get(0));
+                overlay.addToMap();
+                overlay.zoomToSpan();
+                mBtnPre.setVisibility(View.VISIBLE);
+                mBtnNext.setVisibility(View.VISIBLE);
+            }else {
+                Log.d("route result", "结果数<0");
+                return;
+            }
+        }
     }
 
     @Override
@@ -186,8 +366,82 @@ public class RoutePlanActivity extends AppCompatActivity
 
     }
 
+    /**
+     * 获取在线建议搜索结果，得到requestSuggestion返回的搜索结果
+     * @param res
+     */
     @Override
-    public void onGetSuggestionResult(SuggestionResult suggestionResult) {
+    public void onGetSuggestionResult(SuggestionResult res) {
+        if(res == null || res.getAllSuggestions() == null){
+            return;
+        }
+//        stNode = PlanNode.withLocation(res.getAllSuggestions().get(0).pt);
+//        enNode = PlanNode.withLocation(res.getAllSuggestions().get(1).pt);
 
+
+        if(NODE_TEXT == START_NODE_TEXT){
+            stInfoList = res.getAllSuggestions();
+            stSuggest = new ArrayList<>();
+            for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
+                if (info.key != null) {
+                    stSuggest.add(info.key);
+                }
+            }
+            startAdapter = new ArrayAdapter<String>(RoutePlanActivity.this, android.R.layout.simple_dropdown_item_1line, stSuggest);
+            startNodeText.setAdapter(startAdapter);
+            startAdapter.notifyDataSetChanged();
+        }
+        if(NODE_TEXT == END_NODE_TEXT){
+            enInfoList = res.getAllSuggestions();
+            enSuggest = new ArrayList<>();
+            for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
+                if (info.key != null) {
+                    enSuggest.add(info.key);
+                }
+            }
+            endAdapter = new ArrayAdapter<String>(RoutePlanActivity.this, android.R.layout.simple_dropdown_item_1line, enSuggest);
+            endNodeText.setAdapter(endAdapter);
+            endAdapter.notifyDataSetChanged();
+        }
+    }
+
+    // 定制RouteOverly
+    private class MyDrivingRouteOverlay extends DrivingRouteOverlay {
+
+        public MyDrivingRouteOverlay(BaiduMap baiduMap) {
+            super(baiduMap);
+        }
+
+        @Override
+        public BitmapDescriptor getStartMarker() {
+            return null;
+        }
+
+        @Override
+        public BitmapDescriptor getTerminalMarker() {
+            return null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mMapView.onResume();
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mSearch != null) {
+            mSearch.destroy();
+        }
+        mMapView.onDestroy();
+        mSuggestionSearch.destroy();
+        super.onDestroy();
     }
 }

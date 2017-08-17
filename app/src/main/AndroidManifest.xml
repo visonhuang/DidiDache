@@ -34,15 +34,10 @@
         >
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="uhNczLLpDpfuND4lXtHK45KYAPFFXT6u"
-            tools:replace="android:value" />
+            android:value="ulAjig5kC7FFvXZ0V2Gbd7gzGl1Liq9k" />
 
         <activity android:name=".ui.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <service
@@ -51,6 +46,14 @@
             android:process=":remote"></service>
 
         <activity android:name=".ui.ChartActivity"></activity>
+
+        <activity android:name=".ui.RoutePlanActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
