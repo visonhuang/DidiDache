@@ -32,14 +32,15 @@ import okhttp3.Response;
 
 public class Http {
     private static Http http;
-    private static OkHttpClient client;
-    private static Dispatcher dispatcher;
-    public static int TAG_HEATPOINTS = 1;//请求热力点的tag
+    private OkHttpClient client;
+    private Dispatcher dispatcher;
+    public static final int TAG_HEATPOINTS = 1;//请求热力点的tag
+    public static final int TAG_TAXICOUNT = 2;//请求柱状图的tag
 
     public static Http getInstance() {
         if (http == null) http = new Http();
-        if (client == null) client = new OkHttpClient();
-        if (dispatcher == null) dispatcher = client.dispatcher();
+        if (http.client == null) http.client = new OkHttpClient();
+        if (http.dispatcher == null) http.dispatcher = http.client.dispatcher();
         return http;
     }
 
@@ -53,6 +54,7 @@ public class Http {
                 Logger.json(new Gson().toJson(info));
                 RequestBody body = RequestBody.create(mediaType, new Gson().toJson(info));
                 Request request = new Request.Builder()
+                        .tag(TAG_HEATPOINTS)
                         .url("http://192.168.1.114:8080/gps/getdataforandroid")
                         .post(body)
                         .addHeader("content-type", "application/json")
@@ -81,7 +83,7 @@ public class Http {
     //请求某个坐标下一段时间内出租车变化情况
     public void getTaxiCountByTime(TaxiCountInfo info) {
         ArrayList<TaxiCount> list = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < info.getBarCount(); i++) {
             list.add(new TaxiCount(new Random().nextInt(100)));
         }
         EventBus.getDefault().post(list);
@@ -94,21 +96,26 @@ public class Http {
             for (Call call : dispatcher.queuedCalls()) {
                 if (tag == (int) call.request().tag()) {
                     call.cancel();
-                    Logger.i(call + "被取消");
+                    switch (tag) {
+                        case TAG_HEATPOINTS:
+                            Logger.i("热力点请求被取消");
+                            break;
+                    }
+
                 }
             }
             //取消正在请求中带有tag的call
             for (Call call : dispatcher.runningCalls()) {
                 if (tag == (int) call.request().tag()) {
                     call.cancel();
-                    Logger.i(call + "被取消");
+                    switch (tag) {
+                        case TAG_HEATPOINTS:
+                            Logger.i("热力点请求被取消");
+                            break;
+                    }
                 }
             }
         }
     }
 
-
-    private static double nextDouble(final double min, final double max) {
-        return min + ((max - min) * new Random().nextDouble());
-    }
 }

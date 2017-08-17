@@ -12,8 +12,11 @@ import android.widget.Button
 import android.widget.LinearLayout
 import com.baidu.mapapi.model.LatLng
 import com.example.kk.dididache.R
+import com.example.kk.dididache.toStr
 import com.example.kk.dididache.ui.MainActivity
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.CombinedChart
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -42,7 +45,7 @@ class ChartDialog(var context: Context?) {
     var _dismiss: () -> Unit = {}//dialog消失
     var _detail: ChartDialog.() -> Unit = {}//点击详情
     var _cancel: ChartDialog.() -> Unit = {}//点击取消
-
+    var xAxis = mutableListOf<String>()
     var isShowing: Boolean = false
         get() = contentView.visibility == View.VISIBLE
 
@@ -73,67 +76,20 @@ class ChartDialog(var context: Context?) {
         }
     }
 
-    fun show() {
+    fun show(time: Calendar) {
         EventBus.getDefault().register(this)
-        getDate()//发出网络请求
+        setChartOptions(time)
+        getDate(time)//发出网络请求
         contentView.visibility = View.VISIBLE
         scrim.visibility = View.VISIBLE
-        contentView.alpha = 0F
-        contentView.scaleX = 0.8F
-        contentView.scaleY = 0.8F
-        contentView.animate()
-                .scaleX(1F)
-                .scaleY(1F)
-                .alpha(1F)
-                .setDuration(500)
-                .setInterpolator(MyOverShootInterpolator()).setListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(p0: Animator?) {
-
-            }
-
-            override fun onAnimationCancel(p0: Animator?) {
-
-            }
-
-            override fun onAnimationStart(p0: Animator?) {
-
-            }
-
-            override fun onAnimationEnd(p0: Animator?) {
-
-            }
-        }).start()
-
+        chart.zoom(0F,0F,0F,0F)
+        animate(true)
     }
 
     fun dismiss() {
         EventBus.getDefault().unregister(this)
         context = null//释放context
-        contentView.animate()
-                .scaleX(0.5F)
-                .scaleY(0.5F)
-                .alpha(0F)
-                .setDuration(200)
-                .setInterpolator(AccelerateDecelerateInterpolator()).setListener(object : Animator.AnimatorListener {
-            override fun onAnimationRepeat(p0: Animator?) {
-
-            }
-
-            override fun onAnimationCancel(p0: Animator?) {
-
-            }
-
-            override fun onAnimationStart(p0: Animator?) {
-
-            }
-
-            override fun onAnimationEnd(p0: Animator?) {
-                contentView.visibility = View.GONE
-                scrim.visibility = View.GONE
-                _dismiss()
-            }
-        }).start()
-
+        animate(false)
     }
 
 
@@ -145,21 +101,29 @@ class ChartDialog(var context: Context?) {
         data.setData(getLineDate(list))
         DataKeeper.getInstance().combinedData = data//存放数据
         chart.data = data
-        chart.invalidate()
+        animateChart()
     }
 
     //发出网络请求
-    fun getDate() {
-        val time = Calendar.getInstance()
-        time.set(2017, 2, 28, 0, 0, 1)
-        Http.getInstance().getTaxiCountByTime(TaxiCountInfo(LatLng(0.0, 0.0), time, "past"))
+    fun getDate(time: Calendar) {
+        val start = time.clone() as Calendar
+        val end = time.clone() as Calendar
+        start.add(Calendar.MINUTE, -60)
+        end.add(Calendar.MINUTE, 60)
+        Http.getInstance().getTaxiCountByTime(TaxiCountInfo(LatLng(0.0, 0.0), start, end, 0))
     }
 
     private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
         val d = LineData()
         val entries = (0 until list.size).map { Entry(it.toFloat(), (list[it].taxiCount).toFloat()) }
         val set = LineDataSet(entries, "Line")
-        set.color = 0xfffaf852.toInt()
+        set.color = 0xff00ffff.toInt()
+        set.lineWidth = 1.5f
+        set.setCircleColor(0x9900ffff.toInt())
+        set.setCircleColorHole(0xff00ffff.toInt())
+        set.circleHoleRadius = 2F
+        set.circleRadius = 4F
+        set.setDrawValues(false)
         d.addDataSet(set)
         return d
     }
@@ -168,19 +132,122 @@ class ChartDialog(var context: Context?) {
         val d = BarData()
         val entries = (0 until list.size).map { BarEntry(it.toFloat(), (list[it].taxiCount).toFloat()) }
         val set = BarDataSet(entries, "Bar")
-        set.color = 0xff47ee5c.toInt()
+        set.color = 0xff3b5c9a.toInt()
         d.addDataSet(set)
+        d.barWidth = 0.55F
         return d
     }
 
-    //回弹插值器
-    class MyOverShootInterpolator(val factor: Double) : Interpolator {
-        constructor() : this(0.3)
+    /**
+     *过度动画，isshow = true则播放出现动画，否则播放消失动画
+     */
+    fun animate(isShow: Boolean) {
+        if (isShow) {
+            cancelButton.scaleX = 0F
+            cancelButton.scaleY = 0F
+            cancelButton.animate()
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
+                    .setDuration(200)
+                    .setStartDelay(100)
+                    .start()
 
-        override fun getInterpolation(p0: Float): Float {
-            return (Math.pow(2.0, (-5 * p0).toDouble()) * Math.sin((p0 - factor / 4) * (2 * Math.PI) / factor) + 1).toFloat()
+            detailButton.scaleX = 0F
+            detailButton.scaleY = 0F
+            detailButton.animate()
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
+                    .setDuration(200)
+                    .setStartDelay(150)
+                    .start()
+
+            contentView.alpha = 0F
+            contentView.scaleX = 0.8F
+            contentView.scaleY = 0.8F
+            contentView.animate()
+                    .scaleX(1F)
+                    .scaleY(1F)
+                    .alpha(1F)
+                    .setDuration(200)
+                    .setInterpolator(AccelerateDecelerateInterpolator()).setListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(p0: Animator?) {
+
+                }
+
+                override fun onAnimationCancel(p0: Animator?) {
+
+                }
+
+                override fun onAnimationStart(p0: Animator?) {
+
+                }
+
+                override fun onAnimationEnd(p0: Animator?) {
+
+                }
+            }).start()
+        } else {
+            cancelButton.animate()
+                    .scaleX(0F)
+                    .setDuration(200)
+                    .start()
+
+            detailButton.animate()
+                    .scaleX(0F)
+                    .setDuration(200)
+                    .start()
+            contentView.animate()
+
+                    .scaleY(0F)
+                    .alpha(0F)
+                    .setDuration(200)
+                    .setStartDelay(70)
+                    .setInterpolator(AccelerateDecelerateInterpolator()).setListener(object : Animator.AnimatorListener {
+                override fun onAnimationRepeat(p0: Animator?) {
+
+                }
+
+                override fun onAnimationCancel(p0: Animator?) {
+
+                }
+
+                override fun onAnimationStart(p0: Animator?) {
+
+                }
+
+                override fun onAnimationEnd(p0: Animator?) {
+                    contentView.visibility = View.GONE
+                    scrim.visibility = View.GONE
+                    _dismiss()
+                }
+            }).start()
         }
+    }
 
+
+    fun animateChart() = chart.animateY(1000, Easing.EasingOption.EaseInQuad)
+
+    private fun setChartOptions(time: Calendar) {
+        //设置x轴
+        val p0 = time.clone() as Calendar
+        p0.add(Calendar.MINUTE, -60)
+        xAxis.clear()
+        for (i in 0..8) {
+            xAxis.add(p0.toStr("HH:mm"))
+            p0.add(Calendar.MINUTE, 15)
+        }
+        chart.description.isEnabled = false//去掉注释
+        chart.legend.isEnabled = false//去调颜色标注
+        chart.axisRight.isEnabled = false //去掉右边y轴
+        chart.axisLeft.setDrawGridLines(true)
+        chart.axisLeft.axisMinimum = 0F
+        chart.axisLeft.granularity = 1F
+        chart.xAxis.position = XAxis.XAxisPosition.BOTTOM//将x轴放在下面
+        chart.xAxis.axisMinimum = 0f
+        chart.xAxis.granularity = 1F
+        chart.xAxis.setValueFormatter { value, _ -> xAxis[value.toInt() % 9] }
     }
 
 }

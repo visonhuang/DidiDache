@@ -13,34 +13,41 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import com.baidu.location.*
 import com.baidu.mapapi.map.*
 import com.baidu.mapapi.map.BaiduMap.OnMapStatusChangeListener
 import com.baidu.mapapi.model.LatLng
+import com.baidu.mapapi.search.core.SearchResult
+import com.baidu.mapapi.search.poi.*
+import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener
+import com.baidu.mapapi.search.sug.SuggestionResult
+import com.baidu.mapapi.search.sug.SuggestionSearch
+import com.baidu.mapapi.search.sug.SuggestionSearchOption
 import com.example.kk.dididache.*
-import com.example.kk.dididache.model.ChartDialog
-import com.example.kk.dididache.model.HeatInfo
-import com.example.kk.dididache.model.Http
-import com.example.kk.dididache.model.LatLongList
+import com.example.kk.dididache.model.*
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.jetbrains.anko.imageResource
+import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.sdk25.coroutines.onTouch
 import java.util.*
 
-class MainActivity : BaseActivity(), SensorEventListener {
+class MainActivity : BaseActivity() {
     //定位相关
     private val locClient by lazy { LocationClient(this) }
-    private val map by lazy { mapView.map }
-    private val senorManager by lazy { getSystemService(Context.SENSOR_SERVICE) as SensorManager }//传感器管理
     private val locationListener by lazy { MyLocationListener() } //定位监听
     private var curPoint: LatLng = LatLng(0.0, 0.0)//当前经纬度
         get() = LatLng(locData?.latitude ?: 0.0, locData?.longitude ?: 0.0)
     private var locData: MyLocationData? = null//坐标信息
-    private var curDirection = 0//当前方向
-    private var lastX: Double = 0.0
-    private var isFirstLoc = true
+
+    //UI相关
+    private val map by lazy { mapView.map }
     private var heatMap: HeatMap? = null
         set(value) {
             field?.removeHeatMap()
@@ -48,6 +55,14 @@ class MainActivity : BaseActivity(), SensorEventListener {
             map.addHeatMap(field)//自动添加
         }
     private var chartDialog: ChartDialog? = null
+    private var isUnusualShowing = false//是否在显示异常点
+    private var suggestAdapter: SearchItemAdapter? = null
+    private val poimarkerIcon = BitmapDescriptorFactory.fromResource(R.drawable.destination_point_blue)
+    private var time: Calendar = Calendar.getInstance()
+
+    //搜索相关
+    private var suggestSearch = SuggestionSearch.newInstance()
+    private var poiSearch = PoiSearch.newInstance()
 
     //地图状态变化监听器
     private var mapStateChangeListener: OnMapStatusChangeListener = object : OnMapStatusChangeListener {
@@ -66,7 +81,8 @@ class MainActivity : BaseActivity(), SensorEventListener {
     }
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
         override fun onMapClick(p0: LatLng?) {
-            chartDialog?.show()
+            time.set(2017, 2, 28, 4, 5, 5)
+            chartDialog?.show(time)
         }
 
         override fun onMapPoiClick(p0: MapPoi?): Boolean {
@@ -79,27 +95,8 @@ class MainActivity : BaseActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         requsetPermission()//请求权限
-    }
 
-    //SensorEventListener
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
 
-    }
-
-    //SensorEventListener
-    override fun onSensorChanged(p0: SensorEvent) {
-        val x = p0.values[SensorManager.DATA_X].toDouble()
-        if (Math.abs(x - lastX) > 1.0) {
-            curDirection = x.toInt()
-            locData = MyLocationData.Builder()
-                    .accuracy(locData?.accuracy ?: 0F)
-                    // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .direction(curDirection.toFloat()).latitude(curPoint.latitude)
-                    .longitude(curPoint.longitude)
-                    .build()
-            map.setMyLocationData(locData)
-        }
-        lastX = x
     }
 
     private fun requsetPermission() {
@@ -151,7 +148,6 @@ class MainActivity : BaseActivity(), SensorEventListener {
             curPoint = LatLng(p0.latitude, p0.longitude)
             locData = MyLocationData.Builder()
                     .accuracy(p0.radius)
-                    .direction(curDirection.toFloat())
                     .latitude(p0.latitude)
                     .longitude(p0.longitude)
                     .build()
@@ -160,7 +156,6 @@ class MainActivity : BaseActivity(), SensorEventListener {
             /***********/
 
             if (HeatInfo.lastTime == null) {
-                Logger.d("kong")
                 val lastTime = Calendar.getInstance()
                 lastTime.set(2017, 2, 28, 0, 0, 1)
                 HeatInfo.lastTime = lastTime.toStr()
@@ -171,13 +166,9 @@ class MainActivity : BaseActivity(), SensorEventListener {
             Http.getInstance().cancelCall(Http.TAG_HEATPOINTS)
             Http.getInstance().getHeatPoints(info)
             HeatInfo.lastTime = newTime.toStr()
+
             /***********/
 
-            //            if (isFirstLoc) {
-//                isFirstLoc = false
-//                backToMyLoc(18.0F)
-//                Http.getInstance().getCarsUnderBounds(map.mapStatus.bound)
-//            }
         }
     }
 
@@ -207,16 +198,31 @@ class MainActivity : BaseActivity(), SensorEventListener {
 
     //初始化视图
     private fun initView() {
-        gotoMyLoc.setOnClickListener { backToMyLoc(18.0F) }
+        gotoMyLoc.onClick { backToMyLoc(18.0F) }
+
+        openUnusual.onClick {
+            isUnusualShowing = !isUnusualShowing
+            if (isUnusualShowing) {
+                openUnusual.unusualImageView.imageResource = R.drawable.cancel_unusual
+                //TODO 显示异常点
+            } else {
+                openUnusual.unusualImageView.imageResource = R.drawable.open_unusual
+                //TODO 去除异常点
+            }
+        }
+
+
         chartDialog = ChartDialog(this@MainActivity) {
             onDismiss { showToast("消失了") }
             onCancel { showToast("取消") }
             onChartClick {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    intent.putExtra("time", time)
                     this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, chart, "chartTransition").toBundle())
                 } else {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    intent.putExtra("time", time)
                     this@MainActivity.startActivity(intent)
                 }
             }
@@ -224,13 +230,77 @@ class MainActivity : BaseActivity(), SensorEventListener {
             onDetail {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    intent.putExtra("time", time)
                     this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, chart, "chartTransition").toBundle())
                 } else {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    intent.putExtra("time", time)
                     this@MainActivity.startActivity(intent)
                 }
             }
         }
+
+        searchTextView.setAdapter(suggestAdapter)
+        searchTextView.threshold = 1
+        searchTextView.dropDownVerticalOffset = 5
+        suggestSearch.setOnGetSuggestionResultListener {
+            if (it == null || it.allSuggestions == null) return@setOnGetSuggestionResultListener
+            suggestAdapter = SearchItemAdapter(this, it.allSuggestions.map { it.key })
+            searchTextView.setAdapter(suggestAdapter)
+            suggestAdapter?.notifyDataSetChanged()
+        }
+        //调整drop down宽度
+        searchTextView.onTouch { v, event ->
+            showToast("click")
+            searchTextView.dropDownWidth = searchCardView.width
+        }
+        searchTextView.setOnItemClickListener { adapterView, view, i, l ->
+            searchTextView.clearFocus()
+        }
+        searchTextView.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+
+            }
+
+            override fun beforeTextChanged(p0: CharSequence, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence, p1: Int, p2: Int, p3: Int) {
+                if (p0.isEmpty()) return
+                suggestSearch
+                        .requestSuggestion(SuggestionSearchOption().city("广州").citylimit(true).keyword(p0.toString()))
+            }
+        })
+        searchButton.onClick {
+            val info: String = searchTextView.text.toString()
+            if (info.isEmpty()) {
+                showToast("搜索内容为空")
+                return@onClick
+            }
+            poiSearch.searchInCity(PoiCitySearchOption().city("广州").keyword(info))
+
+        }
+        poiSearch.setOnGetPoiSearchResultListener(object : OnGetPoiSearchResultListener {
+            override fun onGetPoiIndoorResult(p0: PoiIndoorResult?) {
+
+            }
+
+            override fun onGetPoiResult(p0: PoiResult?) {
+                if (p0 == null || p0.error == SearchResult.ERRORNO.RESULT_NOT_FOUND) {
+                    showToast("未找到结果")
+                    return
+                }
+                if (p0.error == SearchResult.ERRORNO.NO_ERROR) {
+                    map.clear()
+                    map.addOverlays(p0.allPoi.map { MarkerOptions().position(it.location).icon(poimarkerIcon) })
+                }
+            }
+
+            override fun onGetPoiDetailResult(p0: PoiDetailResult?) {
+
+            }
+        })
     }
 
     private fun initMap() {
@@ -254,15 +324,14 @@ class MainActivity : BaseActivity(), SensorEventListener {
 
     @Subscribe
     fun addHeatMap(list: LatLongList) {
-        Log.d(Tagg, "$list")
+        if (list.option.isEmpty()) return
         heatMap = HeatMap.Builder().data(list.option).build()
     }
 
     override fun onResume() {
         mapView.onResume()
-        //为系统的方向传感器注册监听器
-        senorManager.registerListener(this, senorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-                SensorManager.SENSOR_DELAY_UI)
+        locClient.registerLocationListener(locationListener)
+        Logger.i("注册定位监听")
         super.onResume()
     }
 
@@ -274,12 +343,16 @@ class MainActivity : BaseActivity(), SensorEventListener {
     }
 
     override fun onPause() {
+        locClient.unRegisterLocationListener(locationListener)
+        Logger.i("注销定位监听")
+        Http.getInstance().cancelCall(Http.TAG_HEATPOINTS)
         mapView.onPause()
         super.onPause()
     }
 
     override fun onStop() {
-        senorManager.unregisterListener(this)//取消注册传感器监听
+        locClient.unRegisterLocationListener(locationListener)
+        Logger.i("注销定位监听")
         EventBus.getDefault().unregister(this)//取消订阅
         super.onStop()
     }

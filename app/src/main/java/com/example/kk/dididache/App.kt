@@ -24,10 +24,7 @@ import kotlin.properties.Delegates
 class App : Application() {
     //单例化App
     companion object {
-        val mainThreadHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
         var instance: App by Delegates.notNull()
-        var mtoast: Toast? = null
-        var mMsg: Any? = null
         //地图主题
         val PATH = "custom_config_blue.txt"
     }
