@@ -1,6 +1,6 @@
 package com.example.kk.dididache.model;
 
-import com.example.kk.dididache.model.netModel.LatLongList;
+
 import com.github.mikephil.charting.data.CombinedData;
 
 /**
@@ -9,7 +9,6 @@ import com.github.mikephil.charting.data.CombinedData;
 
 public class DataKeeper {
     private static DataKeeper keeper;
-    private LatLongList heatPoints;
     private CombinedData combinedData;
 
     public static DataKeeper getInstance() {
@@ -19,13 +18,6 @@ public class DataKeeper {
         return keeper;
     }
 
-    public LatLongList getHeatPoints() {
-        return heatPoints;
-    }
-
-    public void setHeatPoints(LatLongList latLongList) {
-        this.heatPoints = latLongList;
-    }
 
     public CombinedData getCombinedData() {
         return combinedData;

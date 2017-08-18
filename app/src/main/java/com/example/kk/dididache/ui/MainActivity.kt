@@ -21,8 +21,8 @@ import com.baidu.mapapi.search.sug.SuggestionSearchOption
 import com.example.kk.dididache.*
 import com.example.kk.dididache.control.adapter.SearchItemAdapter
 import com.example.kk.dididache.model.*
-import com.example.kk.dididache.model.netModel.HeatInfo
-import com.example.kk.dididache.model.netModel.LatLongList
+import com.example.kk.dididache.model.Event.HeatMapEvent
+import com.example.kk.dididache.model.netModel.request.HeatInfo
 import com.example.kk.dididache.widget.ChartDialog
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_main.*
@@ -33,6 +33,7 @@ import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sdk25.coroutines.onTouch
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : BaseActivity() {
     //定位相关
@@ -159,8 +160,8 @@ class MainActivity : BaseActivity() {
             val newTime = HeatInfo.lastTime!!.toCalender()
             newTime.add(Calendar.SECOND, 30)
             val info: HeatInfo = HeatInfo(HeatInfo.lastTime!!, newTime.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest)
-            Http.getInstance().cancelCall(Http.TAG_HEATPOINTS)
-            Http.getInstance().getHeatPoints(info)
+            Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
+            Http.getInstance().doPost(Http.ADRESS.heatMap, info)
             HeatInfo.lastTime = newTime.toStr()
 
             /***********/
@@ -319,9 +320,9 @@ class MainActivity : BaseActivity() {
     }
 
     @Subscribe
-    fun addHeatMap(list: LatLongList) {
-        if (list.option.isEmpty()) return
-        heatMap = HeatMap.Builder().data(list.option).build()
+    fun addHeatMap(event: HeatMapEvent) {
+        if (event.list.isEmpty()) return
+        heatMap = HeatMap.Builder().weightedData(event.list as ArrayList<WeightedLatLng>).build()
     }
 
     override fun onResume() {
@@ -341,7 +342,7 @@ class MainActivity : BaseActivity() {
     override fun onPause() {
         locClient.unRegisterLocationListener(locationListener)
         Logger.i("注销定位监听")
-        Http.getInstance().cancelCall(Http.TAG_HEATPOINTS)
+        Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
         mapView.onPause()
         super.onPause()
     }

@@ -1,11 +1,26 @@
 package com.example.kk.dididache.model;
 
 import com.example.kk.dididache.MethodsKt;
-import com.example.kk.dididache.model.netModel.HeatInfo;
-import com.example.kk.dididache.model.netModel.LatLongList;
-import com.example.kk.dididache.model.netModel.TaxiCount;
-import com.example.kk.dididache.model.netModel.TaxiCountInfo;
+import com.example.kk.dididache.model.Event.DriveTimeEvent;
+import com.example.kk.dididache.model.Event.ExceptionEvent;
+import com.example.kk.dididache.model.Event.HeatMapEvent;
+import com.example.kk.dididache.model.Event.TaxiCountEvent;
+import com.example.kk.dididache.model.Event.UseRatioEvent;
+import com.example.kk.dididache.model.netModel.request.DriveTimeInfo;
+import com.example.kk.dididache.model.netModel.request.ExceptionInfo;
+import com.example.kk.dididache.model.netModel.request.RealTimeHeatInfo;
+import com.example.kk.dididache.model.netModel.request.UseRatioInfo;
+import com.example.kk.dididache.model.netModel.response.ArrayFeedBack;
+import com.example.kk.dididache.model.netModel.response.CarCountInXY;
+import com.example.kk.dididache.model.netModel.request.HeatInfo;
+import com.example.kk.dididache.model.netModel.response.DriveTime;
+import com.example.kk.dididache.model.netModel.response.Exception;
+import com.example.kk.dididache.model.netModel.response.ObjectFeedBack;
+import com.example.kk.dididache.model.netModel.response.TaxiCount;
+import com.example.kk.dididache.model.netModel.request.TaxiCountInfo;
+import com.example.kk.dididache.model.netModel.response.UseRatio;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,8 +46,31 @@ public class Http {
     private static Http http;
     private OkHttpClient client;
     private Dispatcher dispatcher;
-    public static final int TAG_HEATPOINTS = 1;//请求热力点的tag
+    public static final int TAG_HEAT_POINTS = 1;//请求热力点的tag
     public static final int TAG_TAXICOUNT = 2;//请求柱状图的tag
+    public static final int TAG_REALTIME_HEAT_POINTS = 3;//请求热力点的tag
+    public static final int TAG_USE_RATIO = 4;//请求使用率的tag
+    public static final int TAG_DRIVE_TIME = 5;//请求路线规划的tag
+    public static final int TAG_EXCEPTION = 6;//请求路线规划的tag
+
+
+    //请求地址枚举类
+    public enum ADRESS {
+        realTimeHeatMap("show/dynamichot"),
+        heatMap("show/statichot"),
+        preHeatMap("show/prediction"),
+        carCountChange("estimation/flowchange"),
+        exception("estimation/trafficexception"),
+        useRatio("show/useratio"),
+        driveTime("estimation/drivetime");
+
+        private String value = "http://ip:80/";
+
+        ADRESS(String value) {
+            this.value += value;
+        }
+    }
+
 
     public static Http getInstance() {
         if (http == null) http = new Http();
@@ -41,34 +79,49 @@ public class Http {
         return http;
     }
 
-    //请求热力点
-    public void getHeatPoints(final HeatInfo info) {
+    public void doPost(ADRESS adress, Object body) {
+        switch (adress) {
+            case heatMap:
+                getHeatPoints((HeatInfo) body, false);
+                break;
+            case useRatio:
+                getUseRatio((UseRatioInfo) body);
+                break;
+            case driveTime:
+                getRoutePlan((DriveTimeInfo) body);
+                break;
+            case exception:
+                getExceptions((ExceptionInfo) body);
+                break;
+            case preHeatMap:
+                getHeatPoints((HeatInfo) body, true);
+                break;
+            case carCountChange:
+                getTaxiCountByTime((TaxiCountInfo) body);
+                break;
+            case realTimeHeatMap:
+                getRealTimeHeatPoints((RealTimeHeatInfo) body);
+                break;
+            default:
+                throw new IllegalArgumentException("wtf!!!!!!!");
+        }
+    }
+
+    //请求静态热力点
+    private void getHeatPoints(final HeatInfo info, final boolean isFuture) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                LatLongList latLngs;
-                MediaType mediaType = MediaType.parse("application/json");
-                Logger.json(new Gson().toJson(info));
-                RequestBody body = RequestBody.create(mediaType, new Gson().toJson(info));
-                Request request = new Request.Builder()
-                        .tag(TAG_HEATPOINTS)
-                        .url("http://192.168.1.114:8080/gps/getdataforandroid")
-                        .post(body)
-                        .addHeader("content-type", "application/json")
-                        .addHeader("cache-control", "no-cache")
-                        .build();
-
+                ArrayFeedBack<CarCountInXY> feedBack;
                 try {
                     //接收数据
-                    Response response = client.newCall(request).execute();
-                    Logger.d("接收热力点", "数据长度" + String.valueOf(response.body().contentLength()));
+                    Response response = getResponse(TAG_HEAT_POINTS, info, isFuture ? ADRESS.preHeatMap.value : ADRESS.heatMap.value);
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
-                    latLngs = new Gson().fromJson(reader, LatLongList.class);
-
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
+                    }.getType());
                     //数据处理
-                    DataKeeper.getInstance().setHeatPoints(latLngs);//保存到数据持有者
-                    EventBus.getDefault().post(latLngs);
-                } catch (IOException e) {
+                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
                     MethodsKt.showToast(Http.this, "热力点出现了一些问题");
                     e.printStackTrace();
                 }
@@ -77,13 +130,139 @@ public class Http {
         }).start();
     }
 
+    //请求实时热力图
+    private void getRealTimeHeatPoints(final RealTimeHeatInfo info) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayFeedBack<CarCountInXY> feedBack;
+                try {
+                    //接收数据
+                    Response response = getResponse(TAG_REALTIME_HEAT_POINTS, info, ADRESS.realTimeHeatMap.value);
+                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
+                    }.getType());
+                    //数据处理
+                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     //请求某个坐标下一段时间内出租车变化情况
-    public void getTaxiCountByTime(TaxiCountInfo info) {
+    private void getTaxiCountByTime(final TaxiCountInfo info) {
+
         ArrayList<TaxiCount> list = new ArrayList<>();
         for (int i = 0; i < info.getBarCount(); i++) {
             list.add(new TaxiCount(new Random().nextInt(100)));
         }
-        EventBus.getDefault().post(list);
+        EventBus.getDefault().post(new TaxiCountEvent(list));
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                ArrayFeedBack<TaxiCount> feedBack;
+//                try {
+//                    //接收数据
+//                    Response response = getResponse(TAG_TAXICOUNT, info, ADRESS.carCountChange.value);
+//                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+//                    feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
+//                    }.getType());
+//                    //数据处理
+//                    EventBus.getDefault().post(new TaxiCountEvent(feedBack.data));
+//                } catch (java.lang.Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+
+
+    }
+
+    //请求使用率
+    private void getUseRatio(final UseRatioInfo info) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ObjectFeedBack<UseRatio> feedBack;
+                try {
+                    //接收数据
+                    Response response = getResponse(TAG_USE_RATIO, info, ADRESS.useRatio.value);
+                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
+                    }.getType());
+                    //数据处理
+                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    //请求最佳路线
+    private void getRoutePlan(final DriveTimeInfo info) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ObjectFeedBack<DriveTime> feedBack;
+                try {
+                    //接收数据
+                    Response response = getResponse(TAG_DRIVE_TIME, info, ADRESS.driveTime.value);
+                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<DriveTime>>() {
+                    }.getType());
+                    //数据处理
+                    EventBus.getDefault().post(new DriveTimeEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    //请求异常
+    private void getExceptions(final ExceptionInfo info) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayFeedBack<Exception> feedBack;
+                try {
+                    //接收数据
+                    Response response = getResponse(TAG_EXCEPTION, info, ADRESS.exception.value);
+                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<Exception>>() {
+                    }.getType());
+                    //数据处理
+                    EventBus.getDefault().post(new ExceptionEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+
+    private Response getResponse(int tag, Object info, String url) {
+        MediaType mediaType = MediaType.parse("application/json");
+        Logger.json(new Gson().toJson(info));
+        RequestBody body = RequestBody.create(mediaType, new Gson().toJson(info));
+        Request request = new Request.Builder()
+                .tag(tag)
+                .url(url)
+                .post(body)
+                .addHeader("content-type", "application/json")
+                .addHeader("cache-control", "no-cache")
+                .build();
+        try {
+            return client.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+            MethodsKt.showToast(this, "服务器在抢修中");
+            return null;
+        }
     }
 
     //取消请求
@@ -94,7 +273,7 @@ public class Http {
                 if (tag == (int) call.request().tag()) {
                     call.cancel();
                     switch (tag) {
-                        case TAG_HEATPOINTS:
+                        case TAG_HEAT_POINTS:
                             Logger.i("热力点请求被取消");
                             break;
                     }
@@ -106,7 +285,7 @@ public class Http {
                 if (tag == (int) call.request().tag()) {
                     call.cancel();
                     switch (tag) {
-                        case TAG_HEATPOINTS:
+                        case TAG_HEAT_POINTS:
                             Logger.i("热力点请求被取消");
                             break;
                     }

@@ -1,4 +1,4 @@
-package com.example.kk.dididache.model.netModel
+package com.example.kk.dididache.model.netModel.request
 
 import com.baidu.mapapi.model.LatLng
 import com.example.kk.dididache.toStr

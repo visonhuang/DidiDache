@@ -2,18 +2,18 @@ package com.example.kk.dididache.widget
 
 import android.animation.Animator
 import android.content.Context
-import android.graphics.Color
 import android.support.design.widget.FloatingActionButton
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.Button
 import android.widget.LinearLayout
 import com.baidu.mapapi.model.LatLng
+import com.example.kk.dididache.MyOverShootInterpolator
 import com.example.kk.dididache.R
 import com.example.kk.dididache.model.DataKeeper
+import com.example.kk.dididache.model.Event.TaxiCountEvent
 import com.example.kk.dididache.model.Http
-import com.example.kk.dididache.model.netModel.TaxiCount
-import com.example.kk.dididache.model.netModel.TaxiCountInfo
+import com.example.kk.dididache.model.netModel.response.TaxiCount
+import com.example.kk.dididache.model.netModel.request.TaxiCountInfo
 import com.example.kk.dididache.toStr
 import com.example.kk.dididache.ui.MainActivity
 import com.github.mikephil.charting.animation.Easing
@@ -82,9 +82,8 @@ class ChartDialog(var context: Context?) {
         EventBus.getDefault().register(this)
         setChartOptions(time)
         getDate(time)//发出网络请求
-        contentView.visibility = View.VISIBLE
-        scrim.visibility = View.VISIBLE
-        chart.zoom(0F,0F,0F,0F)
+
+        chart.zoom(0F, 0F, 0F, 0F)
         animate(true)
     }
 
@@ -97,10 +96,11 @@ class ChartDialog(var context: Context?) {
 
     //收到数据
     @Subscribe
-    fun setData(list: ArrayList<TaxiCount>) {
+    fun setData(event: TaxiCountEvent) {
+        if (event.list.isEmpty()) return
         val data = CombinedData()
-        data.setData(getBarData(list))
-        data.setData(getLineDate(list))
+        data.setData(getBarData(event.list))
+        data.setData(getLineDate(event.list))
         DataKeeper.getInstance().combinedData = data//存放数据
         chart.data = data
         animateChart()
@@ -112,7 +112,7 @@ class ChartDialog(var context: Context?) {
         val end = time.clone() as Calendar
         start.add(Calendar.MINUTE, -60)
         end.add(Calendar.MINUTE, 60)
-        Http.getInstance().getTaxiCountByTime(TaxiCountInfo(LatLng(0.0, 0.0), start, end, 0))
+        Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(LatLng(0.0, 0.0), start, end, 0))
     }
 
     private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
@@ -145,35 +145,36 @@ class ChartDialog(var context: Context?) {
      */
     fun animate(isShow: Boolean) {
         if (isShow) {
-            cancelButton.scaleX = 0F
-            cancelButton.scaleY = 0F
-            cancelButton.animate()
-                    .scaleX(1F)
-                    .scaleY(1F)
-                    .setInterpolator(AccelerateDecelerateInterpolator())
-                    .setDuration(200)
-                    .setStartDelay(100)
-                    .start()
-
-            detailButton.scaleX = 0F
-            detailButton.scaleY = 0F
-            detailButton.animate()
-                    .scaleX(1F)
-                    .scaleY(1F)
-                    .setInterpolator(AccelerateDecelerateInterpolator())
-                    .setDuration(200)
-                    .setStartDelay(150)
-                    .start()
-
-            contentView.alpha = 0F
-            contentView.scaleX = 0.8F
-            contentView.scaleY = 0.8F
-            contentView.animate()
-                    .scaleX(1F)
-                    .scaleY(1F)
+            contentView.visibility = View.VISIBLE
+            scrim.visibility = View.VISIBLE
+            cancelButton.visibility = View.VISIBLE
+            detailButton.visibility = View.VISIBLE
+            scrim.alpha = 0f
+            scrim.animate()
                     .alpha(1F)
-                    .setDuration(200)
-                    .setInterpolator(AccelerateDecelerateInterpolator()).setListener(object : Animator.AnimatorListener {
+                    .setInterpolator(AccelerateDecelerateInterpolator())
+                    .setDuration(300)
+                    .start()
+            cancelButton.translationX = -400F
+            cancelButton.animate()
+                    .translationX(0F)
+                    .setInterpolator(MyOverShootInterpolator())
+                    .setDuration(300)
+                    .start()
+
+            detailButton.translationX = 400F
+            detailButton.animate()
+                    .translationX(0F)
+                    .setInterpolator(MyOverShootInterpolator())
+                    .setDuration(300)
+                    .start()
+            contentView.translationY = -400F
+            contentView.alpha = 0F
+            contentView.animate()
+                    .translationY(0F)
+                    .alpha(1F)
+                    .setDuration(300)
+                    .setInterpolator(MyOverShootInterpolator()).setListener(object : Animator.AnimatorListener {
                 override fun onAnimationRepeat(p0: Animator?) {
 
                 }
@@ -191,21 +192,25 @@ class ChartDialog(var context: Context?) {
                 }
             }).start()
         } else {
+            scrim.animate()
+                    .alpha(0F)
+                    .setDuration(300)
+                    .start()
             cancelButton.animate()
-                    .scaleX(0F)
-                    .setDuration(200)
+                    .translationX(-400F)
+                    .setDuration(300)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
                     .start()
 
             detailButton.animate()
-                    .scaleX(0F)
-                    .setDuration(200)
+                    .translationX(400F)
+                    .setDuration(300)
+                    .setInterpolator(AccelerateDecelerateInterpolator())
                     .start()
             contentView.animate()
-
-                    .scaleY(0F)
+                    .translationY(-400F)
                     .alpha(0F)
-                    .setDuration(200)
-                    .setStartDelay(70)
+                    .setDuration(300)
                     .setInterpolator(AccelerateDecelerateInterpolator()).setListener(object : Animator.AnimatorListener {
                 override fun onAnimationRepeat(p0: Animator?) {
 
@@ -222,6 +227,8 @@ class ChartDialog(var context: Context?) {
                 override fun onAnimationEnd(p0: Animator?) {
                     contentView.visibility = View.GONE
                     scrim.visibility = View.GONE
+                    cancelButton.visibility = View.GONE
+                    detailButton.visibility = View.GONE
                     _dismiss()
                 }
             }).start()
@@ -244,13 +251,15 @@ class ChartDialog(var context: Context?) {
         chart.legend.isEnabled = false//去调颜色标注
         chart.axisRight.isEnabled = false //去掉右边y轴
         chart.axisLeft.setDrawGridLines(true)
-        chart.axisLeft.gridColor = Color.RED
-        chart.axisLeft.gridLineWidth = 5F
+        chart.axisLeft.axisLineWidth = 2F
         chart.axisLeft.axisMinimum = 0F
         chart.axisLeft.granularity = 1F
+        chart.axisLeft.textColor = 0xff626161.toInt()
         chart.xAxis.position = XAxis.XAxisPosition.BOTTOM//将x轴放在下面
         chart.xAxis.axisMinimum = 0f
         chart.xAxis.granularity = 1F
+        chart.xAxis.textColor = 0xff626161.toInt()
+        chart.xAxis.axisLineWidth = 2F
         chart.xAxis.setValueFormatter { value, _ -> xAxis[value.toInt() % 9] }
     }
 
