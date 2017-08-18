@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -16,8 +15,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by linzongzhan on 2017/8/14.
@@ -265,7 +262,7 @@ public class WheelView extends View {
         adjust();
         String textCopy = wheelItems.get(index).getText();
 
-        Log.d(TAG, textCopy);
+       // Log.d(TAG, textCopy);
 
         if (text == null) {
             text = textCopy;
@@ -390,4 +387,98 @@ public class WheelView extends View {
     public void setLinePadding (int linePadding) {
         this.linePadding = linePadding;
     }
+
+    private synchronized void slowMoveCopy (final float dy) {
+        if (threadQueue.peek() != null) {
+            threadQueue.poll().interrupt();
+        }
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int height = Math.abs((int) dy);
+                int distance = 0;
+
+//                int speed = height / itemHeight;
+//                int distanceCopy = 7 * speed;
+
+                int distanceCopy = 80;
+
+                int onlyOne = 1;
+                int onlyOne1 = 1;
+                int onlyOne2 = 2;
+                while (distance < height) {
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    handleMove(dy > 0 ? distanceCopy : distanceCopy * (-1));
+                    distance += distanceCopy;
+
+                    if (distance >= height - itemHeight * 10 && distance < height - itemHeight * 5) {
+                        if (onlyOne1 == 1) {
+                            onlyOne1 = 0;
+                            distanceCopy = 55;
+                        }
+                    }
+
+                    if (distance >= height - itemHeight * 30 && distance < height - itemHeight * 10) {
+                        if (onlyOne2 == 1) {
+                            onlyOne2 = 0;
+                            distance = 65;
+                        }
+                    }
+
+                    if (distance >= height - itemHeight * 5) {
+                        if (onlyOne == 1) {
+                            onlyOne = 0;
+                            distanceCopy = 27;
+                        }
+                        distanceCopy--;
+                        if (distanceCopy <= 0) {
+                            break;
+                        }
+                    }
+                }
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                handleUp();
+
+            }
+        });
+        thread.start();
+
+        threadQueue.add(thread);
+
+    }
+
+    private void moveToGoal (int distance) {
+        int dy = distance * itemHeight;
+        slowMoveCopy((float) dy);
+    }
+
+    public void smoothTo (String text) {
+        int after = lists.indexOf(text);
+        int before = lists.indexOf(this.text);
+
+        this.text = text;
+//        int distance1 = after - before;
+//        int distance2;
+//        if (after >= before) {
+//            distance2 = listSize  - after + before;
+//        } else {
+//            distance2 = - (after + listSize - before);
+//        }
+//        if (Math.abs(distance1) > Math.abs(distance2)) {
+//            moveToGoal(distance2);
+//        } else {
+//            moveToGoal(distance1);
+//        }
+        moveToGoal(before - after);
+    }
+
 }
