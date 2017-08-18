@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -16,11 +17,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import static android.content.ContentValues.TAG;
+
 /**
  * Created by linzongzhan on 2017/8/14.
  */
 
 public class WheelView extends View {
+
+    public interface Listener {
+        void listen(String info);
+    }
+    private Listener listener;
+    public void setListener (Listener listener) {
+        this.listener = listener;
+    }
 
     private Canvas canvas;
 
@@ -45,11 +56,12 @@ public class WheelView extends View {
     private AttributeSet attributeSet;
 
     private long downTime;
-    private String text;
+    private String text = "";
+    private String text6;
 
     private static final int SELECTEDSIZE = 80;
     private int selectedSize = SELECTEDSIZE;
-    private int linePadding = 0;
+    private int linePadding = 20;
 
     public static final int FONT_COLOR = Color.parseColor("#4F4F4F");
     public static final int FONT_SIZE = 80;
@@ -68,7 +80,8 @@ public class WheelView extends View {
     private int padding = PADDING;
     private int lineColor = Color.parseColor("#FFFFFF");
 
-    private List<String> lists;
+    private List<String> lists = new ArrayList<String>();
+    private int listSize;
     private String selectTip;
 
     private List<WheelItem> wheelItems = new ArrayList<WheelItem>();
@@ -87,6 +100,12 @@ public class WheelView extends View {
         mContext = context;
         attributeSet = attrs;
 
+        //详细考虑一下
+        for (int i = 0; i < 12; i++) {
+            lists.add("");
+        }
+
+
 //        TypedArray a = context.getTheme().obtainStyledAttributes(attrs,R.styleable.WheelView,0,0);
 //        try {
 //            linePadding = a.getInteger(R.styleable.WheelView_padding,0);
@@ -103,20 +122,26 @@ public class WheelView extends View {
     }
 
     //输入内容
-    public WheelView setLists (List<String> lists) {
+    public synchronized void setLists (List<String> lists) {
         this.lists = lists;
-        return this;
+        listSize = lists.size();
+        invalidate();
+        //return this;
     }
 
-    private synchronized void initWheelItems (int width,int itemHeight) {
+    private synchronized void initWheelItems (int width,int itemHeight,List<String> lists) {
         wheelItems.clear();
         for (int i = 0; i < showCount + 2; i++) {
             int startY = itemHeight * (i - 1);
             int stringIndex = select - showCount / 2 - 1 + i;
             if (stringIndex < 0) {
+
                 stringIndex = lists.size() + stringIndex;
             }
             if (stringIndex < lists.size()) {
+                if (i == 2) {
+                    text = lists.get(stringIndex);
+                }
                 wheelItems.add(new WheelItem(startY,width,itemHeight,fontColor,fontSize,lists.get(stringIndex)));
             }
         }
@@ -129,7 +154,7 @@ public class WheelView extends View {
         mPaint.setTextSize(selectedSize / 2);
         Paint.FontMetrics fontMetrics = mPaint.getFontMetrics();
         itemHeight = (int) (fontMetrics.bottom - fontMetrics.top) + 2 * padding;
-        initWheelItems(width,itemHeight);
+        initWheelItems(width,itemHeight,lists);
         wheelSelect = new WheelSelect(showCount / 2 * itemHeight,width,itemHeight,selectTip,fontColor,fontSize,padding,lineColor);
         height = itemHeight * showCount;
         super.onMeasure(widthMeasureSpec,MeasureSpec.makeMeasureSpec(height,MeasureSpec.EXACTLY));
@@ -162,7 +187,6 @@ public class WheelView extends View {
                 if (threadQueue.peek() != null) {
                     threadQueue.poll().interrupt();
                 }
-
                 handleMove(dy);
 
                 break;
@@ -239,7 +263,21 @@ public class WheelView extends View {
 
         freshView();
         adjust();
-        text = wheelItems.get(index).getText();
+        String textCopy = wheelItems.get(index).getText();
+
+        Log.d(TAG, textCopy);
+
+        if (text == null) {
+            text = textCopy;
+        } else {
+            if (!text.equals(textCopy)) {
+                text = textCopy;
+                if (listener != null) {
+                    listener.listen(text);
+                }
+            }
+        }
+
 
     }
 
@@ -345,6 +383,7 @@ public class WheelView extends View {
     public void setIndex (String text) {
         int index = lists.indexOf(text);
         select = index;
+    //    freshView();
     }
 
     //设置选中线颜色
