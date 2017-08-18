@@ -6,6 +6,30 @@
     android:layout_height="match_parent"
     tools:context="com.example.kk.dididache.ui.MainActivity">
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="8dp"
+        app:backgroundTint="#ffffffff"
+        app:fabSize="normal"
+        app:layout_constraintStart_toStartOf="@+id/chartContainer"
+        app:layout_constraintTop_toBottomOf="@+id/chartContainer"
+        app:srcCompat="@drawable/cancel" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/detailButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="64dp"
+        android:layout_marginTop="8dp"
+        app:srcCompat="@drawable/detail"
+        app:backgroundTint="#ffffffff"
+        app:fabSize="normal"
+        app:layout_constraintEnd_toEndOf="@+id/chartContainer"
+        app:layout_constraintTop_toBottomOf="@+id/chartContainer" />
+
     <android.support.v7.widget.CardView
         android:id="@+id/timeCardView"
         android:layout_width="0dp"
@@ -168,7 +192,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:translationZ="5dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:cardBackgroundColor="#d9ffffff"
         app:layout_constraintBottom_toBottomOf="@+id/scrim"
         app:layout_constraintEnd_toEndOf="parent"
@@ -215,32 +239,6 @@
                     app:layout_constraintStart_toEndOf="@+id/textView2"
                     app:layout_constraintTop_toBottomOf="@+id/chart" />
             </LinearLayout>
-
-            <Button
-                android:id="@+id/cancelButton"
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginStart="41dp"
-                android:backgroundTint="#ffff0000"
-                android:text=" 取 消"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <Button
-                android:id="@+id/detailButton"
-                android:layout_width="80dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="41dp"
-                android:backgroundTint="#ff3ecc59"
-                android:text="详 情"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
 
             <com.github.mikephil.charting.charts.CombinedChart
                 android:id="@+id/chart"

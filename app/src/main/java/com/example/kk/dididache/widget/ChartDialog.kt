@@ -2,6 +2,8 @@ package com.example.kk.dididache.widget
 
 import android.animation.Animator
 import android.content.Context
+import android.graphics.Color
+import android.support.design.widget.FloatingActionButton
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
@@ -38,8 +40,8 @@ class ChartDialog(var context: Context?) {
     var contentView: View = View(context)//表容器
     val scrim: View by lazy { (context as MainActivity).find<View>(R.id.scrim) }//遮罩
     val chart: CombinedChart by lazy { contentView.find<CombinedChart>(R.id.chart) }//表
-    val cancelButton: Button by lazy { contentView.find<Button>(R.id.cancelButton) }
-    val detailButton: Button by lazy { contentView.find<Button>(R.id.detailButton) }
+    val cancelButton: FloatingActionButton by lazy { (context as MainActivity).find<FloatingActionButton>(R.id.cancelButton) }
+    val detailButton: FloatingActionButton by lazy { (context as MainActivity).find<FloatingActionButton>(R.id.detailButton) }
     val underChartLinear: LinearLayout by lazy { contentView.find<LinearLayout>(R.id.underChartLinear) }
     var _chartClick: (View) -> Unit = {}//点击表
     var _dismiss: () -> Unit = {}//dialog消失
@@ -242,6 +244,8 @@ class ChartDialog(var context: Context?) {
         chart.legend.isEnabled = false//去调颜色标注
         chart.axisRight.isEnabled = false //去掉右边y轴
         chart.axisLeft.setDrawGridLines(true)
+        chart.axisLeft.gridColor = Color.RED
+        chart.axisLeft.gridLineWidth = 5F
         chart.axisLeft.axisMinimum = 0F
         chart.axisLeft.granularity = 1F
         chart.xAxis.position = XAxis.XAxisPosition.BOTTOM//将x轴放在下面
