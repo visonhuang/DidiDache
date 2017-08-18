@@ -51,6 +51,8 @@ public class WheelSelect {
 
         canvas.drawLine(0 + padding,startY,width - padding,startY,mPaint);
         canvas.drawLine(0 + padding,startY + height,width - padding,startY + height,mPaint);
+        canvas.drawLine(0 + padding - 1,startY,width - padding - 1,startY,mPaint);
+        canvas.drawLine(0 + padding + 1,startY + height,width - padding + 1,startY + height,mPaint);
 
         shadow.setStyle(Paint.Style.FILL);
         shadow.setColor(Color.WHITE);
