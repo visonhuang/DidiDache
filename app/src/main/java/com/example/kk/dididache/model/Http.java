@@ -1,11 +1,10 @@
 package com.example.kk.dididache.model;
 
-import android.util.JsonReader;
-import android.util.Log;
-
-import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.model.LatLngBounds;
 import com.example.kk.dididache.MethodsKt;
+import com.example.kk.dididache.model.netModel.HeatInfo;
+import com.example.kk.dididache.model.netModel.LatLongList;
+import com.example.kk.dididache.model.netModel.TaxiCount;
+import com.example.kk.dididache.model.netModel.TaxiCountInfo;
 import com.google.gson.Gson;
 import com.orhanobut.logger.Logger;
 
@@ -13,9 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import okhttp3.Call;

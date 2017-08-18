@@ -1,4 +1,4 @@
-package com.example.kk.dididache.model;
+package com.example.kk.dididache.control.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

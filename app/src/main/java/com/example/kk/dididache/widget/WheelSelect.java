@@ -1,4 +1,4 @@
-package com.example.kk.dididache.model;
+package com.example.kk.dididache.widget;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

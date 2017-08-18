@@ -1,4 +1,4 @@
-package com.example.kk.dididache.model;
+package com.example.kk.dididache.model.netModel;
 
 import com.baidu.mapapi.model.LatLng;
 

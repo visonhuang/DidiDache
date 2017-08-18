@@ -1,5 +1,6 @@
 package com.example.kk.dididache.model;
 
+import com.example.kk.dididache.model.netModel.LatLongList;
 import com.github.mikephil.charting.data.CombinedData;
 
 /**

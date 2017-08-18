@@ -1,17 +1,17 @@
-package com.example.kk.dididache.model
+package com.example.kk.dididache.widget
 
 import android.animation.Animator
-import android.support.v7.app.AlertDialog
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.Interpolator
 import android.widget.Button
 import android.widget.LinearLayout
 import com.baidu.mapapi.model.LatLng
 import com.example.kk.dididache.R
+import com.example.kk.dididache.model.DataKeeper
+import com.example.kk.dididache.model.Http
+import com.example.kk.dididache.model.netModel.TaxiCount
+import com.example.kk.dididache.model.netModel.TaxiCountInfo
 import com.example.kk.dididache.toStr
 import com.example.kk.dididache.ui.MainActivity
 import com.github.mikephil.charting.animation.Easing
