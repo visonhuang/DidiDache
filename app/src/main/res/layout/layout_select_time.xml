@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipChildren="false">
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,7 +13,8 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:clipChildren="false">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="12dp" />
@@ -26,10 +28,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="11dp" />
+
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp">
+
                 <TextView
                     android:layout_width="2dp"
                     android:layout_height="match_parent" />
@@ -38,10 +44,10 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    app:cardCornerRadius="10dp"
+                    android:background="#bcd2fa"
                     android:elevation="6dp"
                     app:cardBackgroundColor="#bcd2fa"
-                    android:background="#bcd2fa">
+                    app:cardCornerRadius="10dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -52,8 +58,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="#bcd2fa">
+                            android:background="#bcd2fa"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -65,7 +71,7 @@
                                 android:textColor="#4F4F4F"
                                 android:textSize="15sp" />
 
-                            <com.example.linzongzhan.rollingviewtext.WheelView
+                            <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_year"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />
@@ -75,8 +81,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="#bcd2fa">
+                            android:background="#bcd2fa"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -88,7 +94,7 @@
                                 android:textColor="#4F4F4F"
                                 android:textSize="15sp" />
 
-                            <com.example.linzongzhan.rollingviewtext.WheelView
+                            <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_month"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />
@@ -98,8 +104,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="#bcd2fa">
+                            android:background="#bcd2fa"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -111,7 +117,7 @@
                                 android:textColor="#4F4F4F"
                                 android:textSize="15sp" />
 
-                            <com.example.linzongzhan.rollingviewtext.WheelView
+                            <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_day"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />
@@ -121,8 +127,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="#bcd2fa">
+                            android:background="#bcd2fa"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -134,7 +140,7 @@
                                 android:textColor="#4F4F4F"
                                 android:textSize="15sp" />
 
-                            <com.example.linzongzhan.rollingviewtext.WheelView
+                            <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_hour"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />
@@ -144,8 +150,8 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:background="#bcd2fa">
+                            android:background="#bcd2fa"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -157,7 +163,7 @@
                                 android:textColor="#4F4F4F"
                                 android:textSize="15sp" />
 
-                            <com.example.linzongzhan.rollingviewtext.WheelView
+                            <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_minute"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent" />

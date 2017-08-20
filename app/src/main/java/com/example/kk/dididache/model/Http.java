@@ -183,23 +183,25 @@ public class Http {
 
     //请求使用率
     private void getUseRatio(final UseRatioInfo info) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ObjectFeedBack<UseRatio> feedBack;
-                try {
-                    //接收数据
-                    Response response = getResponse(TAG_USE_RATIO, info, ADRESS.useRatio.value);
-                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
-                    feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
-                    }.getType());
-                    //数据处理
-                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data));
-                } catch (java.lang.Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+
+        EventBus.getDefault().post(new UseRatioEvent(new UseRatio(100, 10)));
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                ObjectFeedBack<UseRatio> feedBack;
+//                try {
+//                    //接收数据
+//                    Response response = getResponse(TAG_USE_RATIO, info, ADRESS.useRatio.value);
+//                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+//                    feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
+//                    }.getType());
+//                    //数据处理
+//                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data));
+//                } catch (java.lang.Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
     }
 
     //请求最佳路线

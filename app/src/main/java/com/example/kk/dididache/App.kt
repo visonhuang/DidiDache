@@ -2,6 +2,7 @@ package com.example.kk.dididache
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -27,6 +28,8 @@ class App : Application() {
         var instance: App by Delegates.notNull()
         //地图主题
         val PATH = "custom_config_blue.txt"
+        val mTfLight by lazy { Typeface.createFromAsset(instance.assets, "OpenSans-Light.ttf") }
+        val mTfRegular by lazy { Typeface.createFromAsset(instance.assets, "OpenSans-Regular.ttf") }
     }
 
     override fun onCreate() {

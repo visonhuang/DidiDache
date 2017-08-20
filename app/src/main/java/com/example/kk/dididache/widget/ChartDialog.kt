@@ -2,24 +2,41 @@ package com.example.kk.dididache.widget
 
 import android.animation.Animator
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.support.design.widget.FloatingActionButton
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.LinearLayout
 import com.baidu.mapapi.model.LatLng
+import com.example.kk.dididache.App
 import com.example.kk.dididache.MyOverShootInterpolator
 import com.example.kk.dididache.R
+import com.example.kk.dididache.control.adapter.ChartAdapter
 import com.example.kk.dididache.model.DataKeeper
 import com.example.kk.dididache.model.Event.TaxiCountEvent
+import com.example.kk.dididache.model.Event.UseRatioEvent
 import com.example.kk.dididache.model.Http
 import com.example.kk.dididache.model.netModel.response.TaxiCount
 import com.example.kk.dididache.model.netModel.request.TaxiCountInfo
+import com.example.kk.dididache.model.netModel.request.UseRatioInfo
 import com.example.kk.dididache.toStr
 import com.example.kk.dididache.ui.MainActivity
 import com.github.mikephil.charting.animation.Easing
+import com.github.mikephil.charting.charts.Chart
 import com.github.mikephil.charting.charts.CombinedChart
+import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.PercentFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.jetbrains.anko.find
@@ -37,11 +54,14 @@ class ChartDialog(var context: Context?) {
         insideBuild()
     }
 
+    var viewPager = (context as MainActivity).viewPager
+    var indicator = (context as MainActivity).indicator
     var contentView: View = View(context)//表容器
     val scrim: View by lazy { (context as MainActivity).find<View>(R.id.scrim) }//遮罩
-    val chart: CombinedChart by lazy { contentView.find<CombinedChart>(R.id.chart) }//表
-    val cancelButton: FloatingActionButton by lazy { (context as MainActivity).find<FloatingActionButton>(R.id.cancelButton) }
-    val detailButton: FloatingActionButton by lazy { (context as MainActivity).find<FloatingActionButton>(R.id.detailButton) }
+    val combinedChart: CombinedChart = CombinedChart(context)//by lazy { contentView.combinedChart }//表
+    val pieChart: PieChart = PieChart(context)
+    val cancelButton: ImageView by lazy { (context as MainActivity).find<ImageView>(R.id.cancelButton) }
+    val detailButton: ImageView by lazy { (context as MainActivity).find<ImageView>(R.id.detailButton) }
     val underChartLinear: LinearLayout by lazy { contentView.find<LinearLayout>(R.id.underChartLinear) }
     var _chartClick: (View) -> Unit = {}//点击表
     var _dismiss: () -> Unit = {}//dialog消失
@@ -50,6 +70,11 @@ class ChartDialog(var context: Context?) {
     var xAxis = mutableListOf<String>()
     var isShowing: Boolean = false
         get() = contentView.visibility == View.VISIBLE
+    var hasException = false
+        set(value) {
+            if (value) underChartLinear.visibility = View.VISIBLE
+            else underChartLinear.visibility = View.GONE
+        }
 
     fun onChartClick(c: (View) -> Unit) {
         _chartClick = c
@@ -68,9 +93,16 @@ class ChartDialog(var context: Context?) {
     }
 
     private fun insideBuild() {
+
         contentView = (context as MainActivity).find(R.id.chartContainer)
+
+        /******实验*******/
+        viewPager.adapter = ChartAdapter(combinedChart, pieChart)
+        indicator.setViewPager(viewPager)
+        /********实验*******/
+
         scrim.onClick { dismiss() }
-        chart.onClick { _chartClick(chart) }//设置表点击事件监听
+        combinedChart.onClick { _chartClick(combinedChart) }//设置表点击事件监听
         detailButton.onClick { _detail() }
         cancelButton.onClick {
             dismiss()
@@ -80,10 +112,9 @@ class ChartDialog(var context: Context?) {
 
     fun show(time: Calendar) {
         EventBus.getDefault().register(this)
-        setChartOptions(time)
+        setChartOptions(combinedChart, time)
         getDate(time)//发出网络请求
-
-        chart.zoom(0F, 0F, 0F, 0F)
+        combinedChart.zoom(0F, 0F, 0F, 0F)
         animate(true)
     }
 
@@ -96,14 +127,39 @@ class ChartDialog(var context: Context?) {
 
     //收到数据
     @Subscribe
-    fun setData(event: TaxiCountEvent) {
+    fun setTaxiCountData(event: TaxiCountEvent) {
         if (event.list.isEmpty()) return
         val data = CombinedData()
         data.setData(getBarData(event.list))
         data.setData(getLineDate(event.list))
         DataKeeper.getInstance().combinedData = data//存放数据
-        chart.data = data
-        animateChart()
+        combinedChart.data = data
+        animateCombinedChart()
+    }
+
+    @Subscribe
+    fun setUseRatioData(event: UseRatioEvent) {
+        val entries = mutableListOf<PieEntry>()
+        val colors = mutableListOf<Int>()
+        val used = event.useRatio.taxiUse.toFloat() / event.useRatio.taxiSum.toFloat() * 100
+
+        entries.add(PieEntry(used, "已载客"))
+        entries.add(PieEntry(100 - used, "空 车"))
+
+        val dataSet = PieDataSet(entries, "")
+        dataSet.sliceSpace = 5F
+        dataSet.selectionShift = 5F
+
+        colors.add(0xff4da8ec.toInt())
+        colors.add(0xff85c8f3.toInt())
+        dataSet.colors = colors
+        val pieData = PieData(dataSet)
+        pieData.setValueFormatter(PercentFormatter())
+        pieData.setValueTextSize(8F)
+        pieData.setValueTextColor(Color.WHITE)
+        pieData.setValueTypeface(App.mTfLight)
+        pieChart.data = pieData
+        animatePieChart()
     }
 
     //发出网络请求
@@ -113,6 +169,7 @@ class ChartDialog(var context: Context?) {
         start.add(Calendar.MINUTE, -60)
         end.add(Calendar.MINUTE, 60)
         Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(LatLng(0.0, 0.0), start, end, 0))
+        Http.getInstance().doPost(Http.ADRESS.useRatio, UseRatioInfo(0.0, 0.0, start.toStr(), end.toStr(), 0))
     }
 
     private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
@@ -236,9 +293,10 @@ class ChartDialog(var context: Context?) {
     }
 
 
-    fun animateChart() = chart.animateY(1000, Easing.EasingOption.EaseInQuad)
+    fun animateCombinedChart() = combinedChart.animateY(1000, Easing.EasingOption.EaseInQuad)
+    fun animatePieChart() = pieChart.animateY(1000, Easing.EasingOption.EaseInQuad)
 
-    private fun setChartOptions(time: Calendar) {
+    private fun setChartOptions(combinedChart: CombinedChart, time: Calendar) {
         //设置x轴
         val p0 = time.clone() as Calendar
         p0.add(Calendar.MINUTE, -60)
@@ -247,20 +305,52 @@ class ChartDialog(var context: Context?) {
             xAxis.add(p0.toStr("HH:mm"))
             p0.add(Calendar.MINUTE, 15)
         }
-        chart.description.isEnabled = false//去掉注释
-        chart.legend.isEnabled = false//去调颜色标注
-        chart.axisRight.isEnabled = false //去掉右边y轴
-        chart.axisLeft.setDrawGridLines(true)
-        chart.axisLeft.axisLineWidth = 2F
-        chart.axisLeft.axisMinimum = 0F
-        chart.axisLeft.granularity = 1F
-        chart.axisLeft.textColor = 0xff626161.toInt()
-        chart.xAxis.position = XAxis.XAxisPosition.BOTTOM//将x轴放在下面
-        chart.xAxis.axisMinimum = 0f
-        chart.xAxis.granularity = 1F
-        chart.xAxis.textColor = 0xff626161.toInt()
-        chart.xAxis.axisLineWidth = 2F
-        chart.xAxis.setValueFormatter { value, _ -> xAxis[value.toInt() % 9] }
+        combinedChart.description.isEnabled = false//去掉注释
+        combinedChart.legend.isEnabled = false//去调颜色标注
+        combinedChart.axisRight.isEnabled = false //去掉右边y轴
+        combinedChart.axisLeft.setDrawGridLines(true)
+        combinedChart.axisLeft.axisLineWidth = 2F
+        combinedChart.axisLeft.axisMinimum = 0F
+        combinedChart.axisLeft.granularity = 1F
+        combinedChart.axisLeft.textColor = 0xff626161.toInt()
+        combinedChart.xAxis.position = XAxis.XAxisPosition.BOTTOM//将x轴放在下面
+        combinedChart.xAxis.axisMinimum = 0f
+        combinedChart.xAxis.granularity = 1F
+        combinedChart.xAxis.textColor = 0xff626161.toInt()
+        combinedChart.xAxis.axisLineWidth = 2F
+        combinedChart.xAxis.setValueFormatter { value, _ -> xAxis[value.toInt() % 9] }
+
+        pieChart.setUsePercentValues(true)
+        pieChart.description.isEnabled = false
+        //pieChart.setExtraOffsets(5F, 10F, 5F, 5F)
+        pieChart.dragDecelerationFrictionCoef = 0.95F
+        pieChart.setCenterTextTypeface(App.mTfLight)
+        pieChart.centerText = genText()
+        pieChart.isDrawHoleEnabled = true
+        pieChart.setHoleColor(Color.WHITE)
+        pieChart.setTransparentCircleColor(Color.WHITE)
+        pieChart.setTransparentCircleAlpha(110)
+        pieChart.holeRadius = 58F
+        pieChart.transparentCircleRadius = 61F
+        pieChart.setDrawCenterText(true)
+        pieChart.rotationAngle = 0f
+        pieChart.isRotationEnabled = true
+        pieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad)
+        pieChart.legend.isEnabled = false
+        pieChart.setEntryLabelColor(Color.WHITE)
+        pieChart.setEntryLabelTypeface(App.mTfRegular)
+        pieChart.setEntryLabelTextSize(7f)
+
     }
 
+    private fun genText(): SpannableString {
+        val s = SpannableString("出租车载客率\npowered by QG Studio")
+        s.setSpan(RelativeSizeSpan(.7f), 0, 6, 0)
+        s.setSpan(StyleSpan(Typeface.NORMAL), 6, s.length - 9, 0)
+        s.setSpan(ForegroundColorSpan(Color.GRAY), 6, s.length - 9, 0)
+        s.setSpan(RelativeSizeSpan(.5f), 6, s.length - 9, 0)
+        s.setSpan(StyleSpan(Typeface.ITALIC), s.length - 9, s.length, 0)
+        s.setSpan(ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length - 9, s.length, 0)
+        return s
+    }
 }

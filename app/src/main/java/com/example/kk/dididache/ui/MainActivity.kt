@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import com.baidu.location.*
 import com.baidu.mapapi.map.*
 import com.baidu.mapapi.map.BaiduMap.OnMapStatusChangeListener
@@ -20,7 +21,9 @@ import com.baidu.mapapi.search.sug.SuggestionSearch
 import com.baidu.mapapi.search.sug.SuggestionSearchOption
 import com.example.kk.dididache.*
 import com.example.kk.dididache.control.adapter.SearchItemAdapter
+import com.example.kk.dididache.control.adapter.SelectTimeManager
 import com.example.kk.dididache.model.*
+import com.example.kk.dididache.model.Event.ExceptionEvent
 import com.example.kk.dididache.model.Event.HeatMapEvent
 import com.example.kk.dididache.model.netModel.request.HeatInfo
 import com.example.kk.dididache.widget.ChartDialog
@@ -32,17 +35,19 @@ import org.greenrobot.eventbus.Subscribe
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sdk25.coroutines.onTouch
+import org.jetbrains.anko.startActivity
 import java.util.*
 import kotlin.collections.ArrayList
 
 class MainActivity : BaseActivity() {
     //定位相关
     private val locClient by lazy { LocationClient(this) }
-    private val locationListener by lazy { MyLocationListener() } //定位监听
+    private var locationListener: MyLocationListener? = MyLocationListener() //定位监听
     private var curPoint: LatLng = LatLng(0.0, 0.0)//当前经纬度
         get() = LatLng(locData?.latitude ?: 0.0, locData?.longitude ?: 0.0)
     private var locData: MyLocationData? = null//坐标信息
-
+    private var exceptions: ExceptionEvent? = null
+    private var exceptionOverLays: MutableList<Overlay> = mutableListOf()
     //UI相关
     private val map by lazy { mapView.map }
     private var heatMap: HeatMap? = null
@@ -55,7 +60,9 @@ class MainActivity : BaseActivity() {
     private var isUnusualShowing = false//是否在显示异常点
     private var suggestAdapter: SearchItemAdapter? = null
     private val poimarkerIcon = BitmapDescriptorFactory.fromResource(R.drawable.destination_point_blue)
-    private var time: Calendar = Calendar.getInstance()
+    private val exceptionIcon = BitmapDescriptorFactory.fromResource(R.drawable.unusual)
+
+    private var timeManager: SelectTimeManager? = null
 
     //搜索相关
     private var suggestSearch = SuggestionSearch.newInstance()
@@ -78,22 +85,23 @@ class MainActivity : BaseActivity() {
     }
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
         override fun onMapClick(p0: LatLng?) {
-            time.set(2017, 2, 28, 4, 5, 5)
-            chartDialog?.show(time)
+            chartDialog?.show(timeManager!!.timeSelected)
+            if (exceptions != null)
+                chartDialog?.hasException = !exceptions!!.exceptions.isEmpty()
         }
 
         override fun onMapPoiClick(p0: MapPoi?): Boolean {
+            chartDialog?.show(timeManager!!.timeSelected)
+            if (exceptions != null)
+                chartDialog?.hasException = !exceptions!!.exceptions.isEmpty()
             return true
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        EventBus.getDefault().register(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         requsetPermission()//请求权限
-
-
     }
 
     private fun requsetPermission() {
@@ -151,18 +159,20 @@ class MainActivity : BaseActivity() {
             map.setMyLocationData(locData)
 
             /***********/
-
-            if (HeatInfo.lastTime == null) {
-                val lastTime = Calendar.getInstance()
-                lastTime.set(2017, 2, 28, 0, 0, 1)
-                HeatInfo.lastTime = lastTime.toStr()
+            if (timeManager!!.timeMode == 0) {
+                if (HeatInfo.lastTime == null) {
+                    val lastTime = Calendar.getInstance()
+                    lastTime.set(2017, 2, 28, 0, 0, 1)
+                    HeatInfo.lastTime = lastTime.toStr()
+                }
+                val newTime = HeatInfo.lastTime!!.toCalender()
+                newTime.add(Calendar.SECOND, 30)
+                val info: HeatInfo = HeatInfo(HeatInfo.lastTime!!, newTime.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest)
+                Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
+                Http.getInstance().doPost(Http.ADRESS.heatMap, info)
+                HeatInfo.lastTime = newTime.toStr()
             }
-            val newTime = HeatInfo.lastTime!!.toCalender()
-            newTime.add(Calendar.SECOND, 30)
-            val info: HeatInfo = HeatInfo(HeatInfo.lastTime!!, newTime.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest)
-            Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
-            Http.getInstance().doPost(Http.ADRESS.heatMap, info)
-            HeatInfo.lastTime = newTime.toStr()
+
 
             /***********/
 
@@ -187,7 +197,6 @@ class MainActivity : BaseActivity() {
         option.coorType = "bd09ll"//设置坐标类型
         option.scanSpan = 5000//扫描速度
         locClient.locOption = option
-        locClient.start()
         Logger.i("开启定位")
         map.setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, BitmapDescriptorFactory.fromResource(R.drawable.my_location_point)))
         initView()//初始化视图
@@ -195,19 +204,26 @@ class MainActivity : BaseActivity() {
 
     //初始化视图
     private fun initView() {
+        timeManager = SelectTimeManager(this) {
+            onSelect { Logger.d(it.toStr()) }
+        }
+        freshTime.onClick { timeManager?.freshTime() }
+        timeButton.onClick { timeManager?.show() }
         gotoMyLoc.onClick { backToMyLoc(18.0F) }
-
         openUnusual.onClick {
             isUnusualShowing = !isUnusualShowing
             if (isUnusualShowing) {
+                //显示异常点
                 openUnusual.unusualImageView.imageResource = R.drawable.cancel_unusual
-                //TODO 显示异常点
+                if (exceptions == null || exceptionOverLays.isEmpty() || exceptions!!.exceptions.isEmpty()) return@onClick
+                exceptionOverLays = map.addOverlays(exceptions!!.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
             } else {
+                //去除异常点
                 openUnusual.unusualImageView.imageResource = R.drawable.open_unusual
-                //TODO 去除异常点
+                exceptionOverLays.map { it.remove() }
             }
         }
-
+        queryPath.onClick { startActivity<RoutePlanActivity>() }
 
         chartDialog = ChartDialog(this@MainActivity) {
             onDismiss { showToast("消失了") }
@@ -215,11 +231,11 @@ class MainActivity : BaseActivity() {
             onChartClick {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
-                    intent.putExtra("time", time)
-                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, chart, "chartTransition").toBundle())
+                    intent.putExtra("time", timeManager!!.timeSelected)
+                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "chartTransition").toBundle())
                 } else {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
-                    intent.putExtra("time", time)
+                    intent.putExtra("time", timeManager!!.timeSelected)
                     this@MainActivity.startActivity(intent)
                 }
             }
@@ -227,11 +243,11 @@ class MainActivity : BaseActivity() {
             onDetail {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
-                    intent.putExtra("time", time)
-                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, chart, "chartTransition").toBundle())
+                    intent.putExtra("time", timeManager!!.timeSelected)
+                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "chartTransition").toBundle())
                 } else {
                     val intent = Intent(this@MainActivity, ChartActivity::class.java)
-                    intent.putExtra("time", time)
+                    intent.putExtra("time", timeManager!!.timeSelected)
                     this@MainActivity.startActivity(intent)
                 }
             }
@@ -278,6 +294,8 @@ class MainActivity : BaseActivity() {
             poiSearch.searchInCity(PoiCitySearchOption().city("广州").keyword(info))
 
         }
+
+
         poiSearch.setOnGetPoiSearchResultListener(object : OnGetPoiSearchResultListener {
             override fun onGetPoiIndoorResult(p0: PoiIndoorResult?) {
 
@@ -290,7 +308,15 @@ class MainActivity : BaseActivity() {
                 }
                 if (p0.error == SearchResult.ERRORNO.NO_ERROR) {
                     map.clear()
-                    map.addOverlays(p0.allPoi.map { MarkerOptions().position(it.location).icon(poimarkerIcon) })
+
+                    val o = map.addOverlays(p0.allPoi.map {
+                        map.animateMapStatus(MapStatusUpdateFactory.newMapStatus(
+                                MapStatus.Builder()
+                                        .target(LatLng(it.location.latitude, it.location.longitude))
+                                        .zoom(18F).build()))
+                        MarkerOptions().position(it.location).icon(poimarkerIcon)
+
+                    })
                 }
             }
 
@@ -325,9 +351,21 @@ class MainActivity : BaseActivity() {
         heatMap = HeatMap.Builder().weightedData(event.list as ArrayList<WeightedLatLng>).build()
     }
 
+    @Subscribe
+    fun getUnusual(event: ExceptionEvent) {
+        exceptions = event
+        if (isUnusualShowing) {
+            if (!exceptionOverLays.isEmpty()) exceptionOverLays.map { it.remove() }
+            exceptionOverLays = map.addOverlays(event.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
+        }
+    }
+
     override fun onResume() {
+        EventBus.getDefault().register(this)
         mapView.onResume()
         locClient.registerLocationListener(locationListener)
+        locClient.start()
+        MapView.setMapCustomEnable(true)
         Logger.i("注册定位监听")
         super.onResume()
     }
@@ -340,7 +378,9 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onPause() {
+        EventBus.getDefault().unregister(this)//取消订阅
         locClient.unRegisterLocationListener(locationListener)
+        locClient.stop()
         Logger.i("注销定位监听")
         Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
         mapView.onPause()
@@ -348,15 +388,16 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onStop() {
-        locClient.unRegisterLocationListener(locationListener)
-        Logger.i("注销定位监听")
-        EventBus.getDefault().unregister(this)//取消订阅
+
+
         super.onStop()
     }
 
     override fun onBackPressed() {
         if (chartDialog!!.isShowing) {
             chartDialog?.dismiss()
+        } else if (timeManager != null && timeManager!!.isShowing) {
+            timeManager?.dismiss()
         } else {
             super.onBackPressed()
         }
