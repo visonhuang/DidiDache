@@ -179,7 +179,7 @@ public class SelectTime extends LinearLayout{
         calendar.set(Calendar.YEAR,Integer.valueOf(year.getIndexText()));
         calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()));
         calendar.set(Calendar.DATE,Integer.valueOf(day.getIndexText()));
-        calendar.set(Calendar.HOUR,Integer.valueOf(hour.getIndexText()));
+        calendar.set(Calendar.HOUR_OF_DAY,Integer.valueOf(hour.getIndexText()));
         calendar.set(Calendar.MINUTE,Integer.valueOf(minute.getIndexText()));
         return calendar;
     }
