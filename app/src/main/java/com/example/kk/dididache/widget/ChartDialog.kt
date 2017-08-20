@@ -137,6 +137,7 @@ class ChartDialog(var context: Context?) {
         animateCombinedChart()
     }
 
+
     @Subscribe
     fun setUseRatioData(event: UseRatioEvent) {
         val entries = mutableListOf<PieEntry>()
