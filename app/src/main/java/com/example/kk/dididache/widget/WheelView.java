@@ -56,7 +56,7 @@ public class WheelView extends View {
     private String text = "";
     private String text6;
 
-    private static final int SELECTEDSIZE = 80;
+    private static final int SELECTEDSIZE = 160;
     private int selectedSize = SELECTEDSIZE;
     private int linePadding = 20;
 

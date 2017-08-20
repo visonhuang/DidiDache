@@ -8,7 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="10dp"
-        android:elevation="5dp">
+        android:elevation="5dp"
+        android:layout_marginBottom="1dp">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -41,7 +42,8 @@
                     app:cardCornerRadius="10dp"
                     android:elevation="6dp"
                     app:cardBackgroundColor="#bcd2fa"
-                    android:background="#bcd2fa">
+                    android:background="#bcd2fa"
+                    android:layout_marginBottom="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -165,9 +167,9 @@
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
 
-                <TextView
-                    android:layout_width="2dp"
-                    android:layout_height="match_parent" />
+                <!--<TextView-->
+                    <!--android:layout_width="2dp"-->
+                    <!--android:layout_height="match_parent" />-->
             </LinearLayout>
             <TextView
                 android:layout_width="match_parent"

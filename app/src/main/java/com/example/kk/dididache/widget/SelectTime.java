@@ -151,7 +151,7 @@ public class SelectTime extends LinearLayout{
 
     public void setIndex (Calendar calendar) {
         year.setIndex(calendar.get(Calendar.YEAR) + "");
-        month.setIndex((calendar.get(Calendar.MONTH) + 1) + "");
+        month.setIndex((calendar.get(Calendar.MONTH)) + "");
         day.setIndex(calendar.get(Calendar.DATE) + "");
         hour.setIndex(calendar.get(Calendar.HOUR_OF_DAY) + "");
         minute.setIndex(calendar.get(Calendar.MINUTE) + "");
@@ -159,7 +159,7 @@ public class SelectTime extends LinearLayout{
 
     public void setIndexAfterNew (Calendar calendar) {
         year.setIndexAfterNew(calendar.get(Calendar.YEAR) + "");
-        month.setIndexAfterNew((calendar.get(Calendar.MONTH) + 1) + "");
+        month.setIndexAfterNew((calendar.get(Calendar.MONTH)) + "");
         day.setIndexAfterNew(calendar.get(Calendar.DATE) + "");
         hour.setIndexAfterNew(calendar.get(Calendar.HOUR_OF_DAY) + "");
         minute.setIndexAfterNew(calendar.get(Calendar.MINUTE) + "");
@@ -177,7 +177,7 @@ public class SelectTime extends LinearLayout{
 
     public Calendar getSelectedTime () {
         calendar.set(Calendar.YEAR,Integer.valueOf(year.getIndexText()));
-        calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()) - 1);
+        calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()));
         calendar.set(Calendar.DATE,Integer.valueOf(day.getIndexText()));
         calendar.set(Calendar.HOUR_OF_DAY,Integer.valueOf(hour.getIndexText()));
         calendar.set(Calendar.MINUTE,Integer.valueOf(minute.getIndexText()));
@@ -203,7 +203,7 @@ public class SelectTime extends LinearLayout{
 
     public void smoothToGoal (Calendar calendar) {
         String yearT = calendar.get(Calendar.YEAR) + "";
-        String monthT = (calendar.get(Calendar.MONTH) + 1) + "";
+        String monthT = (calendar.get(Calendar.MONTH)) + "";
         String dayT = calendar.get(Calendar.DATE) + "";
         String hourT = calendar.get(Calendar.HOUR_OF_DAY) + "";
         String minuteT = calendar.get(Calendar.MINUTE) + "";
