@@ -383,6 +383,13 @@ public class WheelView extends View {
     //    freshView();
     }
 
+    public void setIndexAfterNew (String text) {
+        int index = lists.indexOf(text);
+        select = index;
+
+        initWheelItems(width,itemHeight,lists);
+    }
+
     //设置选中线颜色
     public void setLinePadding (int linePadding) {
         this.linePadding = linePadding;

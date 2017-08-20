@@ -157,6 +157,14 @@ public class SelectTime extends LinearLayout{
         minute.setIndex(calendar.get(Calendar.MINUTE) + "");
     }
 
+    public void setIndexAfterNew (Calendar calendar) {
+        year.setIndexAfterNew(calendar.get(Calendar.YEAR) + "");
+        month.setIndexAfterNew((calendar.get(Calendar.MONTH) + 1) + "");
+        day.setIndexAfterNew(calendar.get(Calendar.DATE) + "");
+        hour.setIndexAfterNew(calendar.get(Calendar.HOUR_OF_DAY) + "");
+        minute.setIndexAfterNew(calendar.get(Calendar.MINUTE) + "");
+    }
+
 //    public List<String> getSelectedTime () {
 //        List<String> time = new ArrayList<>();
 //        time.add(year.getIndexText());
@@ -169,7 +177,7 @@ public class SelectTime extends LinearLayout{
 
     public Calendar getSelectedTime () {
         calendar.set(Calendar.YEAR,Integer.valueOf(year.getIndexText()));
-        calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()));
+        calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()) - 1);
         calendar.set(Calendar.DATE,Integer.valueOf(day.getIndexText()));
         calendar.set(Calendar.HOUR,Integer.valueOf(hour.getIndexText()));
         calendar.set(Calendar.MINUTE,Integer.valueOf(minute.getIndexText()));
