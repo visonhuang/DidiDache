@@ -265,7 +265,8 @@
             android:layout_height="match_parent"
             android:background="?attr/colorPrimary"
             android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme" />
+            android:theme="?attr/actionBarTheme"
+            android:elevation="5dp"/>
 
         <TextView
             android:layout_width="wrap_content"

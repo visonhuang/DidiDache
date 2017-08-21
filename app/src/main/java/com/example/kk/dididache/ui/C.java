@@ -217,6 +217,10 @@ public class C extends AppCompatActivity {
         });
         setSelectViewPagerConfig();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            exceptionCardView.setVisibility(View.GONE);
+        }
+
         viewPager.setCurrentItem(DataKeeper.getInstance().getPage(),false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setSharedElementReturnTransition(getWindow().getSharedElementEnterTransition().clone());
@@ -228,6 +232,7 @@ public class C extends AppCompatActivity {
 
                 @Override
                 public void onTransitionEnd(Transition transition) {
+                    exceptionCardView.setVisibility(View.VISIBLE);
                     addAnimationForCardView();
                 }
 
