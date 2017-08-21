@@ -217,11 +217,13 @@ public class C extends BaseActivity {
      */
     private void setMessageForTextView() {
         Exception exception = DataKeeper.getInstance().getException();
-        where.setText("经度：" + exception.getX() + "  纬度：" + exception.getY());
-        time = DataKeeper.getInstance().getTime();
-        when.setText(MethodsKt.toStr(time, "HH.mm"));
-        difference.setText(exception.getException());
-        reason.setText(exception.getReason());
+        if (exception != null) {
+            where.setText("经度：" + exception.getX() + "  纬度：" + exception.getY());
+            time = DataKeeper.getInstance().getTime();
+            when.setText(MethodsKt.toStr(time, "HH.mm"));
+            difference.setText(exception.getException());
+            reason.setText(exception.getReason());
+        }
     }
 
     /**
