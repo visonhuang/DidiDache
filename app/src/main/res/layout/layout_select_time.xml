@@ -79,7 +79,8 @@
                             <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_year"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
+                                android:layout_height="match_parent"
+                                android:layout_marginBottom="5dp"/>
 
                             <!--<TextView-->
                                 <!--android:layout_width="match_parent"-->
@@ -107,11 +108,12 @@
                             <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_month"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
+                                android:layout_height="match_parent"
+                                android:layout_marginBottom="5dp"/>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="5dp" />
+                            <!--<TextView-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="5dp" />-->
                         </LinearLayout>
 
                         <LinearLayout
@@ -134,11 +136,12 @@
                             <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_day"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
+                                android:layout_height="match_parent"
+                                android:layout_marginBottom="5dp"/>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="5dp" />
+                            <!--<TextView-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="5dp" />-->
                         </LinearLayout>
 
                         <LinearLayout
@@ -161,11 +164,12 @@
                             <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_hour"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
+                                android:layout_height="match_parent"
+                                android:layout_marginBottom="5dp"/>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="5dp" />
+                            <!--<TextView-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="5dp" />-->
                         </LinearLayout>
 
                         <LinearLayout
@@ -188,11 +192,12 @@
                             <com.example.kk.dididache.widget.WheelView
                                 android:id="@+id/wheelview_minute"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent" />
+                                android:layout_height="match_parent"
+                                android:layout_marginBottom="5dp"/>
 
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="5dp" />
+                            <!--<TextView-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="5dp" />-->
                         </LinearLayout>
                     </LinearLayout>
                 </android.support.v7.widget.CardView>
