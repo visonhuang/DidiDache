@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.view.ViewPager
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
@@ -99,6 +100,22 @@ class ChartDialog(var context: Context?) {
         /******实验*******/
         viewPager.adapter = ChartAdapter(combinedChart, pieChart)
         indicator.setViewPager(viewPager)
+        viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(state: Int) {
+
+            }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+
+            }
+
+            override fun onPageSelected(position: Int) {
+                when (position) {
+                    0 -> animateCombinedChart()
+                    else -> animatePieChart()
+                }
+            }
+        })
         /********实验*******/
 
         scrim.onClick { dismiss() }
@@ -159,6 +176,7 @@ class ChartDialog(var context: Context?) {
         pieData.setValueTextSize(8F)
         pieData.setValueTextColor(Color.WHITE)
         pieData.setValueTypeface(App.mTfLight)
+        DataKeeper.getInstance().pieData = pieData
         pieChart.data = pieData
         animatePieChart()
     }
@@ -306,7 +324,8 @@ class ChartDialog(var context: Context?) {
             xAxis.add(p0.toStr("HH:mm"))
             p0.add(Calendar.MINUTE, 15)
         }
-        combinedChart.description.isEnabled = false//去掉注释
+        combinedChart.description.isEnabled = true//去掉注释
+        combinedChart.description.text = "车流量变化图"
         combinedChart.legend.isEnabled = false//去调颜色标注
         combinedChart.axisRight.isEnabled = false //去掉右边y轴
         combinedChart.axisLeft.setDrawGridLines(true)
@@ -336,7 +355,6 @@ class ChartDialog(var context: Context?) {
         pieChart.setDrawCenterText(true)
         pieChart.rotationAngle = 0f
         pieChart.isRotationEnabled = true
-        pieChart.animateY(1400, Easing.EasingOption.EaseInOutQuad)
         pieChart.legend.isEnabled = false
         pieChart.setEntryLabelColor(Color.WHITE)
         pieChart.setEntryLabelTypeface(App.mTfRegular)
