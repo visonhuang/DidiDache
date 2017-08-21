@@ -62,7 +62,7 @@ public class WheelSelect {
         shadow.setShader(top);
         canvas.drawRect(0,0,width - padding,startY / 2,shadow);
 
-        LinearGradient bottom = new LinearGradient(0,0,0,startY / 2,0x00bcd2fa,0xffbcd2fa,Shader.TileMode.REPEAT);
+        LinearGradient bottom = new LinearGradient(0,0,0,startY / 2 ,0x00bcd2fa,0xffbcd2fa,Shader.TileMode.REPEAT);
         shadow.setShader(bottom);
         canvas.drawRect(0,startY + height * 3 / 2,width - padding,startY + height * 2,shadow);
 

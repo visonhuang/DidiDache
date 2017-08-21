@@ -56,13 +56,13 @@ public class WheelView extends View {
     private String text = "";
     private String text6;
 
-    private static final int SELECTEDSIZE = 160;
+    private static final int SELECTEDSIZE = 120;
     private int selectedSize = SELECTEDSIZE;
     private int linePadding = 20;
 
     public static final int FONT_COLOR = Color.parseColor("#4F4F4F");
     public static final int FONT_SIZE = 80;
-    public static final int PADDING = 7;
+    public static final int PADDING = 0;
     public static final int SHOW_COUNT = 3;
     public static final int SELECT = 0;
 

@@ -64,7 +64,7 @@ class ChartDialog(var context: Context?) {
     val cancelButton: ImageView by lazy { (context as MainActivity).find<ImageView>(R.id.cancelButton) }
     val detailButton: ImageView by lazy { (context as MainActivity).find<ImageView>(R.id.detailButton) }
     val underChartLinear: LinearLayout by lazy { contentView.find<LinearLayout>(R.id.underChartLinear) }
-    var _chartClick: (View) -> Unit = {}//点击表
+    var _chartClick: () -> Unit = {}//点击表
     var _dismiss: () -> Unit = {}//dialog消失
     var _detail: ChartDialog.() -> Unit = {}//点击详情
     var _cancel: ChartDialog.() -> Unit = {}//点击取消
@@ -80,7 +80,7 @@ class ChartDialog(var context: Context?) {
             }
         }
 
-    fun onChartClick(c: (View) -> Unit) {
+    fun onChartClick(c: () -> Unit) {
         _chartClick = c
     }
 
@@ -113,6 +113,7 @@ class ChartDialog(var context: Context?) {
             }
 
             override fun onPageSelected(position: Int) {
+                DataKeeper.getInstance().page = position
                 when (position) {
                     0 -> animateCombinedChart()
                     else -> animatePieChart()
@@ -122,7 +123,8 @@ class ChartDialog(var context: Context?) {
         /********实验*******/
 
         scrim.onClick { dismiss() }
-        combinedChart.onClick { _chartClick(combinedChart) }//设置表点击事件监听
+        combinedChart.onClick { _chartClick() }//设置表点击事件监听
+        pieChart.onClick { _chartClick() }
         detailButton.onClick { _detail() }
         cancelButton.onClick {
             dismiss()

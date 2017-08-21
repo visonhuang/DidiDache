@@ -8,6 +8,7 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import com.example.kk.dididache.MyOverShootInterpolator
 import com.example.kk.dididache.R
+import com.example.kk.dididache.model.DataKeeper
 import com.example.kk.dididache.model.Event.ExceptionEvent
 import com.example.kk.dididache.showToast
 import com.example.kk.dididache.toStr
@@ -45,8 +46,10 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
             if (timeCardView.timeButton.text == "查 询 时 间") {
                 val now = Calendar.getInstance()
                 now.add(Calendar.MONTH, 1)
+                DataKeeper.getInstance().time = now
                 return now
             }
+            DataKeeper.getInstance().time = field
             return field
         }
     var _select: (Calendar) -> Unit = {}
@@ -224,8 +227,6 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
         selectTime.setIndexAfterNew(timeSelected)
         timeCardView.timeButton.text = "查 询 时 间"
     }
-
-
 
 
 }
