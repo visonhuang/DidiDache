@@ -27,6 +27,7 @@ import com.example.kk.dididache.model.Event.ExceptionEvent
 import com.example.kk.dididache.model.Event.HeatMapEvent
 import com.example.kk.dididache.model.netModel.request.HeatInfo
 import com.example.kk.dididache.widget.ChartDialog
+import com.google.gson.internal.bind.DateTypeAdapter
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
@@ -84,16 +85,37 @@ class MainActivity : BaseActivity() {
         }
     }
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
-        override fun onMapClick(p0: LatLng?) {
+        override fun onMapClick(p0: LatLng) {
             chartDialog?.show(timeManager!!.timeSelected)
-            if (exceptions != null)
-                chartDialog?.hasException = !exceptions!!.exceptions.isEmpty()
+            if (exceptions != null) {
+                //TODO 判断该处是否有异常
+                exceptions!!.exceptions
+                        .filter { (it.x in p0.longitude - 0.0001..p0.longitude + 0.0001) && (it.y in p0.latitude - 0.0001..p0.latitude + 0.0001) }
+                        .forEach {
+                            chartDialog?.hasException = true
+                            DataKeeper.getInstance().exception = it
+                            //保存后结束方法
+                            return
+                        }
+                chartDialog?.hasException = false
+            } else chartDialog?.hasException = false
+
         }
 
-        override fun onMapPoiClick(p0: MapPoi?): Boolean {
+        override fun onMapPoiClick(p0: MapPoi): Boolean {
             chartDialog?.show(timeManager!!.timeSelected)
-            if (exceptions != null)
-                chartDialog?.hasException = !exceptions!!.exceptions.isEmpty()
+            if (exceptions != null) {
+                //TODO 判断该处是否有异常
+                exceptions!!.exceptions
+                        .filter { (it.x in p0.position.longitude - 0.0001..p0.position.longitude + 0.0001) && (it.y in p0.position.latitude - 0.0001..p0.position.latitude + 0.0001) }
+                        .forEach {
+                            chartDialog?.hasException = true
+                            DataKeeper.getInstance().exception = it
+                            //保存后结束方法
+                            return true
+                        }
+                chartDialog?.hasException = false
+            } else chartDialog?.hasException = false
             return true
         }
     }

@@ -74,7 +74,10 @@ class ChartDialog(var context: Context?) {
     var hasException = false
         set(value) {
             if (value) underChartLinear.visibility = View.VISIBLE
-            else underChartLinear.visibility = View.GONE
+            else {
+                underChartLinear.visibility = View.GONE
+                DataKeeper.getInstance().exception = null
+            }
         }
 
     fun onChartClick(c: (View) -> Unit) {
