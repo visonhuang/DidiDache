@@ -252,7 +252,7 @@ public class C extends AppCompatActivity {
         }
         bigChart.getDescription().setText("车流量变化图");
         bigChart.getDescription().setXOffset(0f);
-        bigChart.getDescription().setYOffset(100f);
+        bigChart.getDescription().setYOffset(200f);
         bigChart.getLegend().setEnabled(false);
         bigChart.getAxisRight().setEnabled(false);
         bigChart.getAxisLeft().setEnabled(true);
