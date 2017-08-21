@@ -378,7 +378,7 @@ class MainActivity : BaseActivity() {
                 }
 
                 override fun onTransitionStart(p0: Transition?) {
-                    viewPager.setCurrentItem(1,false)
+                    viewPager.setCurrentItem(DataKeeper.getInstance().page,false)
                 }
             })
         }

@@ -115,7 +115,7 @@ class ChartDialog(var context: Context?) {
             }
 
             override fun onPageSelected(position: Int) {
-//                DataKeeper.getInstance().page = position
+                DataKeeper.getInstance().page = position
 //                when (position) {
 //                    0 -> animateCombinedChart()
 //                    else -> animatePieChart()
@@ -126,7 +126,7 @@ class ChartDialog(var context: Context?) {
 
         scrim.onClick { dismiss() }
         combinedChart.onClick { _chartClick() }//设置表点击事件监听
-        pieChart.setOnClickListener { _chartClick() }
+        pieChart.setTouchEnabled(false)
         pieChart.onClick { _chartClick() }
         detailButton.onClick { _detail() }
         cancelButton.onClick {
@@ -175,7 +175,6 @@ class ChartDialog(var context: Context?) {
         val dataSet = PieDataSet(entries, "")
         dataSet.sliceSpace = 5F
         dataSet.selectionShift = 5F
-
 
         colors.add(0xff4da8ec.toInt())
         colors.add(0xff85c8f3.toInt())
