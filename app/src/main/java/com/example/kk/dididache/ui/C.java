@@ -19,6 +19,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
+import android.transition.Transition;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -217,6 +218,35 @@ public class C extends AppCompatActivity {
         setSelectViewPagerConfig();
 
         viewPager.setCurrentItem(DataKeeper.getInstance().getPage(),false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setSharedElementReturnTransition(getWindow().getSharedElementEnterTransition().clone());
+            getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    addAnimationForCardView();
+                }
+
+                @Override
+                public void onTransitionCancel(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+
+                }
+            });
+        }
     }
 
     /**
