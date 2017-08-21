@@ -1,105 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#c9ffffff"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/mapView" >
+    <include layout="@layout/plan_route_title" />
 
-        <AutoCompleteTextView
-            android:id="@+id/start_node"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:hint="在城市内搜索"
-            android:paddingLeft="8dp" />
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#c9ffffff"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/mapView"
-        android:onClick="searchButtonProcess">
-
-        <AutoCompleteTextView
-            android:id="@+id/end_node"
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:hint="在城市内搜索"
-            android:paddingLeft="8dp" />
-    </android.support.v7.widget.CardView>
-
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
         <com.baidu.mapapi.map.MapView
             android:id="@+id/map"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:clickable="true" />
 
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignWithParentIfMissing="false"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dip"
-            android:orientation="vertical" >
+        <android.support.v7.widget.CardView
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="28dp"
+            android:background="#00ffffff">
 
-        </LinearLayout>
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#00000000">
 
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+                <TextView
+                    android:id="@+id/end_node"
+                    android:layout_width="255dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="72dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/green_frame"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="13dp"
+                    android:hint="输入终点"
+                    android:textColorHint="#8c8c8c"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/start_node"
+                    android:transitionName="shareElementName"/>
+
+                <TextView
+                    android:id="@+id/start_node"
+                    android:layout_width="255dp"
+                    android:layout_height="29dp"
+                    android:layout_marginStart="72dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bule_frame"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="13dp"
+                    android:hint="输入起点"
+                    android:textColorHint="#8c8c8c"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:transitionName="shareElementName"/>
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="46dp"
+                    android:layout_marginTop="47dp"
+                    android:text="到"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </android.support.v7.widget.CardView>
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="22dp"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="17dp"
+                    android:layout_marginStart="15dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:srcCompat="@drawable/ic_green_point" />
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="22dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="13dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_bule_point" />
+
+                <TextView
+                    android:id="@+id/textView3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="46dp"
+                    android:layout_marginTop="12dp"
+                    android:text="从"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/imageView4"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="30dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/turn" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/pre"
+            android:layout_width="43dp"
+            android:layout_height="43dp"
+            android:layout_gravity="bottom"
             android:layout_alignParentBottom="true"
-            android:layout_alignWithParentIfMissing="false"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="false"
-            android:layout_marginBottom="10dip" >
+            android:layout_marginLeft="108dp"
+            android:layout_marginBottom="16dp"
+            android:onClick="nodeClick" >
 
-            <Button
-                android:id="@+id/pre"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
-                android:layout_weight="1.0"
-                android:background="@mipmap/ic_launcher"
-                android:onClick="nodeClick" />
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/last"/>
 
-            <Button
-                android:id="@+id/next"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
-                android:layout_weight="1.0"
-                android:background="@mipmap/ic_launcher"
-                android:onClick="nodeClick" />
-        </LinearLayout>
-    </RelativeLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/next"
+            android:layout_width="43dp"
+            android:layout_height="43dp"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="208dp"
+            android:layout_marginBottom="16dp"
+            android:layout_toRightOf="@id/pre"
+            android:layout_alignParentBottom="true"
+            android:onClick="nodeClick" >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/next"/>
+
+        </android.support.v7.widget.CardView>
+
+    </FrameLayout>
 
 </LinearLayout>

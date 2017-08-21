@@ -9,6 +9,7 @@
     android:paddingRight="12dp">
 
     <LinearLayout
+        android:id="@+id/item_linear"
         android:layout_width="match_parent"
         android:layout_height="49dp"
         android:gravity="center"

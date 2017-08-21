@@ -1,12 +1,21 @@
 package com.example.kk.dididache.ui;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -51,18 +60,21 @@ import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.example.kk.dididache.R;
+import com.example.kk.dididache.control.adapter.SearchItemAdapter;
 import com.example.kk.dididache.util.DrivingRouteOverlay;
 import com.example.kk.dididache.util.OverlayManager;
 import com.orhanobut.logger.Logger;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoutePlanActivity extends AppCompatActivity
-        implements OnGetSuggestionResultListener, OnGetRoutePlanResultListener {
+        implements OnGetRoutePlanResultListener, View.OnClickListener {
 
-    Button mBtnPre = null; // 上一个节点
-    Button mBtnNext = null; // 下一个节点
+    CardView mBtnPre = null; // 上一个节点
+    CardView mBtnNext = null; // 下一个节点
     int nodeIndex = -1; // 节点索引,供浏览节点时使用
     RouteLine route = null;
     OverlayManager routeOverlay = null;
@@ -77,182 +89,86 @@ public class RoutePlanActivity extends AppCompatActivity
     LatLng enLatLng;
 
     private SuggestionSearch mSuggestionSearch = null;
-    private List<String> stSuggest;
-    private List<String> enSuggest;
-    private List<SuggestionResult.SuggestionInfo> stInfoList;
-    private List<SuggestionResult.SuggestionInfo> enInfoList;
-    private AutoCompleteTextView startNodeText;
-    private AutoCompleteTextView endNodeText;
-    private ArrayAdapter<String> startAdapter;
-    private ArrayAdapter<String> endAdapter;
-    private static final int START_NODE_TEXT = 1;
-    private static final int END_NODE_TEXT = 2;
-    private static int NODE_TEXT = START_NODE_TEXT;
-    private static final int ITEM_SELECTED = 1;
-    private static final int ITEM_NO_SELECTED = 2;
-    private static int START_IS_SELECTED = ITEM_NO_SELECTED;
-    private static int END_IS_SELECTED = ITEM_NO_SELECTED;
+    private TextView startNodeText;
+    private TextView endNodeText;
+    private CardView mCardView;
 
+    public static final int START_REQUEST_CODE = 1;
+    public static final int END_REQUEST_CODE = 2;
+    public static final String START_KEY = "start_key";
+    public static final String END_KEY = "end_key";
+    public static final String KEY = "key";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plan_route);
+        MapView.setMapCustomEnable(true);//设置个性化
+
         mMapView = (MapView) findViewById(R.id.map);
         mBaidumap = mMapView.getMap();
-        mBtnPre = (Button) findViewById(R.id.pre);
-        mBtnNext = (Button) findViewById(R.id.next);
+        mBtnPre = (CardView) findViewById(R.id.pre);
+        mBtnNext = (CardView) findViewById(R.id.next);
         mBtnPre.setVisibility(View.INVISIBLE);
         mBtnNext.setVisibility(View.INVISIBLE);
         // 初始化搜索模块，注册事件监听
         mSearch = RoutePlanSearch.newInstance();
         mSearch.setOnGetRoutePlanResultListener(this);
 
-        startNodeText = (AutoCompleteTextView) findViewById(R.id.start_node);
-        endNodeText = (AutoCompleteTextView) findViewById(R.id.end_node);
-        mSuggestionSearch = SuggestionSearch.newInstance();
-        mSuggestionSearch.setOnGetSuggestionResultListener(this);
+        mCardView = (CardView) findViewById(R.id.card_view);
+        startNodeText = (TextView) findViewById(R.id.start_node);
+        endNodeText = (TextView) findViewById(R.id.end_node);
+        startNodeText.setOnClickListener(this);
+        endNodeText.setOnClickListener(this);
+    }
 
-        startAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line);
-        startNodeText.setAdapter(startAdapter);
+    // 定制RouteOverly
+    private class MyDrivingRouteOverlay extends DrivingRouteOverlay {
 
-        endAdapter = new ArrayAdapter<String>(this,
+        public MyDrivingRouteOverlay(BaiduMap baiduMap) {
+            super(baiduMap);
+        }
 
-                android.R.layout.simple_dropdown_item_1line);
-        endNodeText.setAdapter(endAdapter);
+        @Override
+        public BitmapDescriptor getStartMarker() {
+            return BitmapDescriptorFactory.fromResource(R.drawable.ic_banma);
+        }
 
-        /**
-         * 当输入关键字变化时，动态更新建议列表
-         */
-        startNodeText.addTextChangedListener(new TextWatcher() {
+        @Override
+        public BitmapDescriptor getTerminalMarker() {
+//            return BitmapDescriptorFactory.fromResource(R.drawable.logo);
+            return null;
+        }
+    }
 
-            @Override
-            public void afterTextChanged(Editable arg0) {
 
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2,
-                                      int arg3) {
-                if (cs.length() <= 0) {
-                    return;
-                }
-
-                /**
-                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
-                 */
-                mSuggestionSearch
-                        .requestSuggestion((new SuggestionSearchOption())
-                                .keyword(cs.toString()).city("广州").citylimit(true));
-            }
-        });
-
-        startNodeText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
-                    NODE_TEXT = START_NODE_TEXT;
-                    return;
-                }
-            }
-        });
-
-        startNodeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                stLatLng = stInfoList.get(position).pt;
-                START_IS_SELECTED = ITEM_SELECTED;
-                Toast.makeText(RoutePlanActivity.this, "onItemClick", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        startNodeText.setOnDismissListener(new AutoCompleteTextView.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                if(START_IS_SELECTED != ITEM_SELECTED){
-                    startNodeText.setText("");
-                }
-                START_IS_SELECTED = ITEM_NO_SELECTED;
-            }
-        });
-
-        endNodeText.setOnDismissListener(new AutoCompleteTextView.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                if(END_IS_SELECTED != ITEM_SELECTED){
-                    endNodeText.setText("");
-                }
-                END_IS_SELECTED = ITEM_NO_SELECTED;
-            }
-        });
-
-        endNodeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                enLatLng = enInfoList.get(position).pt;
-                END_IS_SELECTED = ITEM_SELECTED;
-            }
-
-        });
-
-        endNodeText.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2,
-                                      int arg3) {
-                if (cs.length() <= 0) {
-                    return;
-                }
-
-                /**
-                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
-                 */
-                mSuggestionSearch
-                        .requestSuggestion((new SuggestionSearchOption())
-                                .keyword(cs.toString()).city("广州").citylimit(true));
-            }
-        });
-
-        endNodeText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus){
-                    NODE_TEXT = END_NODE_TEXT;
-                    return;
-                }
-            }
-        });
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.start_node:
+                Bundle options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, startNodeText, "shareElementName").toBundle();
+                Intent intent1 = new Intent(this, ChooseAreaActivity.class);
+                ActivityCompat.startActivityForResult(this,intent1, START_REQUEST_CODE, options);
+                break;
+            case R.id.end_node:
+                Bundle options2 = ActivityOptionsCompat.makeSceneTransitionAnimation(this, endNodeText, "shareElementName").toBundle();
+                Intent intent2 = new Intent(this, ChooseAreaActivity.class);
+                ActivityCompat.startActivityForResult(this, intent2, END_REQUEST_CODE, options2);
+                break;
+            default:
+                break;
+        }
     }
 
     /**
      * 节点浏览示例
-     *
-     * @param v/**
      * 发起路线规划搜索示例
-     *
-     * @param v
      */
-    public void searchButtonProcess(View v) {
+    public void searchButtonProcess() {
         // 重置浏览节点的路线数据
         route = null;
-        mBtnPre.setVisibility(View.INVISIBLE);
-        mBtnNext.setVisibility(View.INVISIBLE);
+//        mBtnPre.setVisibility(View.INVISIBLE);
+//        mBtnNext.setVisibility(View.INVISIBLE);
         mBaidumap.clear();
         // 处理搜索按钮响应
         // 设置起终点信息，对于tranist search 来说，城市名无意义
@@ -303,10 +219,38 @@ public class RoutePlanActivity extends AppCompatActivity
         mBaidumap.setMapStatus(MapStatusUpdateFactory.newLatLng(nodeLocation));
         // show popup
         popupText = new TextView(RoutePlanActivity.this);
+        popupText.setGravity(Gravity.CENTER_HORIZONTAL);
         popupText.setBackgroundResource(R.drawable.popup);
         popupText.setTextColor(0xFF000000);
         popupText.setText(nodeTitle);
         mBaidumap.showInfoWindow(new InfoWindow(popupText, nodeLocation, 0));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode != RESULT_OK){
+            return;
+        }
+        switch (requestCode){
+            case START_REQUEST_CODE:
+                Toast.makeText(this, "onActivityResult", Toast.LENGTH_SHORT).show();
+                stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                Logger.d(stLatLng.toString() + "");
+                startNodeText.setText(data.getStringExtra(ChooseAreaActivity.NAME_BACK));
+                if(!TextUtils.isEmpty(endNodeText.getText().toString())){
+                    searchButtonProcess();
+                }
+                break;
+            case END_REQUEST_CODE:
+                enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                endNodeText.setText(data.getStringExtra(ChooseAreaActivity.NAME_BACK));
+                if(!TextUtils.isEmpty(startNodeText.getText().toString())){
+                    searchButtonProcess();
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -364,63 +308,6 @@ public class RoutePlanActivity extends AppCompatActivity
     @Override
     public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
 
-    }
-
-    /**
-     * 获取在线建议搜索结果，得到requestSuggestion返回的搜索结果
-     * @param res
-     */
-    @Override
-    public void onGetSuggestionResult(SuggestionResult res) {
-        if(res == null || res.getAllSuggestions() == null){
-            return;
-        }
-//        stNode = PlanNode.withLocation(res.getAllSuggestions().get(0).pt);
-//        enNode = PlanNode.withLocation(res.getAllSuggestions().get(1).pt);
-
-
-        if(NODE_TEXT == START_NODE_TEXT){
-            stInfoList = res.getAllSuggestions();
-            stSuggest = new ArrayList<>();
-            for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-                if (info.key != null) {
-                    stSuggest.add(info.key);
-                }
-            }
-            startAdapter = new ArrayAdapter<String>(RoutePlanActivity.this, android.R.layout.simple_dropdown_item_1line, stSuggest);
-            startNodeText.setAdapter(startAdapter);
-            startAdapter.notifyDataSetChanged();
-        }
-        if(NODE_TEXT == END_NODE_TEXT){
-            enInfoList = res.getAllSuggestions();
-            enSuggest = new ArrayList<>();
-            for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
-                if (info.key != null) {
-                    enSuggest.add(info.key);
-                }
-            }
-            endAdapter = new ArrayAdapter<String>(RoutePlanActivity.this, android.R.layout.simple_dropdown_item_1line, enSuggest);
-            endNodeText.setAdapter(endAdapter);
-            endAdapter.notifyDataSetChanged();
-        }
-    }
-
-    // 定制RouteOverly
-    private class MyDrivingRouteOverlay extends DrivingRouteOverlay {
-
-        public MyDrivingRouteOverlay(BaiduMap baiduMap) {
-            super(baiduMap);
-        }
-
-        @Override
-        public BitmapDescriptor getStartMarker() {
-            return null;
-        }
-
-        @Override
-        public BitmapDescriptor getTerminalMarker() {
-            return null;
-        }
     }
 
     @Override
