@@ -215,6 +215,8 @@ public class C extends AppCompatActivity {
             }
         });
         setSelectViewPagerConfig();
+
+        viewPager.setCurrentItem(DataKeeper.getInstance().getPage(),false);
     }
 
     /**
