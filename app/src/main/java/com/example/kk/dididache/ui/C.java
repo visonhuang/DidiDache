@@ -1,8 +1,14 @@
 package com.example.kk.dididache.ui;
 
+import android.app.SharedElementCallback;
+import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -16,10 +22,17 @@ import android.text.style.StyleSpan;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import com.example.kk.dididache.App;
 import com.example.kk.dididache.MethodsKt;
+import com.example.kk.dididache.MyOverShootInterpolator;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.ChartAdapter;
 import com.example.kk.dididache.model.DataKeeper;
@@ -39,6 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linzongzhan on 2017/8/20.
@@ -114,7 +128,48 @@ public class C extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setEnterSharedElementCallback(new SharedElementCallback() {
+                @Override
+                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
+                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
+                }
 
+                @Override
+                public void onSharedElementEnd(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
+
+                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
+                }
+
+                @Override
+                public void onRejectSharedElements(List<View> rejectedSharedElements) {
+                    super.onRejectSharedElements(rejectedSharedElements);
+                }
+
+                @Override
+                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+                    super.onMapSharedElements(names, sharedElements);
+                }
+
+                @Override
+                public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix, RectF screenBounds) {
+                    return super.onCaptureSharedElementSnapshot(sharedElement, viewToGlobalMatrix, screenBounds);
+                }
+
+                @Override
+                public View onCreateSnapshotView(Context context, Parcelable snapshot) {
+                    return super.onCreateSnapshotView(context, snapshot);
+                }
+
+                @Override
+                public void onSharedElementsArrived(List<String> sharedElementNames, List<View> sharedElements, OnSharedElementsReadyListener listener) {
+                    addAnimationForCardView();
+                    super.onSharedElementsArrived(sharedElementNames, sharedElements, listener);
+                }
+            });
+
+
+        }
         setContentView(R.layout.activity_chart);
 
         initView();
@@ -122,6 +177,7 @@ public class C extends AppCompatActivity {
         initChart();
         getMessage();
         setMessageForTextView();
+
 
     }
 
@@ -142,6 +198,22 @@ public class C extends AppCompatActivity {
         pieChart = new PieChart(this);
 
         viewPager.setAdapter(new ChartAdapter(bigChart, pieChart));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                DataKeeper.getInstance().setPage(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         setSelectViewPagerConfig();
     }
 
@@ -178,7 +250,9 @@ public class C extends AppCompatActivity {
             xAxis.add(MethodsKt.toStr(p0, "HH.mm"));
             p0.add(Calendar.MINUTE, 15);
         }
-        bigChart.getDescription().setEnabled(false);
+        bigChart.getDescription().setText("车流量变化图");
+        bigChart.getDescription().setXOffset(0f);
+        bigChart.getDescription().setYOffset(100f);
         bigChart.getLegend().setEnabled(false);
         bigChart.getAxisRight().setEnabled(false);
         bigChart.getAxisLeft().setEnabled(true);
@@ -211,7 +285,7 @@ public class C extends AppCompatActivity {
         pieChart.getLegend().setEnabled(false);
         pieChart.setEntryLabelColor(Color.WHITE);
         pieChart.setEntryLabelTypeface(App.Companion.getMTfRegular());
-        pieChart.setEntryLabelTextSize(7f);
+        pieChart.setEntryLabelTextSize(11f);
     }
 
     /**
@@ -273,7 +347,24 @@ public class C extends AppCompatActivity {
      * 为CardView添加动画
      */
     private void addAnimationForCardView() {
-
+        TranslateAnimation translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,0,Animation.RELATIVE_TO_SELF,0,Animation.RELATIVE_TO_SELF,0.25f,Animation.RELATIVE_TO_SELF,0);
+        translateAnimation.setDuration(200);
+        translateAnimation.setFillAfter(true);
+        //translateAnimation.setStartOffset(500);
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0f,1f);
+        alphaAnimation.setDuration(200);
+        alphaAnimation.setFillAfter(true);
+        //alphaAnimation.setStartOffset(500);
+        ScaleAnimation scaleAnimation = new ScaleAnimation(0.9f,1f,0.9f,1f,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        scaleAnimation.setDuration(200);
+        scaleAnimation.setFillAfter(true);
+        //scaleAnimation.setStartOffset(500);
+        AnimationSet animationSet = new AnimationSet(true);
+        animationSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animationSet.addAnimation(translateAnimation);
+        animationSet.addAnimation(alphaAnimation);
+        animationSet.addAnimation(scaleAnimation);
+        exceptionCardView.startAnimation(animationSet);
     }
 
     /**
@@ -287,7 +378,7 @@ public class C extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                onBackPressed();
                 break;
             default:
         }
@@ -304,10 +395,10 @@ public class C extends AppCompatActivity {
 
     private SpannableString genText() {
         SpannableString s = new SpannableString("出租车载客率\npowered by QG Studio");
-        s.setSpan(new RelativeSizeSpan(.7f), 0, 6, 0);
+        s.setSpan(new RelativeSizeSpan(1.2f), 0, 6, 0);
         s.setSpan(new StyleSpan(Typeface.NORMAL), 6, s.length() - 9, 0);
         s.setSpan(new ForegroundColorSpan(Color.GRAY), 6, s.length() - 9, 0);
-        s.setSpan(new RelativeSizeSpan(.5f), 6, s.length() - 9, 0);
+        s.setSpan(new RelativeSizeSpan(.8f), 6, s.length() - 9, 0);
         s.setSpan(new StyleSpan(Typeface.ITALIC), s.length() - 9, s.length(), 0);
         s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 9, s.length(), 0);
         return s;
