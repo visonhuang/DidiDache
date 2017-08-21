@@ -44,7 +44,7 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
         }
     var timeSelected = Calendar.getInstance()
         get() {
-            if (timeMode == 0) {
+            if (isNow) {
                 val now = Calendar.getInstance()
                 now.add(Calendar.MONTH, 1)
                 DataKeeper.getInstance().time = now
