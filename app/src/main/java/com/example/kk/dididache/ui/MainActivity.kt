@@ -2,11 +2,16 @@ package com.example.kk.dididache.ui
 
 import android.Manifest
 import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Matrix
+import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.v4.app.ActivityCompat
+import android.support.v4.app.SharedElementCallback
 import android.support.v4.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
@@ -252,11 +257,11 @@ class MainActivity : BaseActivity() {
             onCancel { showToast("取消") }
             onChartClick {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    val intent = Intent(this@MainActivity, C::class.java)
                     intent.putExtra("time", timeManager!!.timeSelected)
-                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "chartTransition").toBundle())
+                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
                 } else {
-                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    val intent = Intent(this@MainActivity, C::class.java)
                     intent.putExtra("time", timeManager!!.timeSelected)
                     this@MainActivity.startActivity(intent)
                 }
@@ -264,11 +269,11 @@ class MainActivity : BaseActivity() {
 
             onDetail {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    val intent = Intent(this@MainActivity, C::class.java)
                     intent.putExtra("time", timeManager!!.timeSelected)
-                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "chartTransition").toBundle())
+                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
                 } else {
-                    val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                    val intent = Intent(this@MainActivity, C::class.java)
                     intent.putExtra("time", timeManager!!.timeSelected)
                     this@MainActivity.startActivity(intent)
                 }
@@ -346,6 +351,13 @@ class MainActivity : BaseActivity() {
 
             }
         })
+
+
+
+
+        //共享元素
+
+
     }
 
     private fun initMap() {
@@ -424,5 +436,8 @@ class MainActivity : BaseActivity() {
             super.onBackPressed()
         }
     }
+
+
+
 
 }

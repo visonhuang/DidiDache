@@ -48,7 +48,8 @@
             android:enabled="true"
             android:process=":remote"></service>
 
-        <activity android:name=".ui.ChartActivity">
+        <activity android:name=".ui.C"
+            android:label="">
 
         </activity>
 

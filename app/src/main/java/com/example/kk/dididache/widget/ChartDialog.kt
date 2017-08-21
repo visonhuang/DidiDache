@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.view.ViewPager
 import android.text.SpannableString
@@ -11,6 +12,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.view.View
+import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -236,6 +238,12 @@ class ChartDialog(var context: Context?) {
                     .setInterpolator(AccelerateDecelerateInterpolator())
                     .setDuration(300)
                     .start()
+            //波澜动画
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                ViewAnimationUtils
+//                        .createCircularReveal(scrim, (scrim.left + scrim.right) / 2, (scrim.top + scrim.bottom) / 2, 0F, Math.max(scrim.width, scrim.height).toFloat())
+//                        .start()
+//            }
             cancelButton.translationX = -400F
             cancelButton.animate()
                     .translationX(0F)
