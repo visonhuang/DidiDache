@@ -152,7 +152,8 @@ public class C extends BaseActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.chart_background);  //设置返回图标
+            actionBar.setHomeAsUpIndicator(R.drawable.vector_drawable_chart_back);//设置返回图标
+           // actionBar.setBackgroundDrawable();
         }
     }
 
