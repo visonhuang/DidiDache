@@ -54,7 +54,7 @@ public class WheelView extends View {
 
     private long downTime;
     private String text = "";
-    private String text6;
+    private String text7;
 
     private static final int SELECTEDSIZE = 120;
     private int selectedSize = SELECTEDSIZE;
