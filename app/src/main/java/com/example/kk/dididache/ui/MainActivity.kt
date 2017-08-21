@@ -262,6 +262,7 @@ class MainActivity : BaseActivity() {
             searchTextView.setAdapter(suggestAdapter)
             suggestAdapter?.notifyDataSetChanged()
         }
+
         //调整drop down宽度
         searchTextView.onTouch { _, _ ->
             searchTextView.dropDownWidth = searchCardView.width
