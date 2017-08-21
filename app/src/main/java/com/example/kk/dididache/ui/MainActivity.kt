@@ -15,6 +15,7 @@ import android.support.v4.app.SharedElementCallback
 import android.support.v4.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
+import android.transition.Transition
 import android.view.View
 import com.baidu.location.*
 import com.baidu.mapapi.map.*
@@ -294,6 +295,7 @@ class MainActivity : BaseActivity() {
         searchTextView.onTouch { _, _ ->
             searchTextView.dropDownWidth = searchCardView.width
         }
+
         searchTextView.setOnItemClickListener { adapterView, view, i, l ->
             searchTextView.clearFocus()
         }
@@ -355,8 +357,31 @@ class MainActivity : BaseActivity() {
 
 
 
-        //共享元素
+        //android5.0以上采用共享元素
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //若不克隆，两个动画将会是同一个，也就是说设置的监听器在启动下一个活动也会执行
+            window.sharedElementReenterTransition = window.sharedElementExitTransition.clone()
+            window.sharedElementReenterTransition.addListener(object: Transition.TransitionListener {
+                override fun onTransitionEnd(p0: Transition?) {
+                }
 
+                override fun onTransitionResume(p0: Transition?) {
+
+                }
+
+                override fun onTransitionPause(p0: Transition?) {
+
+                }
+
+                override fun onTransitionCancel(p0: Transition?) {
+
+                }
+
+                override fun onTransitionStart(p0: Transition?) {
+                    viewPager.setCurrentItem(1,false)
+                }
+            })
+        }
 
     }
 

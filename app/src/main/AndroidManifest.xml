@@ -1,4 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.kk.dididache">
@@ -56,6 +56,7 @@
         <activity android:name=".ui.RoutePlanActivity">
 
         </activity>
+        <activity android:name=".ui.ChooseAreaActivity"/>
     </application>
 
 </manifest>
