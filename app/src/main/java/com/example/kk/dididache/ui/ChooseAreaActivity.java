@@ -3,6 +3,7 @@ package com.example.kk.dididache.ui;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -47,7 +48,9 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        getWindow().setExitTransition(new Explode());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setExitTransition(new Explode());
+        }
         setContentView(R.layout.activity_choose_area);
 
         itemLinear = (LinearLayout) findViewById(R.id.item_linear);
@@ -147,7 +150,6 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
         ImageView animImage = (ImageView) findViewById(R.id.anim_image);
         AnimationDrawable animationDrawable = (AnimationDrawable) animImage.getDrawable();
         animationDrawable.start();
-        AnimationUtils
         super.onResume();
     }
 }
