@@ -129,48 +129,48 @@ public class C extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setEnterSharedElementCallback(new SharedElementCallback() {
-                @Override
-                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-                }
-
-                @Override
-                public void onSharedElementEnd(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-
-                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
-                }
-
-                @Override
-                public void onRejectSharedElements(List<View> rejectedSharedElements) {
-                    super.onRejectSharedElements(rejectedSharedElements);
-                }
-
-                @Override
-                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-                    super.onMapSharedElements(names, sharedElements);
-                }
-
-                @Override
-                public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix, RectF screenBounds) {
-                    return super.onCaptureSharedElementSnapshot(sharedElement, viewToGlobalMatrix, screenBounds);
-                }
-
-                @Override
-                public View onCreateSnapshotView(Context context, Parcelable snapshot) {
-                    return super.onCreateSnapshotView(context, snapshot);
-                }
-
-                @Override
-                public void onSharedElementsArrived(List<String> sharedElementNames, List<View> sharedElements, OnSharedElementsReadyListener listener) {
-                    addAnimationForCardView();
-                    super.onSharedElementsArrived(sharedElementNames, sharedElements, listener);
-                }
-            });
-
-
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            setEnterSharedElementCallback(new SharedElementCallback() {
+//                @Override
+//                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
+//                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
+//                }
+//
+//                @Override
+//                public void onSharedElementEnd(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
+//
+//                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
+//                }
+//
+//                @Override
+//                public void onRejectSharedElements(List<View> rejectedSharedElements) {
+//                    super.onRejectSharedElements(rejectedSharedElements);
+//                }
+//
+//                @Override
+//                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+//                    super.onMapSharedElements(names, sharedElements);
+//                }
+//
+//                @Override
+//                public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix, RectF screenBounds) {
+//                    return super.onCaptureSharedElementSnapshot(sharedElement, viewToGlobalMatrix, screenBounds);
+//                }
+//
+//                @Override
+//                public View onCreateSnapshotView(Context context, Parcelable snapshot) {
+//                    return super.onCreateSnapshotView(context, snapshot);
+//                }
+//
+//                @Override
+//                public void onSharedElementsArrived(List<String> sharedElementNames, List<View> sharedElements, OnSharedElementsReadyListener listener) {
+//                    addAnimationForCardView();
+//                    super.onSharedElementsArrived(sharedElementNames, sharedElements, listener);
+//                }
+//            });
+//
+//
+//        }
         setContentView(R.layout.activity_chart);
 
         initView();
