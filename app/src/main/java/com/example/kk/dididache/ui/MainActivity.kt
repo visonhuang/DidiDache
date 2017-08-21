@@ -235,7 +235,7 @@ class MainActivity : BaseActivity() {
         timeManager = SelectTimeManager(this) {
             onSelect { Logger.d(it.toStr()) }
         }
-        freshTime.onClick { timeManager?.freshTime() }
+        freshTime.onClick { timeManager?.isNow = true;timeManager?.freshTime() }
         timeButton.onClick { timeManager?.show() }
         gotoMyLoc.onClick { backToMyLoc(18.0F) }
         openUnusual.onClick {
@@ -355,13 +355,11 @@ class MainActivity : BaseActivity() {
         })
 
 
-
-
         //android5.0以上采用共享元素
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //若不克隆，两个动画将会是同一个，也就是说设置的监听器在启动下一个活动也会执行
             window.sharedElementReenterTransition = window.sharedElementExitTransition.clone()
-            window.sharedElementReenterTransition.addListener(object: Transition.TransitionListener {
+            window.sharedElementReenterTransition.addListener(object : Transition.TransitionListener {
                 override fun onTransitionEnd(p0: Transition?) {
                 }
 
@@ -378,7 +376,7 @@ class MainActivity : BaseActivity() {
                 }
 
                 override fun onTransitionStart(p0: Transition?) {
-                    viewPager.setCurrentItem(DataKeeper.getInstance().page,false)
+                    viewPager.setCurrentItem(DataKeeper.getInstance().page, false)
                 }
             })
         }
@@ -461,8 +459,6 @@ class MainActivity : BaseActivity() {
             super.onBackPressed()
         }
     }
-
-
 
 
 }
