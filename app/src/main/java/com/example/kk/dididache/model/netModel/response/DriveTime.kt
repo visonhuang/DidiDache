@@ -9,7 +9,8 @@ import com.example.kk.dididache.toStr
 "time": "到达时间",   	    // 字符串类型
 "index": "路径数组的下标"      // int类型
  */
-data class DriveTime(var driveTime: String, var time: String, var index: Int) {
+data class
+DriveTime(var driveTime: String, var time: String, var index: Int) {
 
     fun timeToCalender() = time.toCalender()
     //按格式显示到达时间

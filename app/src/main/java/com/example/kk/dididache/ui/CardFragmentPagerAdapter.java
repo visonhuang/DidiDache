@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.widget.CardView;
 import android.view.ViewGroup;
 
+import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.CardAdapter;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.List;
 
 public class CardFragmentPagerAdapter extends FragmentStatePagerAdapter implements CardAdapter {
 
+    private int[] resArray = {R.drawable.card_one, R.drawable.card_two, R.drawable.card_three, R.drawable.card_four};
     private List<CardFragment> mFragments;
     private float mBaseElevation;
 
@@ -25,8 +27,8 @@ public class CardFragmentPagerAdapter extends FragmentStatePagerAdapter implemen
         mFragments = new ArrayList<>();
         mBaseElevation = baseElevation;
 
-        for(int i = 0; i< 5; i++){
-            addCardFragment(new CardFragment());
+        for(int i = 0; i< 4; i++){
+            addCardFragment(CardFragment.newInstance(resArray[i]));
         }
     }
 

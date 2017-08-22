@@ -61,10 +61,17 @@ import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.SearchItemAdapter;
+import com.example.kk.dididache.model.Event.DriveTimeEvent;
+import com.example.kk.dididache.model.Http;
+import com.example.kk.dididache.model.netModel.request.DriveTimeInfo;
+import com.example.kk.dididache.model.netModel.request.Xy;
+import com.example.kk.dididache.model.netModel.response.DriveTime;
 import com.example.kk.dididache.util.DrivingRouteOverlay;
 import com.example.kk.dididache.util.OverlayManager;
 import com.orhanobut.logger.Logger;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
@@ -72,6 +79,9 @@ import java.util.List;
 
 public class RoutePlanActivity extends AppCompatActivity
         implements OnGetRoutePlanResultListener, View.OnClickListener {
+
+    public LocationClient mLocationClient;
+    private boolean isFirstLocate = true;
 
     CardView mBtnPre = null; // 上一个节点
     CardView mBtnNext = null; // 下一个节点
@@ -102,11 +112,18 @@ public class RoutePlanActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mLocationClient = new LocationClient(getApplicationContext());
+        mLocationClient.registerLocationListener(new MyLocationListener());
+        SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_plan_route);
+
+        EventBus.getDefault().register(this);
+
         MapView.setMapCustomEnable(true);//设置个性化
 
         mMapView = (MapView) findViewById(R.id.map);
         mBaidumap = mMapView.getMap();
+        mBaidumap.setMyLocationEnabled(true);
         mBtnPre = (CardView) findViewById(R.id.pre);
         mBtnNext = (CardView) findViewById(R.id.next);
         mBtnPre.setVisibility(View.INVISIBLE);
@@ -120,6 +137,8 @@ public class RoutePlanActivity extends AppCompatActivity
         endNodeText = (TextView) findViewById(R.id.end_node);
         startNodeText.setOnClickListener(this);
         endNodeText.setOnClickListener(this);
+
+        requestLocation();
     }
 
     // 定制RouteOverly
@@ -283,21 +302,42 @@ public class RoutePlanActivity extends AppCompatActivity
 
             if(result.getRouteLines().size() >= 1){
                 nowResultdrive = result;
+                List<DrivingRouteLine> lineList = nowResultdrive.getRouteLines();
+                ArrayList<ArrayList<Xy>> xyDoubleList = new ArrayList<>();
+                for(int i = 0; i < lineList.size(); i++){
+                    DrivingRouteLine line = lineList.get(i);
+                    ArrayList<Xy> xyList = new ArrayList<>();
+                    for(int j = 0; j < line.getWayPoints().size(); j++){
+                        LatLng latLng = line.getWayPoints().get(j).getLocation();
+                        xyList.add(new Xy(latLng));
+                    }
+                    xyDoubleList.add(xyList);
+                }
+                String time = null;
+                DriveTimeInfo info = new DriveTimeInfo(time, xyDoubleList);
+                Http.getInstance().doPost(Http.ADRESS.driveTime, info);
 
-                route = nowResultdrive.getRouteLines().get(0);
-                DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
-                mBaidumap.setOnMarkerClickListener(overlay);
-                routeOverlay = overlay;
-                overlay.setData(nowResultdrive.getRouteLines().get(0));
-                overlay.addToMap();
-                overlay.zoomToSpan();
-                mBtnPre.setVisibility(View.VISIBLE);
-                mBtnNext.setVisibility(View.VISIBLE);
             }else {
                 Log.d("route result", "结果数<0");
                 return;
             }
         }
+    }
+
+    @Subscribe
+    public void getBestLine(DriveTimeEvent driveTimeEvent){
+        if(driveTimeEvent == null) return;
+        DriveTime driveTime = driveTimeEvent.getDriveTime();
+        int position = driveTime.getIndex();
+        route = nowResultdrive.getRouteLines().get(position);
+        DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
+        mBaidumap.setOnMarkerClickListener(overlay);
+        routeOverlay = overlay;
+        overlay.setData(nowResultdrive.getRouteLines().get(0));
+        overlay.addToMap();
+        overlay.zoomToSpan();
+        mBtnPre.setVisibility(View.VISIBLE);
+        mBtnNext.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -308,6 +348,24 @@ public class RoutePlanActivity extends AppCompatActivity
     @Override
     public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
 
+    }
+
+    private void navigateTo(BDLocation location) {
+        Toast.makeText(this, "nav to " + location.getAddrStr(), Toast.LENGTH_SHORT).show();
+        if (isFirstLocate) {
+            LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
+            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
+            mBaidumap.animateMapStatus(update);
+            update = MapStatusUpdateFactory.zoomTo(16f);
+            mBaidumap.animateMapStatus(update);
+            isFirstLocate = false;
+        }
+        MyLocationData.Builder locationBuilder = new MyLocationData.
+                Builder();
+        locationBuilder.latitude(location.getLatitude());
+        locationBuilder.longitude(location.getLongitude());
+        MyLocationData locationData = locationBuilder.build();
+        mBaidumap.setMyLocationData(locationData);
     }
 
     @Override
@@ -327,8 +385,33 @@ public class RoutePlanActivity extends AppCompatActivity
         if (mSearch != null) {
             mSearch.destroy();
         }
+        mLocationClient.stop();
         mMapView.onDestroy();
-        mSuggestionSearch.destroy();
+        mBaidumap.setMyLocationEnabled(false);
+        EventBus.getDefault().unregister(this);
         super.onDestroy();
+    }
+
+    public class MyLocationListener implements BDLocationListener {
+
+        @Override
+        public void onReceiveLocation(BDLocation location) {
+            if (location.getLocType() == BDLocation.TypeGpsLocation
+                    || location.getLocType() == BDLocation.TypeNetWorkLocation) {
+                navigateTo(location);
+            }
+        }
+    }
+
+    private void requestLocation() {
+        initLocation();
+        mLocationClient.start();
+    }
+
+    private void initLocation(){
+        LocationClientOption option = new LocationClientOption();
+        option.setScanSpan(5000);
+        option.setIsNeedAddress(true);
+        mLocationClient.setLocOption(option);
     }
 }
