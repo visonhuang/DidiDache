@@ -190,7 +190,7 @@ public class SelectTime extends LinearLayout{
         calendar.set(Calendar.DATE,Integer.valueOf(day.getIndexText()));
         calendar.set(Calendar.HOUR_OF_DAY,Integer.valueOf(hour.getIndexText()));
         calendar.set(Calendar.MINUTE,Integer.valueOf(minute.getIndexText()));
-        return calendar;
+        return (Calendar)calendar.clone();
     }
 
 
@@ -211,7 +211,7 @@ public class SelectTime extends LinearLayout{
         minute.setLinePadding(linePadding);
     }
 
-    public void smoothToGoal (Calendar calendar1) {
+    public void smoothToGoal1 (Calendar calendar1) {
         Calendar calendar = (Calendar) calendar1.clone();
         String yearT = calendar.get(Calendar.YEAR) + "";
         String monthT = (calendar.get(Calendar.MONTH) + 1) + "";
@@ -264,6 +264,11 @@ public class SelectTime extends LinearLayout{
         minute.smoothTo(minuteT);
 
 
+    }
+
+    public void smoothToGoal (Calendar calendar1) {
+        smoothToGoal1(calendar1);
+        smoothToGoal1(calendar1);
     }
 
     private void changeDate () {
