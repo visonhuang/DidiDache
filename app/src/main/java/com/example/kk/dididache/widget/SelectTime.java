@@ -116,19 +116,19 @@ public class SelectTime extends LinearLayout{
                     for (int i = 1;i <= 31;i++) {
                         list.add(i + "");
                     }
-                    month.setLists(list);
-                    month.setIndexAfterNew(dayNow);
+                    day.setLists(list);
+                    day.setIndexAfterNew(dayNow);
                 }
                 if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) {
                     List<String> list = new ArrayList<>();
                     for (int i = 1;i <= 30;i++) {
                         list.add(i + "");
                     }
-                    month.setLists(list);
+                    day.setLists(list);
                     if (dayNow.equals("31")) {
-                        month.setIndexAfterNew("30");
+                        day.setIndexAfterNew("30");
                     } else {
-                        month.setIndexAfterNew(dayNow);
+                        day.setIndexAfterNew(dayNow);
                     }
                 }
                 if (monthNum == 2) {
@@ -136,18 +136,19 @@ public class SelectTime extends LinearLayout{
                     for (int i = 1;i < day2;i++) {
                         list.add(i + "");
                     }
+                    day.setLists(list);
                     if (day2 == 29) {
                         if (dayNow.equals("31") || dayNow.equals("30")) {
-                            month.setIndexAfterNew("29");
+                            day.setIndexAfterNew("29");
                         } else {
-                            month.setIndexAfterNew(dayNow);
+                            day.setIndexAfterNew(dayNow);
                         }
                     }
                     if (day2 == 28) {
                         if (dayNow.equals("31") || dayNow.equals("30") || dayNow.equals("29")) {
-                            month.setIndexAfterNew("28");
+                            day.setIndexAfterNew("28");
                         } else {
-                            month.setIndexAfterNew(dayNow);
+                            day.setIndexAfterNew(dayNow);
                         }
                     }
                 }
