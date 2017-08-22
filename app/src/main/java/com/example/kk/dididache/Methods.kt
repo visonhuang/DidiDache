@@ -53,7 +53,6 @@ fun Calendar.toStr(format: String): String {
 fun Calendar.getTimeNow(): Calendar {
     val c = Calendar.getInstance()
     c.add(Calendar.DATE,-200)
-    com.orhanobut.logger.Logger.d(c.toStr())
     return c
 }
 

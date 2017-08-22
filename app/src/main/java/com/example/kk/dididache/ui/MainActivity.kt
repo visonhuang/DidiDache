@@ -32,7 +32,9 @@ import com.example.kk.dididache.model.*
 import com.example.kk.dididache.model.Event.ExceptionEvent
 import com.example.kk.dididache.model.Event.HeatMapEvent
 import com.example.kk.dididache.model.netModel.request.HeatInfo
+import com.example.kk.dididache.model.netModel.request.RealTimeHeatInfo
 import com.example.kk.dididache.widget.ChartDialog
+import com.google.gson.Gson
 import com.google.gson.internal.bind.DateTypeAdapter
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_main.*
@@ -187,20 +189,11 @@ class MainActivity : BaseActivity() {
             map.setMyLocationData(locData)
 
             /***********/
-            if (timeManager!!.timeMode == 0) {
-                if (HeatInfo.lastTime == null) {
-                    val lastTime = Calendar.getInstance()
-                    lastTime.set(2017, 2, 28, 0, 0, 1)
-                    HeatInfo.lastTime = lastTime.toStr()
-                }
-                val newTime = HeatInfo.lastTime!!.toCalender()
-                newTime.add(Calendar.SECOND, 30)
-                val info: HeatInfo = HeatInfo(HeatInfo.lastTime!!, newTime.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest)
-                Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
-                Http.getInstance().doPost(Http.ADRESS.heatMap, info)
-                HeatInfo.lastTime = newTime.toStr()
+            if (timeManager!!.isNow) {
+                val timeBound = chartDialog!!.getTimeBound(Calendar.getInstance().getTimeNow(), false)
+                val info = RealTimeHeatInfo(timeBound.first.toStr(), timeBound.second.toStr())
+                Http.getInstance().doPost(Http.ADRESS.realTimeHeatMap, info)
             }
-
 
             /***********/
 
@@ -233,7 +226,10 @@ class MainActivity : BaseActivity() {
     //初始化视图
     private fun initView() {
         timeManager = SelectTimeManager(this) {
-            onSelect { Logger.d(it.toStr()) }
+            onSelect {
+                val timeBound = chartDialog!!.getTimeBound(timeSelected, false)
+                Http.getInstance().doPost(Http.ADRESS.heatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+            }
         }
         freshTime.onClick { timeManager?.freshTime() }
         timeButton.onClick { timeManager?.show() }
@@ -392,7 +388,8 @@ class MainActivity : BaseActivity() {
     @Subscribe
     fun addHeatMap(event: HeatMapEvent) {
         if (event.list.isEmpty()) return
-        heatMap = HeatMap.Builder().weightedData(event.list as ArrayList<WeightedLatLng>).build()
+        Logger.json(Gson().toJson(event))
+        heatMap = HeatMap.Builder().weightedData(event.list.map { WeightedLatLng(LatLng(it.y, it.x), it.c.toDouble()) }).build()
     }
 
     @Subscribe

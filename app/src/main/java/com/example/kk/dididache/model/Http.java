@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Dispatcher;
@@ -68,7 +69,8 @@ public class Http {
         preUseRatio("estimation/useratio"),
         driveTime("estimation/drivetime");
 
-        private String value = "http://192.168.1.140:8080/";
+        private String value = "http://192.168.199.56:8080/";
+//        private String value = "http://192.168.1.132:10000/";
 
         ADRESS(String value) {
             this.value += value;
@@ -89,10 +91,10 @@ public class Http {
                 getHeatPoints((HeatInfo) body, false);
                 break;
             case useRatio:
-                getUseRatio((UseRatioInfo) body);
+                getUseRatio((UseRatioInfo) body,false);
                 break;
             case preUseRatio:
-                getUseRatio((PreUseRatioInfo) body);
+                getUseRatio((PreUseRatioInfo) body,true);
                 break;
             case driveTime:
                 getRoutePlan((DriveTimeInfo) body);
@@ -104,10 +106,10 @@ public class Http {
                 getHeatPoints((HeatInfo) body, true);
                 break;
             case carCountChange:
-                getTaxiCountByTime((TaxiCountInfo) body);
+                getTaxiCountByTime((TaxiCountInfo) body,false);
                 break;
             case preCarCountChange:
-                getTaxiCountByTime((PreTaxiCountInfo) body);
+                getTaxiCountByTime((PreTaxiCountInfo) body,true);
                 break;
             case realTimeHeatMap:
                 getRealTimeHeatPoints((RealTimeHeatInfo) body);
@@ -162,7 +164,7 @@ public class Http {
     }
 
     //请求某个坐标下一段时间内出租车变化情况
-    private void getTaxiCountByTime(final Object info) {
+    private void getTaxiCountByTime(final Object info,final boolean isFuture) {
 
 //        ArrayList<TaxiCount> list = new ArrayList<>();
 //        for (int i = 0; i < info.getBarCount(); i++) {
@@ -176,10 +178,11 @@ public class Http {
                 ArrayFeedBack<TaxiCount> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_TAXICOUNT, info, ADRESS.carCountChange.value);
+                    Response response = getResponse(TAG_TAXICOUNT, info, isFuture?ADRESS.preCarCountChange.value:ADRESS.carCountChange.value);
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
                     }.getType());
+                    Logger.json(new Gson().toJson(feedBack));
                     //数据处理
                     EventBus.getDefault().post(new TaxiCountEvent(feedBack.data));
                 } catch (java.lang.Exception e) {
@@ -192,7 +195,7 @@ public class Http {
     }
 
     //请求使用率
-    private void getUseRatio(final Object info) {
+    private void getUseRatio(final Object info, final boolean isFuture) {
 
 //        EventBus.getDefault().post(new UseRatioEvent(new UseRatio(100, 10)));
         new Thread(new Runnable() {
@@ -201,7 +204,7 @@ public class Http {
                 ObjectFeedBack<UseRatio> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_USE_RATIO, info, ADRESS.useRatio.value);
+                    Response response = getResponse(TAG_USE_RATIO, info, isFuture?ADRESS.preUseRatio.value:ADRESS.useRatio.value);
                     //Logger.d(response.body().string());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {

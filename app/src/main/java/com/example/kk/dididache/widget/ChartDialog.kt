@@ -24,6 +24,8 @@ import com.example.kk.dididache.model.DataKeeper
 import com.example.kk.dididache.model.Event.TaxiCountEvent
 import com.example.kk.dididache.model.Event.UseRatioEvent
 import com.example.kk.dididache.model.Http
+import com.example.kk.dididache.model.netModel.request.PreTaxiCountInfo
+import com.example.kk.dididache.model.netModel.request.PreUseRatioInfo
 import com.example.kk.dididache.model.netModel.response.TaxiCount
 import com.example.kk.dididache.model.netModel.request.TaxiCountInfo
 import com.example.kk.dididache.model.netModel.request.UseRatioInfo
@@ -190,11 +192,18 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     //发出网络请求
     fun getDate(time: Calendar, pos: LatLng) {
-        val start = time.clone() as Calendar
-        val end = time.clone() as Calendar
-        start.add(Calendar.MINUTE, -60)
-        Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(pos, start, end))
-        Http.getInstance().doPost(Http.ADRESS.useRatio, UseRatioInfo(pos.longitude, pos.latitude, start.toStr(), end.toStr()))
+        val timeBound = getTimeBound(time,true)
+        when (timeManager.timeMode) {
+            -1 -> {
+                Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(pos, timeBound.first, timeBound.second))
+                Http.getInstance().doPost(Http.ADRESS.useRatio, UseRatioInfo(pos.longitude, pos.latitude, timeBound.first.toStr(), timeBound.second.toStr()))
+            }
+            else -> {
+                Http.getInstance().doPost(Http.ADRESS.preCarCountChange, PreTaxiCountInfo(pos, timeBound.first, timeBound.second))
+                Http.getInstance().doPost(Http.ADRESS.preUseRatio, PreUseRatioInfo(pos.longitude, pos.latitude, timeBound.first.toStr(), timeBound.second.toStr()))
+            }
+        }
+
     }
 
     private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
@@ -385,12 +394,52 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         return s
     }
 
-//    private fun getTimeBound(time: Calendar): Pair<Calendar, Calendar> {
-//        when (timeManager.timeMode) {
-//            -1 -> {
-//            }
-//            else -> {
-//            }
-//        }
-//    }
+    fun getTimeBound(time: Calendar, isAnHour: Boolean): Pair<Calendar, Calendar> {
+        val a = Calendar.getInstance().getTimeNow().timeInMillis - time.timeInMillis
+        if (isAnHour) {
+            when (timeManager.timeMode) {
+                -1 -> {
+                    if (a < 3600000) {
+                        val end = Calendar.getInstance().getTimeNow()
+                        val start = time.clone() as Calendar
+                        start.add(Calendar.MILLISECOND, (-(3600000 - a)).toInt())
+                        return Pair(start, end)
+                    } else {
+                        val end = time.clone() as Calendar
+                        val start = time.clone() as Calendar
+                        start.add(Calendar.MINUTE, -30)
+                        end.add(Calendar.MINUTE, 30)
+                        return Pair(start, end)
+                    }
+                }
+                0 -> {
+                    val end = time.clone() as Calendar
+                    end.add(Calendar.MINUTE, 60)
+                    return Pair(time, end)
+                }
+                else -> {
+                    if (a > -3600000) {
+                        val start = Calendar.getInstance().getTimeNow()
+                        val end = time.clone() as Calendar
+                        end.add(Calendar.MILLISECOND, (3600000 + a).toInt())
+                        return Pair(start, end)
+                    } else {
+                        val end = time.clone() as Calendar
+                        val start = time.clone() as Calendar
+                        start.add(Calendar.MINUTE, -30)
+                        end.add(Calendar.MINUTE, 30)
+                        return Pair(start, end)
+                    }
+                }
+            }
+        } else {
+            val end = time.clone() as Calendar
+            val start = time.clone() as Calendar
+            start.add(Calendar.SECOND, -10)
+            end.add(Calendar.SECOND, 10)
+            return Pair(start, end)
+        }
+
+
+    }
 }
