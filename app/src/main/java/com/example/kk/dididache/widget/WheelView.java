@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -126,7 +127,7 @@ public class WheelView extends View {
         //return this;
     }
 
-    private synchronized void initWheelItems (int width,int itemHeight,List<String> lists) {
+    private synchronized void  initWheelItems (int width,int itemHeight,List<String> lists) {
         wheelItems.clear();
         for (int i = 0; i < showCount + 2; i++) {
             int startY = itemHeight * (i - 1);
@@ -242,12 +243,12 @@ public class WheelView extends View {
     private synchronized void handleUp () {
         int index = -1;
         for (int i = 0; i < wheelItems.size(); i++) {
-            WheelItem item =wheelItems.get(i);
-            if (item.getStartY() >= wheelSelect.getStartY() && item.getStartY() < (wheelSelect.getStartY() + itemHeight / 2)) {
+            WheelItem item = wheelItems.get(i);
+            if (item.getStartY() >= wheelSelect.getStartY() && item.getStartY() < (wheelSelect.getStartY() + itemHeight / 2 - 1)) {
                 index = i;
                 break;
             }
-            if (item.getStartY() >= (wheelSelect.getStartY() + itemHeight / 2) && item.getStartY() < (wheelSelect.getStartY() + itemHeight)) {
+            if (item.getStartY() >= (wheelSelect.getStartY() + itemHeight / 2 - 1) && item.getStartY() < (wheelSelect.getStartY() + itemHeight)) {
                 index = i - 1;
                 break;
             }
@@ -391,6 +392,7 @@ public class WheelView extends View {
     public void setIndexAfterNew (String text) {
         int index = lists.indexOf(text);
         select = index;
+        this.text = text;
 
         initWheelItems(width,itemHeight,lists);
     }
@@ -477,7 +479,10 @@ public class WheelView extends View {
         int after = lists.indexOf(text);
         int before = lists.indexOf(this.text);
 
+        Log.d("月份",text);
+
         this.text = text;
+        Log.d("月份",this.text);
 //        int distance1 = after - before;
 //        int distance2;
 //        if (after >= before) {
