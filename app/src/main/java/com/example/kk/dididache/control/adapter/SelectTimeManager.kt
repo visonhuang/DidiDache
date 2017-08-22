@@ -34,16 +34,17 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
     private val timeCardView = (ctx as MainActivity).timeCardView
     var isShowing = false
         get() = selectTime.visibility == View.VISIBLE
+    var isNow = true//是不是当前时间
     var timeMode = 0//-1过去，0当前，1未来
         get() {
             val now = Calendar.getInstance()
             now.add(Calendar.MONTH, 1)
-            if (timeCardView.timeButton.text == "查 询 时 间") return 0
+            if (isNow) return 0
             return timeSelected.compareTo(now)
         }
     var timeSelected = Calendar.getInstance()
         get() {
-            if (timeCardView.timeButton.text == "查 询 时 间") {
+            if (isNow) {
                 val now = Calendar.getInstance()
                 now.add(Calendar.MONTH, 1)
                 DataKeeper.getInstance().time = now
@@ -59,6 +60,7 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
         scrimForSelectTime.onClick { dismiss() }
         cancelButton.onClick { dismiss() }
         selectButton.onClick {
+            isNow = false//按下选择即不是当前时间
             timeSelected = selectTime.selectedTime
             _select(timeSelected)
             timeCardView.timeButton.text = timeSelected.toStr("yyyy-MM-dd HH:mm")
