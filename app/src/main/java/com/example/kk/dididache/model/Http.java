@@ -8,6 +8,8 @@ import com.example.kk.dididache.model.Event.TaxiCountEvent;
 import com.example.kk.dididache.model.Event.UseRatioEvent;
 import com.example.kk.dididache.model.netModel.request.DriveTimeInfo;
 import com.example.kk.dididache.model.netModel.request.ExceptionInfo;
+import com.example.kk.dididache.model.netModel.request.PreTaxiCountInfo;
+import com.example.kk.dididache.model.netModel.request.PreUseRatioInfo;
 import com.example.kk.dididache.model.netModel.request.RealTimeHeatInfo;
 import com.example.kk.dididache.model.netModel.request.UseRatioInfo;
 import com.example.kk.dididache.model.netModel.response.ArrayFeedBack;
@@ -59,12 +61,14 @@ public class Http {
         realTimeHeatMap("show/dynamichot"),
         heatMap("show/statichot"),
         preHeatMap("show/prediction"),
-        carCountChange("estimation/flowchange"),
+        carCountChange("show/flowchange"),
+        preCarCountChange("estimation/flowchange"),
         exception("estimation/trafficexception"),
         useRatio("show/useratio"),
+        preUseRatio("estimation/useratio"),
         driveTime("estimation/drivetime");
 
-        private String value = "http://ip:80/";
+        private String value = "http://192.168.1.140:8080/";
 
         ADRESS(String value) {
             this.value += value;
@@ -87,6 +91,9 @@ public class Http {
             case useRatio:
                 getUseRatio((UseRatioInfo) body);
                 break;
+            case preUseRatio:
+                getUseRatio((PreUseRatioInfo) body);
+                break;
             case driveTime:
                 getRoutePlan((DriveTimeInfo) body);
                 break;
@@ -98,6 +105,9 @@ public class Http {
                 break;
             case carCountChange:
                 getTaxiCountByTime((TaxiCountInfo) body);
+                break;
+            case preCarCountChange:
+                getTaxiCountByTime((PreTaxiCountInfo) body);
                 break;
             case realTimeHeatMap:
                 getRealTimeHeatPoints((RealTimeHeatInfo) body);
@@ -152,56 +162,58 @@ public class Http {
     }
 
     //请求某个坐标下一段时间内出租车变化情况
-    private void getTaxiCountByTime(final TaxiCountInfo info) {
+    private void getTaxiCountByTime(final Object info) {
 
-        ArrayList<TaxiCount> list = new ArrayList<>();
-        for (int i = 0; i < info.getBarCount(); i++) {
-            list.add(new TaxiCount(new Random().nextInt(100)));
-        }
-        EventBus.getDefault().post(new TaxiCountEvent(list));
+//        ArrayList<TaxiCount> list = new ArrayList<>();
+//        for (int i = 0; i < info.getBarCount(); i++) {
+//            list.add(new TaxiCount(new Random().nextInt(100)));
+//        }
+//        EventBus.getDefault().post(new TaxiCountEvent(list));
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                ArrayFeedBack<TaxiCount> feedBack;
-//                try {
-//                    //接收数据
-//                    Response response = getResponse(TAG_TAXICOUNT, info, ADRESS.carCountChange.value);
-//                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
-//                    feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
-//                    }.getType());
-//                    //数据处理
-//                    EventBus.getDefault().post(new TaxiCountEvent(feedBack.data));
-//                } catch (java.lang.Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayFeedBack<TaxiCount> feedBack;
+                try {
+                    //接收数据
+                    Response response = getResponse(TAG_TAXICOUNT, info, ADRESS.carCountChange.value);
+                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
+                    }.getType());
+                    //数据处理
+                    EventBus.getDefault().post(new TaxiCountEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
 
     }
 
     //请求使用率
-    private void getUseRatio(final UseRatioInfo info) {
+    private void getUseRatio(final Object info) {
 
-        EventBus.getDefault().post(new UseRatioEvent(new UseRatio(100, 10)));
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                ObjectFeedBack<UseRatio> feedBack;
-//                try {
-//                    //接收数据
-//                    Response response = getResponse(TAG_USE_RATIO, info, ADRESS.useRatio.value);
-//                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
-//                    feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
-//                    }.getType());
-//                    //数据处理
-//                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data));
-//                } catch (java.lang.Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
+//        EventBus.getDefault().post(new UseRatioEvent(new UseRatio(100, 10)));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ObjectFeedBack<UseRatio> feedBack;
+                try {
+                    //接收数据
+                    Response response = getResponse(TAG_USE_RATIO, info, ADRESS.useRatio.value);
+                    //Logger.d(response.body().string());
+                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
+                    }.getType());
+                    //数据处理
+                    Logger.json(new Gson().toJson(feedBack));
+                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data));
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     //请求最佳路线
@@ -249,6 +261,7 @@ public class Http {
 
     private Response getResponse(int tag, Object info, String url) {
         MediaType mediaType = MediaType.parse("application/json");
+        Logger.d(url);
         Logger.json(new Gson().toJson(info));
         RequestBody body = RequestBody.create(mediaType, new Gson().toJson(info));
         Request request = new Request.Builder()

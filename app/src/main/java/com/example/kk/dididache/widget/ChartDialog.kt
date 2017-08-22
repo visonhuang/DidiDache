@@ -17,10 +17,9 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.baidu.mapapi.model.LatLng
-import com.example.kk.dididache.App
-import com.example.kk.dididache.MyOverShootInterpolator
-import com.example.kk.dididache.R
+import com.example.kk.dididache.*
 import com.example.kk.dididache.control.adapter.ChartAdapter
+import com.example.kk.dididache.control.adapter.SelectTimeManager
 import com.example.kk.dididache.model.DataKeeper
 import com.example.kk.dididache.model.Event.TaxiCountEvent
 import com.example.kk.dididache.model.Event.UseRatioEvent
@@ -28,7 +27,6 @@ import com.example.kk.dididache.model.Http
 import com.example.kk.dididache.model.netModel.response.TaxiCount
 import com.example.kk.dididache.model.netModel.request.TaxiCountInfo
 import com.example.kk.dididache.model.netModel.request.UseRatioInfo
-import com.example.kk.dididache.toStr
 import com.example.kk.dididache.ui.MainActivity
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.Chart
@@ -50,9 +48,9 @@ import java.util.*
  * Created by 小吉哥哥 on 2017/8/15.
  */
 
-class ChartDialog(var context: Context?) {
+class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
-    constructor(context: Context?, build: ChartDialog.() -> Unit) : this(context) {
+    constructor(context: Context?, timeManager: SelectTimeManager, build: ChartDialog.() -> Unit) : this(context, timeManager) {
         this.build()
         insideBuild()
     }
@@ -135,10 +133,10 @@ class ChartDialog(var context: Context?) {
         }
     }
 
-    fun show(time: Calendar) {
+    fun show(time: Calendar, pos: LatLng) {
         EventBus.getDefault().register(this)
         setChartOptions(combinedChart, time)
-        getDate(time)//发出网络请求
+        getDate(time, pos)//发出网络请求
         combinedChart.zoom(0F, 0F, 0F, 0F)
         animate(true)
     }
@@ -159,7 +157,8 @@ class ChartDialog(var context: Context?) {
         data.setData(getLineDate(event.list))
         DataKeeper.getInstance().combinedData = data//存放数据
         combinedChart.data = data
-        animateCombinedChart()
+        inUiThread { animateCombinedChart() }
+
     }
 
 
@@ -186,17 +185,16 @@ class ChartDialog(var context: Context?) {
         pieData.setValueTypeface(App.mTfLight)
         DataKeeper.getInstance().pieData = pieData
         pieChart.data = pieData
-        animatePieChart()
+        inUiThread { animatePieChart() }
     }
 
     //发出网络请求
-    fun getDate(time: Calendar) {
+    fun getDate(time: Calendar, pos: LatLng) {
         val start = time.clone() as Calendar
         val end = time.clone() as Calendar
         start.add(Calendar.MINUTE, -60)
-        end.add(Calendar.MINUTE, 60)
-        Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(LatLng(0.0, 0.0), start, end, 0))
-        Http.getInstance().doPost(Http.ADRESS.useRatio, UseRatioInfo(0.0, 0.0, start.toStr(), end.toStr(), 0))
+        Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(pos, start, end))
+        Http.getInstance().doPost(Http.ADRESS.useRatio, UseRatioInfo(pos.longitude, pos.latitude, start.toStr(), end.toStr()))
     }
 
     private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
@@ -386,4 +384,13 @@ class ChartDialog(var context: Context?) {
         s.setSpan(ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length - 9, s.length, 0)
         return s
     }
+
+//    private fun getTimeBound(time: Calendar): Pair<Calendar, Calendar> {
+//        when (timeManager.timeMode) {
+//            -1 -> {
+//            }
+//            else -> {
+//            }
+//        }
+//    }
 }

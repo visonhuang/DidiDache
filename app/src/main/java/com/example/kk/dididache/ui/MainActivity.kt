@@ -92,7 +92,7 @@ class MainActivity : BaseActivity() {
     }
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
         override fun onMapClick(p0: LatLng) {
-            chartDialog?.show(timeManager!!.timeSelected)
+            chartDialog?.show(timeManager!!.timeSelected,p0)
             if (exceptions != null) {
                 //TODO 判断该处是否有异常
                 exceptions!!.exceptions
@@ -109,7 +109,7 @@ class MainActivity : BaseActivity() {
         }
 
         override fun onMapPoiClick(p0: MapPoi): Boolean {
-            chartDialog?.show(timeManager!!.timeSelected)
+            chartDialog?.show(timeManager!!.timeSelected,p0.position)
             if (exceptions != null) {
                 //TODO 判断该处是否有异常
                 exceptions!!.exceptions
@@ -235,7 +235,7 @@ class MainActivity : BaseActivity() {
         timeManager = SelectTimeManager(this) {
             onSelect { Logger.d(it.toStr()) }
         }
-        freshTime.onClick { timeManager?.isNow = true;timeManager?.freshTime() }
+        freshTime.onClick { timeManager?.freshTime() }
         timeButton.onClick { timeManager?.show() }
         gotoMyLoc.onClick { backToMyLoc(18.0F) }
         openUnusual.onClick {
@@ -253,31 +253,19 @@ class MainActivity : BaseActivity() {
         }
         queryPath.onClick { startActivity<RoutePlanActivity>() }
 
-        chartDialog = ChartDialog(this@MainActivity) {
+        chartDialog = ChartDialog(this@MainActivity,timeManager!!) {
             onDismiss { showToast("消失了") }
             onCancel { showToast("取消") }
             onChartClick {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val intent = Intent(this@MainActivity, C::class.java)
-                    intent.putExtra("time", timeManager!!.timeSelected)
-                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
-                } else {
-                    val intent = Intent(this@MainActivity, C::class.java)
-                    intent.putExtra("time", timeManager!!.timeSelected)
-                    this@MainActivity.startActivity(intent)
-                }
+                val intent = Intent(this@MainActivity, C::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
+                else this@MainActivity.startActivity(intent)
             }
-
             onDetail {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val intent = Intent(this@MainActivity, C::class.java)
-                    intent.putExtra("time", timeManager!!.timeSelected)
-                    this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
-                } else {
-                    val intent = Intent(this@MainActivity, C::class.java)
-                    intent.putExtra("time", timeManager!!.timeSelected)
-                    this@MainActivity.startActivity(intent)
-                }
+                val intent = Intent(this@MainActivity, C::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
+                else this@MainActivity.startActivity(intent)
+
             }
         }
 
@@ -353,7 +341,6 @@ class MainActivity : BaseActivity() {
 
             }
         })
-
 
         //android5.0以上采用共享元素
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

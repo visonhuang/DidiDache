@@ -6,12 +6,9 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
-import com.example.kk.dididache.MyOverShootInterpolator
-import com.example.kk.dididache.R
+import com.example.kk.dididache.*
 import com.example.kk.dididache.model.DataKeeper
 import com.example.kk.dididache.model.Event.ExceptionEvent
-import com.example.kk.dididache.showToast
-import com.example.kk.dididache.toStr
 import com.example.kk.dididache.ui.MainActivity
 import com.example.kk.dididache.widget.SelectTime
 import com.orhanobut.logger.Logger
@@ -37,16 +34,14 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
     var isNow = true//是不是当前时间
     var timeMode = 0//-1过去，0当前，1未来
         get() {
-            val now = Calendar.getInstance()
-            now.add(Calendar.MONTH, 1)
+            val now = Calendar.getInstance().getTimeNow()
             if (isNow) return 0
             return timeSelected.compareTo(now)
         }
     var timeSelected = Calendar.getInstance()
         get() {
             if (isNow) {
-                val now = Calendar.getInstance()
-                now.add(Calendar.MONTH, 1)
+                val now = Calendar.getInstance().getTimeNow()
                 DataKeeper.getInstance().time = now
                 return now
             }
@@ -56,7 +51,7 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
     var _select: (Calendar) -> Unit = {}
 
     init {
-        timeSelected.add(Calendar.MONTH, 1)
+        //timeSelected.add(Calendar.MONTH, 1)
         scrimForSelectTime.onClick { dismiss() }
         cancelButton.onClick { dismiss() }
         selectButton.onClick {
@@ -224,10 +219,12 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
     }
 
     fun freshTime() {
+        isNow = true
         timeSelected = Calendar.getInstance()
         timeSelected.add(Calendar.MONTH, 1)
         selectTime.setIndexAfterNew(timeSelected)
         timeCardView.timeButton.text = "查 询 时 间"
+
     }
 
 

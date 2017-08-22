@@ -9,6 +9,7 @@ import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.time.Month
 import java.util.*
+import java.util.logging.Logger
 import kotlin.properties.Delegates
 
 /**
@@ -39,18 +40,21 @@ fun Any.showToast(msg: Any) {
 
 fun Calendar.toStr(): String {
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    add(Calendar.MONTH, -1)
     val result = sdf.format(time)
-    add(Calendar.MONTH, 1)
     return result//"${get(Calendar.YEAR)}-${get(Calendar.MONTH)}-${get(Calendar.DATE)} ${get(Calendar.HOUR_OF_DAY)}:${get(Calendar.MINUTE)}:${get(Calendar.SECOND)}"
 }
 
 fun Calendar.toStr(format: String): String {
     val sdf = SimpleDateFormat(format)
-    add(Calendar.MONTH, -1)
     val result = sdf.format(time)
-    add(Calendar.MONTH, 1)
     return result
+}
+
+fun Calendar.getTimeNow(): Calendar {
+    val c = Calendar.getInstance()
+    c.add(Calendar.DATE,-200)
+    com.orhanobut.logger.Logger.d(c.toStr())
+    return c
 }
 
 fun String.toCalender(): Calendar {
@@ -73,6 +77,7 @@ val Any.Tagg: String
         val tag = this.javaClass.name.split(".")
         return tag[tag.size - 1].replace("$", "->") + "===="
     }
+
 
 //果冻回弹插值器
 class MyOverShootInterpolator(val factor: Double) : Interpolator {

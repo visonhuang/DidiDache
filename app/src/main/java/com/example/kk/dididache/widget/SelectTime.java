@@ -236,6 +236,7 @@ public class SelectTime extends LinearLayout{
 
 
     public void setHeight (int height) {
+
         year.setSelectedSize(height);
         month.setSelectedSize(height);
         day.setSelectedSize(height);
