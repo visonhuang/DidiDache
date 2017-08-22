@@ -450,15 +450,18 @@ public class WheelView extends View {
                         }
                         distanceCopy--;
                         if (distanceCopy <= 0) {
-                         //   break;
-                            distance = 8;
+                            if (height - distance != 0) {
+                                handleMove(height - distance);
+                            }
+                            break;
+                   //         distance = 8;
                         }
                     }
 
-                    if (height - distance <= 20) {
-                        handleMove(dy > 0 ? height - distance : distance - height);
-                        break;
-                    }
+//                    if (height - distance <= 20) {
+//                        handleMove(dy > 0 ? height - distance : distance - height);
+//                        break;
+//                    }
                 }
                 try {
                     Thread.sleep(150);
