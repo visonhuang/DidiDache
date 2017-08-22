@@ -69,8 +69,8 @@ public class Http {
         preUseRatio("estimation/useratio"),
         driveTime("estimation/drivetime");
 
-        private String value = "http://192.168.199.56:8080/";
-//        private String value = "http://192.168.1.132:10000/";
+//        private String value = "http://192.168.199.56:8080/";
+        private String value = "http://192.168.1.132:10000/";
 
         ADRESS(String value) {
             this.value += value;
@@ -254,6 +254,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<Exception>>() {
                     }.getType());
                     //数据处理
+                    Logger.json(new Gson().toJson(feedBack));
                     EventBus.getDefault().post(new ExceptionEvent(feedBack.data));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();

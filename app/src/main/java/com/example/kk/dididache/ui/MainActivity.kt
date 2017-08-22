@@ -31,6 +31,7 @@ import com.example.kk.dididache.control.adapter.SelectTimeManager
 import com.example.kk.dididache.model.*
 import com.example.kk.dididache.model.Event.ExceptionEvent
 import com.example.kk.dididache.model.Event.HeatMapEvent
+import com.example.kk.dididache.model.netModel.request.ExceptionInfo
 import com.example.kk.dididache.model.netModel.request.HeatInfo
 import com.example.kk.dididache.model.netModel.request.RealTimeHeatInfo
 import com.example.kk.dididache.widget.ChartDialog
@@ -228,26 +229,40 @@ class MainActivity : BaseActivity() {
         timeManager = SelectTimeManager(this) {
             onSelect {
                 val timeBound = chartDialog!!.getTimeBound(timeSelected, false)
+                Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
                 Http.getInstance().doPost(Http.ADRESS.heatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+
+                val timeBound2 = chartDialog!!.getTimeBound(timeSelected, true)
+                Http.getInstance().cancelCall(Http.TAG_EXCEPTION)
+                Http.getInstance().doPost(Http.ADRESS.exception, ExceptionInfo(timeBound2.first.toStr(), timeBound2.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+
             }
         }
         freshTime.onClick { timeManager?.freshTime() }
         timeButton.onClick { timeManager?.show() }
         gotoMyLoc.onClick { backToMyLoc(18.0F) }
         openUnusual.onClick {
-            isUnusualShowing = !isUnusualShowing
-            if (isUnusualShowing) {
-                //显示异常点
-                openUnusual.unusualImageView.imageResource = R.drawable.cancel_unusual
-                if (exceptions == null || exceptionOverLays.isEmpty() || exceptions!!.exceptions.isEmpty()) return@onClick
-                exceptionOverLays = map.addOverlays(exceptions!!.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
-            } else {
-                //去除异常点
-                openUnusual.unusualImageView.imageResource = R.drawable.open_unusual
-                exceptionOverLays.map { it.remove() }
-            }
+            if (timeManager!!.timeMode == -1) {
+                isUnusualShowing = !isUnusualShowing
+                if (isUnusualShowing) {
+                    //显示异常点
+                    openUnusual.unusualImageView.imageResource = R.drawable.cancel_unusual
+                    if (exceptions == null || exceptionOverLays.isEmpty() || exceptions!!.exceptions.isEmpty()) return@onClick
+                    exceptionOverLays = map.addOverlays(exceptions!!.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
+                } else {
+                    //去除异常点
+                    openUnusual.unusualImageView.imageResource = R.drawable.open_unusual
+                    exceptionOverLays.map { it.remove() }
+                }
+            } else showToast("非过去时间无法显示异常")
+
         }
-        queryPath.onClick { DataKeeper.getInstance().time = timeManager!!.timeSelected;startActivity<RoutePlanActivity>() }
+        queryPath.onClick {
+            if (timeManager!!.timeMode != -1) {
+                DataKeeper.getInstance().time = timeManager!!.timeSelected
+                startActivity<RoutePlanActivity>()
+            } else showToast("过去时间无法预测")
+        }
 
         chartDialog = ChartDialog(this@MainActivity, timeManager!!) {
             onDismiss { showToast("消失了") }
