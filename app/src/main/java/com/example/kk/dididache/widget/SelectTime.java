@@ -252,7 +252,7 @@ public class SelectTime extends LinearLayout{
 
     public void smoothToGoal (Calendar calendar) {
         String yearT = calendar.get(Calendar.YEAR) + "";
-        String monthT = (calendar.get(Calendar.MONTH)) + "";
+        String monthT = (calendar.get(Calendar.MONTH) + 1) + "";
         String dayT = calendar.get(Calendar.DATE) + "";
         String hourT = calendar.get(Calendar.HOUR_OF_DAY) + "";
         String minuteT = calendar.get(Calendar.MINUTE) + "";
