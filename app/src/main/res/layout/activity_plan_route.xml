@@ -25,7 +25,7 @@
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
             android:layout_marginTop="28dp"
-            android:background="#00ffffff">
+            app:cardBackgroundColor="#f5ffffff">
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -110,15 +110,22 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
-                    android:id="@+id/imageView4"
+                <android.support.v7.widget.CardView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="30dp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/turn" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/change"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        app:srcCompat="@drawable/turn" />
+                </android.support.v7.widget.CardView>
+
 
             </android.support.constraint.ConstraintLayout>
 
@@ -131,7 +138,8 @@
             android:layout_gravity="bottom"
             android:layout_alignParentBottom="true"
             android:layout_marginLeft="108dp"
-            android:layout_marginBottom="56dp"
+            android:layout_marginBottom="62dp"
+            app:cardBackgroundColor="#f5ffffff"
             android:onClick="nodeClick" >
 
             <ImageView
@@ -147,7 +155,7 @@
             android:layout_height="43dp"
             android:layout_gravity="bottom"
             android:layout_marginLeft="208dp"
-            android:layout_marginBottom="56dp"
+            android:layout_marginBottom="62dp"
             android:layout_toRightOf="@id/pre"
             android:layout_alignParentBottom="true"
             android:onClick="nodeClick" >
@@ -155,11 +163,14 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/next"/>
+                android:background="#f5ffffff"
+                android:src="@drawable/next"
+                />
 
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
+            android:id="@+id/time_card_view"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_gravity="bottom"
@@ -167,6 +178,7 @@
             android:layout_marginEnd="12dp"
             android:layout_marginStart="12dp"
             android:translationZ="1dp"
+            android:visibility="gone"
             app:cardBackgroundColor="#f5ffffff"
             app:cardCornerRadius="10dp">
 
@@ -183,7 +195,8 @@
                     android:layout_marginStart="11dp"
                     android:layout_marginTop="10dp"
                     android:background="@drawable/round_shape_blue"
-                    android:text="查 询 时 间"
+                    android:text="预 测 时 间"
+                    android:gravity="center"
                     android:textColor="#4f4f4f"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"

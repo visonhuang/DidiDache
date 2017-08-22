@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -16,9 +17,8 @@ import android.widget.CompoundButton;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.widget.CirclePageIndicator;
 
-public class FirstUseActivity extends AppCompatActivity implements View.OnClickListener{
+public class FirstUseActivity extends AppCompatActivity{
 
-    private Button mButton;
     private ViewPager mViewPager;
     private CirclePageIndicator mPageIndicator;
     private CardFragmentPagerAdapter mFragmentCardAdapter;
@@ -29,12 +29,13 @@ public class FirstUseActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_use);
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener(){
+        CardView cardView = (CardView) findViewById(R.id.enter_button);
+        cardView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(FirstUseActivity.this, MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -54,12 +55,6 @@ public class FirstUseActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
-    @Override
-    public void onClick(View view) {
-        mButton.setText("Views");
-        mViewPager.setAdapter(mFragmentCardAdapter);
-        mViewPager.setPageTransformer(false, mFragmentCardShadowTransformer);
-    }
 
     public static float dpToPixels(int dp, Context context) {
         return dp * (context.getResources().getDisplayMetrics().density);

@@ -33,6 +33,7 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -108,6 +109,8 @@ public class RoutePlanActivity extends AppCompatActivity
     private TextView startNodeText;
     private TextView endNodeText;
     private CardView mCardView;
+    private Button timeButton;
+    private CardView timeCardView;
 
     public static final int START_REQUEST_CODE = 1;
     public static final int END_REQUEST_CODE = 2;
@@ -151,7 +154,8 @@ public class RoutePlanActivity extends AppCompatActivity
         endNodeText = (TextView) findViewById(R.id.end_node);
         startNodeText.setOnClickListener(this);
         endNodeText.setOnClickListener(this);
-
+        timeButton = (Button) findViewById(R.id.timeButton);
+        timeCardView = (CardView) findViewById(R.id.time_card_view);
         requestLocation();
     }
 
@@ -342,10 +346,12 @@ public class RoutePlanActivity extends AppCompatActivity
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void getBestLine(DriveTimeEvent driveTimeEvent){
         if(driveTimeEvent == null) return;
         DriveTime driveTime = driveTimeEvent.getDriveTime();
+        String time = driveTime.getDriveTime();
+        timeButton.setText("预测时间：" + time + "分钟");
         int position = driveTime.getIndex();
         route = nowResultdrive.getRouteLines().get(position);
         DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
@@ -354,8 +360,10 @@ public class RoutePlanActivity extends AppCompatActivity
         overlay.setData(nowResultdrive.getRouteLines().get(0));
         overlay.addToMap();
         overlay.zoomToSpan();
+        mMapView.showZoomControls(false);
         mBtnPre.setVisibility(View.VISIBLE);
         mBtnNext.setVisibility(View.VISIBLE);
+        timeCardView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -369,7 +377,6 @@ public class RoutePlanActivity extends AppCompatActivity
     }
 
     private void navigateTo(BDLocation location) {
-        Toast.makeText(this, "nav to " + location.getAddrStr(), Toast.LENGTH_SHORT).show();
         if (isFirstLocate) {
             LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
             MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
@@ -384,6 +391,15 @@ public class RoutePlanActivity extends AppCompatActivity
         locationBuilder.longitude(location.getLongitude());
         MyLocationData locationData = locationBuilder.build();
         mBaidumap.setMyLocationData(locationData);
+        backToMyLoc(new LatLng(location.getLatitude(), location.getLongitude()));
+    }
+
+    //回到定位位置
+    private void backToMyLoc(LatLng curPoint) {
+        mBaidumap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(
+                new MapStatus.Builder()
+                        .target(new LatLng(curPoint.latitude, curPoint.longitude))
+                        .zoom(16f).build()));
     }
 
     @Override

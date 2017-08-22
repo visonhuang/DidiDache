@@ -4,12 +4,12 @@
     android:id="@+id/cardView"
     app:cardUseCompatPadding="true"
     android:layout_gravity="center_horizontal"
-    android:layout_width="307dp"
-    android:layout_height="441dp">
+    android:layout_width="100dp"
+    android:layout_height="404dp">
 
     <ImageView
         android:id="@+id/card_view_image"
-        android:layout_width="307dp"
-        android:layout_height="441dp" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </android.support.v7.widget.CardView>

@@ -1,5 +1,6 @@
 package com.example.kk.dididache.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -7,6 +8,7 @@ import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.kk.dididache.R;
@@ -30,7 +32,8 @@ public class CardFragment extends Fragment {
         mCardView.setMaxCardElevation(mCardView.getCardElevation()
                 * CardAdapter.MAX_ELEVATION_FACTOR);
         ImageView cardImage = (ImageView) view.findViewById(R.id.card_view_image);
-        cardImage.setImageResource(getArguments().getInt(KEY));
+        int resId = getArguments().getInt(KEY);
+        cardImage.setBackgroundResource(resId);
         return view;
     }
 
