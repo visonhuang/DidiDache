@@ -446,12 +446,16 @@ public class WheelView extends View {
                     if (distance >= height - itemHeight * 5) {
                         if (onlyOne == 1) {
                             onlyOne = 0;
-                            distanceCopy = 27;
+                            distanceCopy = 20;
                         }
                         distanceCopy--;
                         if (distanceCopy <= 0) {
-                            break;
+                            distance = 8;
                         }
+                    }
+
+                    if (height - distance <= 20) {
+                        handleMove(dy > 0 ? height - distance : distance - height);
                     }
                 }
                 try {

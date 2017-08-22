@@ -268,7 +268,7 @@ public class SelectTime extends LinearLayout{
 
     public void smoothToGoal (Calendar calendar1) {
         smoothToGoal1(calendar1);
-        smoothToGoal1(calendar1);
+ //       smoothToGoal1(calendar1);
     }
 
     private void changeDate () {
