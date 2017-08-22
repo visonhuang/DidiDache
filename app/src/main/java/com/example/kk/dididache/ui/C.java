@@ -337,6 +337,11 @@ public class C extends AppCompatActivity {
             when.setText(MethodsKt.toStr(time, "HH:mm"));
             difference.setText(exception.getException());
             reason.setText(exception.getReason());
+        } else {
+            where.setText("-");
+            when.setText("-");
+            difference.setText("-");
+            reason.setText("-");
         }
     }
 
