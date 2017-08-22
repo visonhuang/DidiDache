@@ -111,7 +111,9 @@
                         android:layout_weight="5"
                         android:background="@android:color/white"
                         android:textColor="#626161"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:text="-"/>
                 </LinearLayout>
 
                 <!--<TextView-->
@@ -149,7 +151,9 @@
                         android:layout_weight="5"
                         android:background="@android:color/white"
                         android:textColor="#626161"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:text="-"/>
                 </LinearLayout>
 
                 <!--<TextView-->
@@ -186,7 +190,9 @@
                         android:layout_weight="5"
                         android:background="@android:color/white"
                         android:textColor="#626161"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:text="-"/>
                 </LinearLayout>
 
                 <!--<TextView-->
@@ -223,7 +229,9 @@
                         android:layout_weight="5"
                         android:background="@android:color/white"
                         android:textColor="#626161"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:gravity="center"
+                        android:text="-"/>
                 </LinearLayout>
 
                 <!--<TextView-->
