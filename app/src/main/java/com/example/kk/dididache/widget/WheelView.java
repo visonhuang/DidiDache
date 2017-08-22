@@ -131,10 +131,16 @@ public class WheelView extends View {
         for (int i = 0; i < showCount + 2; i++) {
             int startY = itemHeight * (i - 1);
             int stringIndex = select - showCount / 2 - 1 + i;
+
             if (stringIndex < 0) {
 
                 stringIndex = lists.size() + stringIndex;
             }
+
+            if (stringIndex == lists.size()) {
+                stringIndex = 0;
+            }
+
             if (stringIndex < lists.size()) {
                 if (i == 2) {
                     text = lists.get(stringIndex);
