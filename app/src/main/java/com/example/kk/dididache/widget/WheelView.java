@@ -244,11 +244,11 @@ public class WheelView extends View {
         int index = -1;
         for (int i = 0; i < wheelItems.size(); i++) {
             WheelItem item = wheelItems.get(i);
-            if (item.getStartY() >= wheelSelect.getStartY() && item.getStartY() < (wheelSelect.getStartY() + itemHeight / 2 - 1)) {
+            if (item.getStartY() >= wheelSelect.getStartY() && item.getStartY() < (wheelSelect.getStartY() + itemHeight / 2)) {
                 index = i;
                 break;
             }
-            if (item.getStartY() >= (wheelSelect.getStartY() + itemHeight / 2 - 1) && item.getStartY() < (wheelSelect.getStartY() + itemHeight)) {
+            if (item.getStartY() >= (wheelSelect.getStartY() + itemHeight / 2) && item.getStartY() < (wheelSelect.getStartY() + itemHeight)) {
                 index = i - 1;
                 break;
             }
@@ -446,16 +446,18 @@ public class WheelView extends View {
                     if (distance >= height - itemHeight * 5) {
                         if (onlyOne == 1) {
                             onlyOne = 0;
-                            distanceCopy = 20;
+                            distanceCopy = 27;
                         }
                         distanceCopy--;
                         if (distanceCopy <= 0) {
+                         //   break;
                             distance = 8;
                         }
                     }
 
                     if (height - distance <= 20) {
                         handleMove(dy > 0 ? height - distance : distance - height);
+                        break;
                     }
                 }
                 try {
