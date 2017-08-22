@@ -239,7 +239,7 @@ public class SelectTime extends LinearLayout{
         }
         if (monthNum == 2) {
             List<String> list = new ArrayList<>();
-            for (int i = 1;i < day2;i++) {
+            for (int i = 1;i <= day2;i++) {
                 list.add(i + "");
             }
             day.setLists(list);
