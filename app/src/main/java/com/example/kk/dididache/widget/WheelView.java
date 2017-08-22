@@ -122,7 +122,7 @@ public class WheelView extends View {
     public synchronized void setLists (List<String> lists) {
         this.lists = lists;
         listSize = lists.size();
-        invalidate();
+        freshView();
         //return this;
     }
 
