@@ -4,6 +4,7 @@ package com.example.kk.dididache.ui;
  * Created by KK on 2017/8/20.
  */
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,6 +29,15 @@ public class FirstUseActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_use);
+        Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FirstUseActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
         mViewPager = (ViewPager) findViewById(R.id.viewPager);
         mPageIndicator = (CirclePageIndicator) findViewById(R.id.indicator);
 

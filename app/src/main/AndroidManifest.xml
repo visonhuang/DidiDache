@@ -35,6 +35,11 @@
             android:value="DY1hDWQqrx7Pyh4sHjGO3a0gozxZFw5u" />
 
         <activity android:name=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <service
@@ -53,11 +58,7 @@
         <activity android:name=".ui.ChooseAreaActivity"/>
 
         <activity android:name=".ui.FirstUseActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 
