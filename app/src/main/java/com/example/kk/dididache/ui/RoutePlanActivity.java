@@ -60,8 +60,10 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.example.kk.dididache.MethodsKt;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.SearchItemAdapter;
+import com.example.kk.dididache.model.DataKeeper;
 import com.example.kk.dididache.model.Event.DriveTimeEvent;
 import com.example.kk.dididache.model.Http;
 import com.example.kk.dididache.model.netModel.request.DriveTimeInfo;
@@ -75,7 +77,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.jetbrains.annotations.Contract;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class RoutePlanActivity extends AppCompatActivity
@@ -311,18 +315,22 @@ public class RoutePlanActivity extends AppCompatActivity
 
             if(result.getRouteLines().size() >= 1){
                 nowResultdrive = result;
-                List<DrivingRouteLine> lineList = nowResultdrive.getRouteLines();
+                List<DrivingRouteLine> lineList = null;
+                lineList = nowResultdrive.getRouteLines();
                 ArrayList<ArrayList<Xy>> xyDoubleList = new ArrayList<>();
                 for(int i = 0; i < lineList.size(); i++){
                     DrivingRouteLine line = lineList.get(i);
                     ArrayList<Xy> xyList = new ArrayList<>();
-                    for(int j = 0; j < line.getWayPoints().size(); j++){
-                        LatLng latLng = line.getWayPoints().get(j).getLocation();
-                        xyList.add(new Xy(latLng));
+                    for(int j = 0; j < line.getAllStep().size(); j++){
+                        DrivingRouteLine.DrivingStep step = line.getAllStep().get(j);
+                        for(int z = 0; z < step.getWayPoints().size(); z++){
+                            xyList.add(new Xy(step.getWayPoints().get(z)));
+                        }
                     }
                     xyDoubleList.add(xyList);
                 }
-                String time = null;
+                Calendar calendar = DataKeeper.getInstance().getTime();
+                String time = MethodsKt.toStr(calendar);
                 DriveTimeInfo info = new DriveTimeInfo(time, xyDoubleList);
                 Http.getInstance().doPost(Http.ADRESS.driveTime, info);
 
