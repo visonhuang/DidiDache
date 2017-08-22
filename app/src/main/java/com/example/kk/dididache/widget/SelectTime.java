@@ -103,6 +103,55 @@ public class SelectTime extends LinearLayout{
         month.setListener(new WheelView.Listener() {
             @Override
             public void listen(String info) {
+
+                int day2 = 28;
+                String dayNow = day.getIndexText();
+                int yearNum = Integer.parseInt(year.getIndexText());
+                if ((yearNum % 4 == 0 && yearNum % 100 != 0) || yearNum % 400 == 0) {
+                    day2 = 29;
+                }
+                int monthNum = Integer.parseInt(month.getIndexText());
+                if (monthNum == 1 || monthNum == 3 || monthNum == 5 || monthNum == 7 || monthNum == 8 || monthNum == 10 || monthNum == 12) {
+                    List<String> list = new ArrayList<>();
+                    for (int i = 1;i <= 31;i++) {
+                        list.add(i + "");
+                    }
+                    month.setLists(list);
+                    month.setIndexAfterNew(dayNow);
+                }
+                if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) {
+                    List<String> list = new ArrayList<>();
+                    for (int i = 1;i <= 30;i++) {
+                        list.add(i + "");
+                    }
+                    month.setLists(list);
+                    if (dayNow.equals("31")) {
+                        month.setIndexAfterNew("30");
+                    } else {
+                        month.setIndexAfterNew(dayNow);
+                    }
+                }
+                if (monthNum == 2) {
+                    List<String> list = new ArrayList<>();
+                    for (int i = 1;i < day2;i++) {
+                        list.add(i + "");
+                    }
+                    if (day2 == 29) {
+                        if (dayNow.equals("31") || dayNow.equals("30")) {
+                            month.setIndexAfterNew("29");
+                        } else {
+                            month.setIndexAfterNew(dayNow);
+                        }
+                    }
+                    if (day2 == 28) {
+                        if (dayNow.equals("31") || dayNow.equals("30") || dayNow.equals("29")) {
+                            month.setIndexAfterNew("28");
+                        } else {
+                            month.setIndexAfterNew(dayNow);
+                        }
+                    }
+                }
+
                 calendar.set(Calendar.MONTH,(Integer.valueOf(info)));
                 if (onDateChangeListener != null) {
                     onDateChangeListener.onChange(calendar);
@@ -151,7 +200,7 @@ public class SelectTime extends LinearLayout{
 
     public void setIndex (Calendar calendar) {
         year.setIndex(calendar.get(Calendar.YEAR) + "");
-        month.setIndex((calendar.get(Calendar.MONTH)) + "");
+        month.setIndex((calendar.get(Calendar.MONTH) + 1) + "");
         day.setIndex(calendar.get(Calendar.DATE) + "");
         hour.setIndex(calendar.get(Calendar.HOUR_OF_DAY) + "");
         minute.setIndex(calendar.get(Calendar.MINUTE) + "");
@@ -159,7 +208,7 @@ public class SelectTime extends LinearLayout{
 
     public void setIndexAfterNew (Calendar calendar) {
         year.setIndexAfterNew(calendar.get(Calendar.YEAR) + "");
-        month.setIndexAfterNew((calendar.get(Calendar.MONTH)) + "");
+        month.setIndexAfterNew((calendar.get(Calendar.MONTH) + 1) + "");
         day.setIndexAfterNew(calendar.get(Calendar.DATE) + "");
         hour.setIndexAfterNew(calendar.get(Calendar.HOUR_OF_DAY) + "");
         minute.setIndexAfterNew(calendar.get(Calendar.MINUTE) + "");
@@ -177,7 +226,7 @@ public class SelectTime extends LinearLayout{
 
     public Calendar getSelectedTime () {
         calendar.set(Calendar.YEAR,Integer.valueOf(year.getIndexText()));
-        calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()));
+        calendar.set(Calendar.MONTH,Integer.valueOf(month.getIndexText()) - 1);
         calendar.set(Calendar.DATE,Integer.valueOf(day.getIndexText()));
         calendar.set(Calendar.HOUR_OF_DAY,Integer.valueOf(hour.getIndexText()));
         calendar.set(Calendar.MINUTE,Integer.valueOf(minute.getIndexText()));
