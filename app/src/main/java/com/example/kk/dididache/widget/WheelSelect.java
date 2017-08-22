@@ -62,10 +62,10 @@ public class WheelSelect {
         shadow.setShader(top);
         canvas.drawRect(0,0,width - padding,startY / 2,shadow);
 
-        LinearGradient bottom = new LinearGradient(0,0,0,startY / 2,0x00bcd2fa,0xffbcd2fa,Shader.TileMode.REPEAT);
+        LinearGradient bottom = new LinearGradient(0,0,0,startY / 2 + 3,0x00bcd2fa,0xffbcd2fa,Shader.TileMode.REPEAT);
         shadow.setShader(bottom);
       //  canvas.drawRect(0,startY + height * 3 / 2,width - padding,startY + height * 2,shadow);
-        canvas.drawRect(0,height * 3 - startY / 2,width - padding, height * 3,shadow);
+        canvas.drawRect(0,height * 3 - startY / 2,width - padding, height * 3 + 2,shadow);
 
         if (selectText != null) {
             mPaint.setTextSize(fontSize);

@@ -133,7 +133,6 @@ public class WheelView extends View {
             int stringIndex = select - showCount / 2 - 1 + i;
 
             if (stringIndex < 0) {
-
                 stringIndex = lists.size() + stringIndex;
             }
 
