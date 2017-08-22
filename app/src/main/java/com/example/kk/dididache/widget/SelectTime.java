@@ -257,10 +257,45 @@ public class SelectTime extends LinearLayout{
         String dayT = calendar.get(Calendar.DATE) + "";
         String hourT = calendar.get(Calendar.HOUR_OF_DAY) + "";
         String minuteT = calendar.get(Calendar.MINUTE) + "";
+
+
+        int day2 = 28;
+        String dayNow = dayT;
+        int yearNum = Integer.parseInt(yearT);
+        if ((yearNum % 4 == 0 && yearNum % 100 != 0) || yearNum % 400 == 0) {
+            day2 = 29;
+        }
+        int monthNum = Integer.parseInt(monthT);
+        if (monthNum == 1 || monthNum == 3 || monthNum == 5 || monthNum == 7 || monthNum == 8 || monthNum == 10 || monthNum == 12) {
+            List<String> list = new ArrayList<>();
+            for (int i = 1;i <= 31;i++) {
+                list.add(i + "");
+            }
+            day.setLists(list);
+        }
+        if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) {
+            List<String> list = new ArrayList<>();
+            for (int i = 1;i <= 30;i++) {
+                list.add(i + "");
+            }
+            day.setLists(list);
+        }
+        if (monthNum == 2) {
+            List<String> list = new ArrayList<>();
+            for (int i = 1;i < day2;i++) {
+                list.add(i + "");
+            }
+            day.setLists(list);
+
+        }
+
+
         year.smoothTo(yearT);
         month.smoothTo(monthT);
         day.smoothTo(dayT);
         hour.smoothTo(hourT);
         minute.smoothTo(minuteT);
+
+
     }
 }
