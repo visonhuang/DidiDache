@@ -51,7 +51,7 @@ public class WheelSelect {
 
         Paint mPaint1 = new Paint();
         mPaint1.setStyle(Paint.Style.STROKE);
-        mPaint1.setColor(Color.parseColor("0xffbcd2fa"));
+        mPaint1.setColor(0xffbcd2fa);
 
         canvas.drawLine(0 + padding,startY,width - padding,startY,mPaint);
         canvas.drawLine(0 + padding,startY + height,width - padding,startY + height,mPaint);
