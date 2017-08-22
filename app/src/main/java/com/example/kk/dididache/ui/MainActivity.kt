@@ -92,7 +92,7 @@ class MainActivity : BaseActivity() {
     }
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
         override fun onMapClick(p0: LatLng) {
-            chartDialog?.show(timeManager!!.timeSelected,p0)
+            chartDialog?.show(timeManager!!.timeSelected, p0)
             if (exceptions != null) {
                 //TODO 判断该处是否有异常
                 exceptions!!.exceptions
@@ -109,7 +109,7 @@ class MainActivity : BaseActivity() {
         }
 
         override fun onMapPoiClick(p0: MapPoi): Boolean {
-            chartDialog?.show(timeManager!!.timeSelected,p0.position)
+            chartDialog?.show(timeManager!!.timeSelected, p0.position)
             if (exceptions != null) {
                 //TODO 判断该处是否有异常
                 exceptions!!.exceptions
@@ -251,9 +251,9 @@ class MainActivity : BaseActivity() {
                 exceptionOverLays.map { it.remove() }
             }
         }
-        queryPath.onClick { startActivity<RoutePlanActivity>() }
+        queryPath.onClick { DataKeeper.getInstance().time = timeManager!!.timeSelected;startActivity<RoutePlanActivity>() }
 
-        chartDialog = ChartDialog(this@MainActivity,timeManager!!) {
+        chartDialog = ChartDialog(this@MainActivity, timeManager!!) {
             onDismiss { showToast("消失了") }
             onCancel { showToast("取消") }
             onChartClick {
