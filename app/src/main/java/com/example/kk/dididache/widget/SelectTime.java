@@ -93,6 +93,9 @@ public class SelectTime extends LinearLayout{
         year.setListener(new WheelView.Listener() {
             @Override
             public void listen(String info) {
+
+                changeDate();
+
                 calendar.set(Calendar.YEAR,(Integer.valueOf(info)));
                 if (onDateChangeListener != null) {
                     onDateChangeListener.onChange(calendar);
@@ -104,54 +107,7 @@ public class SelectTime extends LinearLayout{
             @Override
             public void listen(String info) {
 
-                int day2 = 28;
-                String dayNow = day.getIndexText();
-                int yearNum = Integer.parseInt(year.getIndexText());
-                if ((yearNum % 4 == 0 && yearNum % 100 != 0) || yearNum % 400 == 0) {
-                    day2 = 29;
-                }
-                int monthNum = Integer.parseInt(month.getIndexText());
-                if (monthNum == 1 || monthNum == 3 || monthNum == 5 || monthNum == 7 || monthNum == 8 || monthNum == 10 || monthNum == 12) {
-                    List<String> list = new ArrayList<>();
-                    for (int i = 1;i <= 31;i++) {
-                        list.add(i + "");
-                    }
-                    day.setLists(list);
-                    day.setIndexAfterNew(dayNow);
-                }
-                if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) {
-                    List<String> list = new ArrayList<>();
-                    for (int i = 1;i <= 30;i++) {
-                        list.add(i + "");
-                    }
-                    day.setLists(list);
-                    if (dayNow.equals("31")) {
-                        day.setIndexAfterNew("30");
-                    } else {
-                        day.setIndexAfterNew(dayNow);
-                    }
-                }
-                if (monthNum == 2) {
-                    List<String> list = new ArrayList<>();
-                    for (int i = 1;i < day2;i++) {
-                        list.add(i + "");
-                    }
-                    day.setLists(list);
-                    if (day2 == 29) {
-                        if (dayNow.equals("31") || dayNow.equals("30")) {
-                            day.setIndexAfterNew("29");
-                        } else {
-                            day.setIndexAfterNew(dayNow);
-                        }
-                    }
-                    if (day2 == 28) {
-                        if (dayNow.equals("31") || dayNow.equals("30") || dayNow.equals("29")) {
-                            day.setIndexAfterNew("28");
-                        } else {
-                            day.setIndexAfterNew(dayNow);
-                        }
-                    }
-                }
+                changeDate();
 
                 calendar.set(Calendar.MONTH,(Integer.valueOf(info)));
                 if (onDateChangeListener != null) {
@@ -298,5 +254,56 @@ public class SelectTime extends LinearLayout{
         minute.smoothTo(minuteT);
 
 
+    }
+
+    private void changeDate () {
+        int day2 = 28;
+        String dayNow = day.getIndexText();
+        int yearNum = Integer.parseInt(year.getIndexText());
+        if ((yearNum % 4 == 0 && yearNum % 100 != 0) || yearNum % 400 == 0) {
+            day2 = 29;
+        }
+        int monthNum = Integer.parseInt(month.getIndexText());
+        if (monthNum == 1 || monthNum == 3 || monthNum == 5 || monthNum == 7 || monthNum == 8 || monthNum == 10 || monthNum == 12) {
+            List<String> list = new ArrayList<>();
+            for (int i = 1;i <= 31;i++) {
+                list.add(i + "");
+            }
+            day.setLists(list);
+            day.setIndexAfterNew(dayNow);
+        }
+        if (monthNum == 4 || monthNum == 6 || monthNum == 9 || monthNum == 11) {
+            List<String> list = new ArrayList<>();
+            for (int i = 1;i <= 30;i++) {
+                list.add(i + "");
+            }
+            day.setLists(list);
+            if (dayNow.equals("31")) {
+                day.setIndexAfterNew("30");
+            } else {
+                day.setIndexAfterNew(dayNow);
+            }
+        }
+        if (monthNum == 2) {
+            List<String> list = new ArrayList<>();
+            for (int i = 1;i <= day2;i++) {
+                list.add(i + "");
+            }
+            day.setLists(list);
+            if (day2 == 29) {
+                if (dayNow.equals("31") || dayNow.equals("30")) {
+                    day.setIndexAfterNew("29");
+                } else {
+                    day.setIndexAfterNew(dayNow);
+                }
+            }
+            if (day2 == 28) {
+                if (dayNow.equals("31") || dayNow.equals("30") || dayNow.equals("29")) {
+                    day.setIndexAfterNew("28");
+                } else {
+                    day.setIndexAfterNew(dayNow);
+                }
+            }
+        }
     }
 }
