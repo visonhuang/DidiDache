@@ -35,7 +35,7 @@
                 <TextView
                     android:id="@+id/end_node"
                     android:layout_width="255dp"
-                    android:layout_height="32dp"
+                    android:layout_height="30dp"
                     android:layout_marginStart="72dp"
                     android:layout_marginTop="4dp"
                     android:background="@drawable/green_frame"
@@ -50,7 +50,7 @@
                 <TextView
                     android:id="@+id/start_node"
                     android:layout_width="255dp"
-                    android:layout_height="29dp"
+                    android:layout_height="30dp"
                     android:layout_marginStart="72dp"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/bule_frame"

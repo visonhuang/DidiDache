@@ -7,6 +7,7 @@ import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.CardAdapter;
@@ -17,6 +18,7 @@ import com.example.kk.dididache.control.adapter.CardAdapter;
 
 public class CardFragment extends Fragment {
 
+    public static final String KEY = "card_fragment_key";
     private CardView mCardView;
 
     @Nullable
@@ -27,10 +29,20 @@ public class CardFragment extends Fragment {
         mCardView = (CardView) view.findViewById(R.id.cardView);
         mCardView.setMaxCardElevation(mCardView.getCardElevation()
                 * CardAdapter.MAX_ELEVATION_FACTOR);
+        ImageView cardImage = (ImageView) view.findViewById(R.id.card_view_image);
+        cardImage.setImageResource(getArguments().getInt(KEY));
         return view;
     }
 
     public CardView getCardView() {
         return mCardView;
+    }
+
+    public static CardFragment newInstance(int resId) {
+        Bundle args = new Bundle();
+        args.putInt(KEY, resId);
+        CardFragment fragment = new CardFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 }

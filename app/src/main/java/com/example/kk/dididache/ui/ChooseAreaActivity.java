@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -43,6 +45,9 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
     private LinearLayout itemLinear;
     public static final String LATLNG_BACK = "latlng_back";
     public static final String NAME_BACK = "name_back";
+    private ImageView onePersonImage;
+    private int nodeTextLeft;
+    private View scrim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +58,29 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
         }
         setContentView(R.layout.activity_choose_area);
 
+        scrim = (View) findViewById(R.id.scrim);
+
+        nodeText = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
+        nodeText.setDropDownVerticalOffset(5);
+
+        ViewTreeObserver vto1 = nodeText.getViewTreeObserver();
+        vto1.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                nodeTextLeft = nodeText.getLeft();
+            }
+        });
+
         itemLinear = (LinearLayout) findViewById(R.id.item_linear);
         ViewTreeObserver vto2 = itemLinear.getViewTreeObserver();
         vto2.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 itemLinear.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                nodeText.setDropDownWidth(itemLinear.getWidth());
+                nodeText.setLeft(0);
+                Log.d("getWidth", nodeTextLeft + ":" + itemLinear.getLeft());
             }
         });
-
-        nodeText = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
 
         mSuggestionSearch = SuggestionSearch.newInstance();
         mSuggestionSearch.setOnGetSuggestionResultListener(this);
@@ -88,6 +105,7 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
             @Override
             public void onTextChanged(CharSequence cs, int arg1, int arg2,
                                       int arg3) {
+                scrim.setVisibility(View.VISIBLE);
                 if (cs.length() <= 0) {
                     return;
                 }
@@ -98,6 +116,13 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
                 mSuggestionSearch
                         .requestSuggestion((new SuggestionSearchOption())
                                 .keyword(cs.toString()).city("广州").citylimit(true));
+            }
+        });
+
+        nodeText.setOnDismissListener(new AutoCompleteTextView.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                scrim.setVisibility(View.GONE);
             }
         });
 
@@ -112,6 +137,16 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
                 finish();
             }
         });
+
+
+        onePersonImage = (ImageView) findViewById(R.id.one_person_image);
+        onePersonImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                personAnimation();
+            }
+        });
+
     }
 
     /**
@@ -124,8 +159,6 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
         if(res == null || res.getAllSuggestions() == null){
             return;
         }
-//        stNode = PlanNode.withLocation(res.getAllSuggestions().get(0).pt);
-//        enNode = PlanNode.withLocation(res.getAllSuggestions().get(1).pt);
 
             infoList = res.getAllSuggestions();
             mSuggest = new ArrayList<>();
@@ -147,9 +180,14 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
 
     @Override
     protected void onResume() {
-        ImageView animImage = (ImageView) findViewById(R.id.anim_image);
-        AnimationDrawable animationDrawable = (AnimationDrawable) animImage.getDrawable();
-        animationDrawable.start();
+        personAnimation();
         super.onResume();
+    }
+
+    private void personAnimation(){
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.bigloolscale);
+        onePersonImage.startAnimation(animation);
+//        Animation animation2 = AnimationUtils.loadAnimation(this, R.anim.bigloolscale);
+//        twoPersonImage.startAnimation(animation2);
     }
 }
