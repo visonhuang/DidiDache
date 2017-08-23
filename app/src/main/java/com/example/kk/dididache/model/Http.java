@@ -29,6 +29,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -234,6 +235,9 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new DriveTimeEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    ObjectFeedBack<DriveTime> errorFeedBack = new ObjectFeedBack<>();
+                    errorFeedBack.state = -1;
+                    EventBus.getDefault().post(new DriveTimeEvent(errorFeedBack));
                     e.printStackTrace();
                 }
             }
@@ -279,8 +283,8 @@ public class Http {
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {
+//            MethodsKt.showToast(this,e.getCause().getClass());
             e.printStackTrace();
-            MethodsKt.showToast(this, "服务器在抢修中");
             return null;
         }
     }
