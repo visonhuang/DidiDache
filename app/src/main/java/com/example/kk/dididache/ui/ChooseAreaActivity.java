@@ -46,6 +46,8 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
     public static final String LATLNG_BACK = "latlng_back";
     public static final String NAME_BACK = "name_back";
     private ImageView onePersonImage;
+    private ImageView backImage;
+    private LinearLayout myLocaLinear;
     private int nodeTextLeft;
     private View scrim;
 
@@ -147,6 +149,24 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
             }
         });
 
+        myLocaLinear = (LinearLayout) findViewById(R.id.my_location);
+        myLocaLinear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.putExtra(NAME_BACK, "我的位置");
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
+
+        backImage = (ImageView) findViewById(R.id.back_image);
+        backImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     /**

@@ -2,6 +2,7 @@ package com.example.kk.dididache.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.Image;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -21,6 +22,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.baidu.location.BDLocation;
@@ -89,6 +92,7 @@ public class RoutePlanActivity extends AppCompatActivity
 
     public LocationClient mLocationClient;
     private boolean isFirstLocate = true;
+    private boolean hasChange = false;
 
     CardView mBtnPre = null; // 上一个节点
     CardView mBtnNext = null; // 下一个节点
@@ -111,6 +115,11 @@ public class RoutePlanActivity extends AppCompatActivity
     private CardView mCardView;
     private Button timeButton;
     private CardView timeCardView;
+    private ImageView changeImage;
+    private ImageView bulePoint;
+    private ImageView greenPoint;
+    private ProgressBar progressBar;
+    private LatLng myLatLng;
 
     public static final int START_REQUEST_CODE = 1;
     public static final int END_REQUEST_CODE = 2;
@@ -125,6 +134,12 @@ public class RoutePlanActivity extends AppCompatActivity
         mLocationClient.registerLocationListener(new MyLocationListener());
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_plan_route);
+
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        greenPoint = (ImageView) findViewById(R.id.green_point);
+        bulePoint = (ImageView) findViewById(R.id.bule_point);
+        changeImage = (ImageView) findViewById(R.id.change);
+        changeImage.setOnClickListener(this);
 
         ImageView backImage = (ImageView) findViewById(R.id.back_image);
         backImage.setOnClickListener(new View.OnClickListener(){
@@ -192,6 +207,33 @@ public class RoutePlanActivity extends AppCompatActivity
                 Intent intent2 = new Intent(this, ChooseAreaActivity.class);
                 ActivityCompat.startActivityForResult(this, intent2, END_REQUEST_CODE, options2);
                 break;
+            case R.id.change:
+                if(hasChange){
+                    greenPoint.setImageResource(R.drawable.ic_bule_point);
+                    bulePoint.setImageResource(R.drawable.ic_green_point);
+                    startNodeText.setBackgroundResource(R.drawable.green_frame);
+                    endNodeText.setBackgroundResource(R.drawable.bule_frame);
+                    String str = startNodeText.getText().toString();
+                    startNodeText.setText(endNodeText.getText().toString());
+                    endNodeText.setText(str);
+                }else {
+                    greenPoint.setImageResource(R.drawable.ic_green_point);
+                    bulePoint.setImageResource(R.drawable.ic_bule_point);
+                    startNodeText.setBackgroundResource(R.drawable.bule_frame);
+                    endNodeText.setBackgroundResource(R.drawable.green_frame);
+                    String str = startNodeText.getText().toString();
+                    startNodeText.setText(endNodeText.getText().toString());
+                    endNodeText.setText(str);
+                }
+                PlanNode tempNode = stNode;
+                stNode = enNode;
+                enNode = tempNode;
+                hasChange = !hasChange;
+                if(stNode != null && enNode != null){
+                    Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
+                    changeSearch();
+                }
+                break;
             default:
                 break;
         }
@@ -202,6 +244,7 @@ public class RoutePlanActivity extends AppCompatActivity
      * 发起路线规划搜索示例
      */
     public void searchButtonProcess() {
+        progressBar.setVisibility(View.VISIBLE);
         // 重置浏览节点的路线数据
         route = null;
 //        mBtnPre.setVisibility(View.INVISIBLE);
@@ -217,6 +260,11 @@ public class RoutePlanActivity extends AppCompatActivity
         }
         stNode = PlanNode.withLocation(stLatLng);
         enNode = PlanNode.withLocation(enLatLng);
+        changeSearch();
+    }
+
+    private void changeSearch(){
+        mBaidumap.clear();
         mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode).to(enNode));
     }
 
@@ -270,17 +318,28 @@ public class RoutePlanActivity extends AppCompatActivity
         }
         switch (requestCode){
             case START_REQUEST_CODE:
-                Toast.makeText(this, "onActivityResult", Toast.LENGTH_SHORT).show();
-                stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                String nameBack = data.getStringExtra(ChooseAreaActivity.NAME_BACK);
+                if(nameBack.equals("我的位置")){
+                    stLatLng = myLatLng;
+                }else {
+                    stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+
+                }
+                startNodeText.setText(nameBack);
                 Logger.d(stLatLng.toString() + "");
-                startNodeText.setText(data.getStringExtra(ChooseAreaActivity.NAME_BACK));
                 if(!TextUtils.isEmpty(endNodeText.getText().toString())){
                     searchButtonProcess();
                 }
                 break;
             case END_REQUEST_CODE:
-                enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
-                endNodeText.setText(data.getStringExtra(ChooseAreaActivity.NAME_BACK));
+                String nameBack2 = data.getStringExtra(ChooseAreaActivity.NAME_BACK);
+                if(nameBack2.equals("我的位置")){
+                    enLatLng = myLatLng;
+                }else {
+                    enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+
+                }
+                endNodeText.setText(nameBack2);
                 if(!TextUtils.isEmpty(startNodeText.getText().toString())){
                     searchButtonProcess();
                 }
@@ -348,6 +407,7 @@ public class RoutePlanActivity extends AppCompatActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getBestLine(DriveTimeEvent driveTimeEvent){
+        progressBar.setVisibility(View.GONE);
         if(driveTimeEvent == null) return;
         DriveTime driveTime = driveTimeEvent.getDriveTime();
         String time = driveTime.getDriveTime();
@@ -357,12 +417,15 @@ public class RoutePlanActivity extends AppCompatActivity
         DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
         mBaidumap.setOnMarkerClickListener(overlay);
         routeOverlay = overlay;
-        overlay.setData(nowResultdrive.getRouteLines().get(0));
+        overlay.setData(nowResultdrive.getRouteLines().get(position));
         overlay.addToMap();
         overlay.zoomToSpan();
+
         mMapView.showZoomControls(false);
         mBtnPre.setVisibility(View.VISIBLE);
+        mBtnPre.getBackground().setAlpha(10);
         mBtnNext.setVisibility(View.VISIBLE);
+        mBtnNext.getBackground().setAlpha(10);
         timeCardView.setVisibility(View.VISIBLE);
     }
 
@@ -378,11 +441,7 @@ public class RoutePlanActivity extends AppCompatActivity
 
     private void navigateTo(BDLocation location) {
         if (isFirstLocate) {
-            LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-            MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(ll);
-            mBaidumap.animateMapStatus(update);
-            update = MapStatusUpdateFactory.zoomTo(16f);
-            mBaidumap.animateMapStatus(update);
+            backToMyLoc(new LatLng(location.getLatitude(), location.getLongitude()));
             isFirstLocate = false;
         }
         MyLocationData.Builder locationBuilder = new MyLocationData.
@@ -391,7 +450,7 @@ public class RoutePlanActivity extends AppCompatActivity
         locationBuilder.longitude(location.getLongitude());
         MyLocationData locationData = locationBuilder.build();
         mBaidumap.setMyLocationData(locationData);
-        backToMyLoc(new LatLng(location.getLatitude(), location.getLongitude()));
+
     }
 
     //回到定位位置
@@ -433,6 +492,7 @@ public class RoutePlanActivity extends AppCompatActivity
             if (location.getLocType() == BDLocation.TypeGpsLocation
                     || location.getLocType() == BDLocation.TypeNetWorkLocation) {
                 navigateTo(location);
+                myLatLng  = new LatLng(location.getLatitude(), location.getLongitude());
             }
         }
     }
@@ -444,8 +504,8 @@ public class RoutePlanActivity extends AppCompatActivity
 
     private void initLocation(){
         LocationClientOption option = new LocationClientOption();
+//        option.setIsNeedAddress(true);
         option.setScanSpan(5000);
-        option.setIsNeedAddress(true);
         mLocationClient.setLocOption(option);
     }
 }
