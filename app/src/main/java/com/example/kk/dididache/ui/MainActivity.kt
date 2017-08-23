@@ -160,16 +160,13 @@ class MainActivity : BaseActivity() {
         when (requestCode) {
             1 -> {
                 if (grantResults.isNotEmpty()) {
-                    (0 until grantResults.size)
-                            .filter {
-                                Logger.json(Gson().toJson(grantResults))
-                                it != PackageManager.PERMISSION_GRANTED
-                            }
-                            .forEach {
-                                showToast("有部分权限未授权")
-                                finish()
-                                return
-                            }
+                    grantResults.map {
+                        if (it != PackageManager.PERMISSION_GRANTED) {
+                            showToast("有部分权限未授权")
+                            finish()
+                            return
+                        }
+                    }
                     initMap()//初始化地图
                     initLocation()
                     initLoc()//授权完毕，初始化定位
