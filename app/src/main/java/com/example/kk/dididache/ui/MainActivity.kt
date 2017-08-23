@@ -1,6 +1,7 @@
 package com.example.kk.dididache.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.support.annotation.RequiresPermission
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.SharedElementCallback
 import android.support.v4.content.ContextCompat
@@ -58,6 +60,7 @@ class MainActivity : BaseActivity() {
     private var locData: MyLocationData? = null//坐标信息
     private var exceptions: ExceptionEvent? = null
     private var exceptionOverLays: MutableList<Overlay> = mutableListOf()
+    private var poiOverLays: MutableList<Overlay> = mutableListOf()
     //UI相关
     private val map by lazy { mapView.map }
     private var heatMap: HeatMap? = null
@@ -158,7 +161,10 @@ class MainActivity : BaseActivity() {
             1 -> {
                 if (grantResults.isNotEmpty()) {
                     (0 until grantResults.size)
-                            .filter { it != PackageManager.PERMISSION_GRANTED }
+                            .filter {
+                                Logger.json(Gson().toJson(grantResults))
+                                it != PackageManager.PERMISSION_GRANTED
+                            }
                             .forEach {
                                 showToast("有部分权限未授权")
                                 finish()
@@ -193,6 +199,7 @@ class MainActivity : BaseActivity() {
             if (timeManager!!.isNow) {
                 val timeBound = chartDialog!!.getTimeBound(Calendar.getInstance().getTimeNow(), false)
                 val info = RealTimeHeatInfo(timeBound.first.toStr(), timeBound.second.toStr())
+                Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
                 Http.getInstance().doPost(Http.ADRESS.realTimeHeatMap, info)
             }
 
@@ -238,17 +245,27 @@ class MainActivity : BaseActivity() {
 
             }
         }
-        freshTime.onClick { timeManager?.freshTime() }
+        freshTime.onClick {
+            map.clear()
+            timeManager?.freshTime()
+        }
+
         timeButton.onClick { timeManager?.show() }
+
         gotoMyLoc.onClick { backToMyLoc(18.0F) }
+
         openUnusual.onClick {
             if (timeManager!!.timeMode == -1) {
                 isUnusualShowing = !isUnusualShowing
                 if (isUnusualShowing) {
                     //显示异常点
                     openUnusual.unusualImageView.imageResource = R.drawable.cancel_unusual
-                    if (exceptions == null || exceptionOverLays.isEmpty() || exceptions!!.exceptions.isEmpty()) return@onClick
-                    exceptionOverLays = map.addOverlays(exceptions!!.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
+                    if (exceptions == null || exceptions!!.exceptions.isEmpty()) {
+                        //空不显示
+                        return@onClick
+                    } else {
+                        exceptionOverLays = map.addOverlays(exceptions!!.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
+                    }
                 } else {
                     //去除异常点
                     openUnusual.unusualImageView.imageResource = R.drawable.open_unusual
@@ -265,8 +282,6 @@ class MainActivity : BaseActivity() {
         }
 
         chartDialog = ChartDialog(this@MainActivity, timeManager!!) {
-            onDismiss { showToast("消失了") }
-            onCancel { showToast("取消") }
             onChartClick {
                 val intent = Intent(this@MainActivity, C::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) this@MainActivity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity, viewPager, "viewPagerTransition").toBundle())
@@ -335,9 +350,8 @@ class MainActivity : BaseActivity() {
                     return
                 }
                 if (p0.error == SearchResult.ERRORNO.NO_ERROR) {
-                    map.clear()
-
-                    val o = map.addOverlays(p0.allPoi.map {
+                    poiOverLays.map { it.remove() }
+                    poiOverLays = map.addOverlays(p0.allPoi.map {
                         map.animateMapStatus(MapStatusUpdateFactory.newMapStatus(
                                 MapStatus.Builder()
                                         .target(LatLng(it.location.latitude, it.location.longitude))

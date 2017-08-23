@@ -18,6 +18,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.jetbrains.anko.find
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by 小吉哥哥 on 2017/8/19.
@@ -51,10 +52,14 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
     var _select: (Calendar) -> Unit = {}
 
     init {
-        //timeSelected.add(Calendar.MONTH, 1)
+        selectTime.setIndexAfterNew(timeSelected)
         scrimForSelectTime.onClick { dismiss() }
         cancelButton.onClick { dismiss() }
         selectButton.onClick {
+            if (isTimeOutOfBound(selectTime.selectedTime, 3, TimeUnit.HOURS)) {
+                showToast("只能选择未来三小时内时间")
+                return@onClick
+            }
             isNow = false//按下选择即不是当前时间
             timeSelected = selectTime.selectedTime
             _select(timeSelected)
@@ -224,6 +229,19 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
         selectTime.setIndexAfterNew(timeSelected)
         timeCardView.timeButton.text = "查 询 时 间"
 
+    }
+
+    //时间是否超出范围
+    fun isTimeOutOfBound(time: Calendar, bound: Int, unit: TimeUnit): Boolean {
+        when (unit) {
+            TimeUnit.HOURS -> return time > { val now = Calendar.getInstance().getTimeNow();now.add(Calendar.HOUR_OF_DAY, bound);now }()
+
+            TimeUnit.MINUTES -> return time > { val now = Calendar.getInstance().getTimeNow();now.add(Calendar.MINUTE, bound);now }()
+
+            TimeUnit.DAYS -> return time > { val now = Calendar.getInstance().getTimeNow();now.add(Calendar.DATE, bound);now }()
+
+            else -> throw IllegalArgumentException("can't found case")
+        }
     }
 
 

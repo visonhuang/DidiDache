@@ -132,7 +132,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
                     //数据处理
-                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data));
+                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data,feedBack.state));
                 } catch (java.lang.Exception e) {
                     MethodsKt.showToast(Http.this, "热力点出现了一些问题");
                     e.printStackTrace();
@@ -155,7 +155,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
                     //数据处理
-                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data));
+                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data,feedBack.state));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -184,7 +184,7 @@ public class Http {
                     }.getType());
                     Logger.json(new Gson().toJson(feedBack));
                     //数据处理
-                    EventBus.getDefault().post(new TaxiCountEvent(feedBack.data));
+                    EventBus.getDefault().post(new TaxiCountEvent(feedBack.data,feedBack.state));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -211,7 +211,7 @@ public class Http {
                     }.getType());
                     //数据处理
                     Logger.json(new Gson().toJson(feedBack));
-                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data));
+                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data,feedBack.state));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -232,7 +232,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<DriveTime>>() {
                     }.getType());
                     //数据处理
-                    EventBus.getDefault().post(new DriveTimeEvent(feedBack.data));
+                    EventBus.getDefault().post(new DriveTimeEvent(feedBack.data,feedBack.state));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -255,7 +255,7 @@ public class Http {
                     }.getType());
                     //数据处理
                     Logger.json(new Gson().toJson(feedBack));
-                    EventBus.getDefault().post(new ExceptionEvent(feedBack.data));
+                    EventBus.getDefault().post(new ExceptionEvent(feedBack.data,feedBack.state));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }

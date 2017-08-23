@@ -53,6 +53,8 @@ fun Calendar.toStr(format: String): String {
 fun Calendar.getTimeNow(): Calendar {
     val c = Calendar.getInstance()
     c.add(Calendar.DATE,-200)
+    c.add(Calendar.HOUR_OF_DAY,1)
+    c.add(Calendar.MINUTE,15)
     return c
 }
 
