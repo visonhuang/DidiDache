@@ -153,10 +153,10 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     //收到数据
     @Subscribe
     fun setTaxiCountData(event: TaxiCountEvent) {
-        if (event.list.isEmpty()) return
+        if (event.list == null || event.list!!.isEmpty()) return
         val data = CombinedData()
-        data.setData(getBarData(event.list))
-        data.setData(getLineDate(event.list))
+        data.setData(getBarData(event.list!!))
+        data.setData(getLineDate(event.list!!))
         DataKeeper.getInstance().combinedData = data//存放数据
         combinedChart.data = data
         inUiThread { animateCombinedChart() }
@@ -166,9 +166,10 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     @Subscribe
     fun setUseRatioData(event: UseRatioEvent) {
+        if (event.useRatio == null) return
         val entries = mutableListOf<PieEntry>()
         val colors = mutableListOf<Int>()
-        val used = event.useRatio.taxiUse.toFloat() / event.useRatio.taxiSum.toFloat() * 100
+        val used = event.useRatio!!.taxiUse.toFloat() / event.useRatio!!.taxiSum.toFloat() * 100
 
         entries.add(PieEntry(used, "已载客"))
         entries.add(PieEntry(100 - used, "空 车"))
@@ -192,7 +193,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     //发出网络请求
     fun getDate(time: Calendar, pos: LatLng) {
-        val timeBound = getTimeBound(time,true)
+        val timeBound = getTimeBound(time, true)
         when (timeManager.timeMode) {
             -1 -> {
                 Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(pos, timeBound.first, timeBound.second))
