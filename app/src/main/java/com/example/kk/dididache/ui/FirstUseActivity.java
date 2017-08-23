@@ -14,11 +14,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
+import com.example.kk.dididache.MethodsKt;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.widget.CirclePageIndicator;
 
 public class FirstUseActivity extends AppCompatActivity{
 
+    private Button dialogButton;
     private ViewPager mViewPager;
     private CirclePageIndicator mPageIndicator;
     private CardFragmentPagerAdapter mFragmentCardAdapter;
@@ -36,6 +38,14 @@ public class FirstUseActivity extends AppCompatActivity{
                 Intent intent = new Intent(FirstUseActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        dialogButton = findViewById(R.id.dialog_button);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MethodsKt.showSetIpPortDialog(FirstUseActivity.this);
             }
         });
 

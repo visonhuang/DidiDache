@@ -139,6 +139,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginLeft="108dp"
             android:layout_marginBottom="62dp"
+            android:elevation="10dp"
             app:cardBackgroundColor="#f5ffffff"
             android:onClick="nodeClick" >
 
@@ -158,6 +159,7 @@
             android:layout_marginBottom="62dp"
             android:layout_toRightOf="@id/pre"
             android:layout_alignParentBottom="true"
+            android:elevation="10dp"
             android:onClick="nodeClick" >
 
             <ImageView

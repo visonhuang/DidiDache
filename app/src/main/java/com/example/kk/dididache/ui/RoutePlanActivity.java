@@ -356,16 +356,17 @@ public class RoutePlanActivity extends AppCompatActivity
                 String nameBack = data.getStringExtra(ChooseAreaActivity.NAME_BACK);
                 if(nameBack.equals("我的位置")){
                     if (endNodeText.getText().toString().equals("我的位置")){
-                        Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                        MethodsKt.showToast(this, "起点和终点不能相同");
                         return;
                     }
+                    stNode = PlanNode.withLocation(myLatLng);
                 }else {
                     if(enLatLng == null){
                         stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
                     }else {
                         LatLng temp = data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
                         if(temp.latitude == enLatLng.latitude || temp.longitude == enLatLng.longitude){
-                            Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                            MethodsKt.showToast(this, "起点和终点不能相同");
                             return;
                         }
                         stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
@@ -380,16 +381,17 @@ public class RoutePlanActivity extends AppCompatActivity
                 String nameBack2 = data.getStringExtra(ChooseAreaActivity.NAME_BACK);
                 if(nameBack2.equals("我的位置")){
                     if (startNodeText.getText().toString().equals("我的位置")){
-                        Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                        MethodsKt.showToast(this, "起点和终点不能相同");
                         return;
                     }
+                    enNode = PlanNode.withLocation(myLatLng);
                 }else {
                     if(stLatLng == null){
                         enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
                     }else {
                         LatLng temp = data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
                         if(temp.latitude == stLatLng.latitude || temp.longitude == stLatLng.longitude){
-                            Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                            MethodsKt.showToast(this, "起点和终点不能相同");
                             return;
                         }
                         enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
@@ -423,7 +425,7 @@ public class RoutePlanActivity extends AppCompatActivity
     @Override
     public void onGetDrivingRouteResult(DrivingRouteResult result) {
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(RoutePlanActivity.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
+            MethodsKt.showToast(this, "抱歉，未找到结果");
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
