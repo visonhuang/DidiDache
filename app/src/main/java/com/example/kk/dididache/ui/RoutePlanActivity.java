@@ -81,6 +81,7 @@ import com.example.kk.dididache.model.netModel.response.DriveTime;
 import com.example.kk.dididache.util.DrivingRouteOverlay;
 import com.example.kk.dididache.util.NetUtil;
 import com.example.kk.dididache.util.OverlayManager;
+import com.google.gson.Gson;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -270,8 +271,9 @@ public class RoutePlanActivity extends AppCompatActivity
     public void searchButtonProcess() {
         // 重置浏览节点的路线数据
         route = null;
-//        mBtnPre.setVisibility(View.INVISIBLE);
-//        mBtnNext.setVisibility(View.INVISIBLE);
+        mBtnPre.setVisibility(View.GONE);
+        mBtnNext.setVisibility(View.GONE);
+        timeCardView.setVisibility(View.GONE);
         mBaidumap.clear();
         // 处理搜索按钮响应
         // 设置起终点信息，对于tranist search 来说，城市名无意义
@@ -426,10 +428,13 @@ public class RoutePlanActivity extends AppCompatActivity
     public void onGetDrivingRouteResult(DrivingRouteResult result) {
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
             MethodsKt.showToast(this, "抱歉，未找到结果");
+            progressBar.setVisibility(View.GONE);
+            return;
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
-            result.getSuggestAddrInfo();
+            MethodsKt.showToast(this, "抱歉，未找到结果");
+            progressBar.setVisibility(View.GONE);
             return;
         }
         if(result.error == SearchResult.ERRORNO.NO_ERROR){
@@ -465,6 +470,7 @@ public class RoutePlanActivity extends AppCompatActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getBestLine(DriveTimeEvent driveTimeEvent){
+        Logger.json(new Gson().toJson(driveTimeEvent));
         progressBar.setVisibility(View.GONE);
         String time = null;
         int position = 0;
