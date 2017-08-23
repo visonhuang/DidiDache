@@ -101,7 +101,7 @@ fun showSetIpPortDialog(context: Context) {
             yesButton { setIpPort(e.text.toString()) }
             noButton { }
         }
-    }
+    }.show()
 }
 
 //默认半径0.001
