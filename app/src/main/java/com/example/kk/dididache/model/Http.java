@@ -132,7 +132,7 @@ public class Http {
                 ArrayFeedBack<CarCountInXY> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_HEAT_POINTS, info, isFuture ? ADRESS.preHeatMap.value : ADRESS.heatMap.value);
+                    Response response = getResponse(TAG_HEAT_POINTS, info, isFuture ? ADRESS.preHeatMap.getUrl() : ADRESS.heatMap.getUrl());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
@@ -156,7 +156,7 @@ public class Http {
                 ArrayFeedBack<CarCountInXY> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_REALTIME_HEAT_POINTS, info, ADRESS.realTimeHeatMap.value);
+                    Response response = getResponse(TAG_REALTIME_HEAT_POINTS, info, ADRESS.realTimeHeatMap.getUrl());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
@@ -185,7 +185,7 @@ public class Http {
                 ArrayFeedBack<TaxiCount> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_TAXICOUNT, info, isFuture ? ADRESS.preCarCountChange.value : ADRESS.carCountChange.value);
+                    Response response = getResponse(TAG_TAXICOUNT, info, isFuture ? ADRESS.preCarCountChange.getUrl() : ADRESS.carCountChange.getUrl());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
                     }.getType());
@@ -212,7 +212,7 @@ public class Http {
                 ObjectFeedBack<UseRatio> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_USE_RATIO, info, isFuture ? ADRESS.preUseRatio.value : ADRESS.useRatio.value);
+                    Response response = getResponse(TAG_USE_RATIO, info, isFuture ? ADRESS.preUseRatio.getUrl() : ADRESS.useRatio.getUrl());
                     //Logger.d(response.body().string());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
@@ -236,7 +236,7 @@ public class Http {
                 ObjectFeedBack<DriveTime> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_DRIVE_TIME, info, ADRESS.driveTime.value);
+                    Response response = getResponse(TAG_DRIVE_TIME, info, ADRESS.driveTime.getUrl());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<DriveTime>>() {
                     }.getType());
@@ -262,7 +262,7 @@ public class Http {
                 ArrayFeedBack<Exception> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_EXCEPTION, info, ADRESS.exception.value);
+                    Response response = getResponse(TAG_EXCEPTION, info, ADRESS.exception.getUrl());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<Exception>>() {
                     }.getType());
