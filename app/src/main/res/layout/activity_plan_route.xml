@@ -80,7 +80,7 @@
                 </android.support.v7.widget.CardView>
 
                 <ImageView
-                    android:id="@+id/imageView2"
+                    android:id="@+id/green_point"
                     android:layout_width="22dp"
                     android:layout_height="20dp"
                     android:layout_marginBottom="17dp"
@@ -90,7 +90,7 @@
                     app:srcCompat="@drawable/ic_green_point" />
 
                 <ImageView
-                    android:id="@+id/imageView"
+                    android:id="@+id/bule_point"
                     android:layout_width="22dp"
                     android:layout_height="20dp"
                     android:layout_marginStart="15dp"
@@ -163,11 +163,16 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#f5ffffff"
-                android:src="@drawable/next"
-                />
+                android:background="@drawable/next" />
 
         </android.support.v7.widget.CardView>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"/>
 
         <android.support.v7.widget.CardView
             android:id="@+id/time_card_view"

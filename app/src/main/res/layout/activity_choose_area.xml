@@ -38,7 +38,7 @@
 
                 <ImageView
                     android:id="@+id/back_image"
-                    android:layout_width="20dp"
+                    android:layout_width="16dp"
                     android:layout_height="35dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="15dp"
@@ -74,6 +74,7 @@
             android:layout_gravity="center">
 
         <LinearLayout
+            android:id="@+id/my_location"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
