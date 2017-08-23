@@ -287,34 +287,15 @@ public class C extends AppCompatActivity {
             xAxis.add(MethodsKt.toStr(p0, "HH.mm"));
             p0.add(Calendar.MINUTE, 15);
         }
-//        bigChart.getDescription().setText("车流量变化图");
-//        bigChart.getDescription().setXOffset(0f);
-//        bigChart.getDescription().setTextSize(20);
-//        bigChart.getDescription().setYOffset(200f);
-//        bigChart.getLegend().setEnabled(false);
-//        bigChart.getAxisRight().setEnabled(false);
-//        bigChart.getAxisLeft().setEnabled(true);
-//        bigChart.getAxisLeft().setAxisMinimum(0F);
-//        bigChart.getAxisLeft().setGranularity(1F);
-//        bigChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-//        bigChart.getXAxis().setAxisMinimum(0F);
-//        bigChart.getXAxis().setGranularity(1F);
-//        bigChart.getXAxis().setValueFormatter(new IAxisValueFormatter() {
-//            @Override
-//            public String getFormattedValue(float value, AxisBase axis) {
-//                return xAxis.get((int) value % 9);
-//            }
-//        });
-
-        bigChart.getDescription().setEnabled(true);
         bigChart.getDescription().setText("车流量变化图");
+        bigChart.getDescription().setXOffset(0f);
+        bigChart.getDescription().setTextSize(20);
+        bigChart.getDescription().setYOffset(200f);
         bigChart.getLegend().setEnabled(false);
         bigChart.getAxisRight().setEnabled(false);
-        bigChart.getAxisLeft().setDrawGridLines(true);
-        bigChart.getAxisLeft().setAxisLineWidth(2F);
+        bigChart.getAxisLeft().setEnabled(true);
         bigChart.getAxisLeft().setAxisMinimum(0F);
         bigChart.getAxisLeft().setGranularity(1F);
-        bigChart.getAxisLeft().setTextColor(0xff626161);
         bigChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         bigChart.getXAxis().setAxisMinimum(0F);
         bigChart.getXAxis().setGranularity(1F);
@@ -326,6 +307,7 @@ public class C extends AppCompatActivity {
                 return xAxis.get((int) value % 9);
             }
         });
+
 
         pieChart.setUsePercentValues(true);
         pieChart.getDescription().setEnabled(false);
