@@ -70,7 +70,9 @@ public class WheelSelect {
         shadow.setShader(bottom);
       //  canvas.drawRect(0,startY + height * 3 / 2,width - padding,startY + height * 2,shadow);
         canvas.drawRect(0,height * 3 - startY / 2,width - padding, height * 3,shadow);
-        canvas.drawLine(0f,(float) (height * 3 + 1),width,(float) (height * 3 + 1),mPaint1);
+        canvas.drawLine(0f,(float) (height * 3-1),width,(float) (height * 3-1),mPaint1);
+        canvas.drawLine(0f,(float) (height * 3-2),width,(float) (height * 3-2),mPaint1);
+        canvas.drawLine(0f,(float) (height * 3-3),width,(float) (height * 3-3),mPaint1);
 
         if (selectText != null) {
             mPaint.setTextSize(fontSize);

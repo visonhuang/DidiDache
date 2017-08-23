@@ -71,7 +71,6 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
 
     fun dismiss() {
         animate(false)
-
     }
 
     fun animate(isShow: Boolean) {

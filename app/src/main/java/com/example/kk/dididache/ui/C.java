@@ -335,7 +335,7 @@ public class C extends AppCompatActivity {
             where.setText("经度：" + exception.getX() + "  纬度：" + exception.getY());
             time = DataKeeper.getInstance().getTime();
             when.setText(MethodsKt.toStr(time, "HH:mm"));
-            difference.setText(exception.getException());
+            difference.setText(exception.getExceptions());
             reason.setText(exception.getReason());
         } else {
             where.setText("-");

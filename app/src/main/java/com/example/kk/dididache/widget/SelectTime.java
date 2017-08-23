@@ -3,6 +3,7 @@ package com.example.kk.dididache.widget;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 
@@ -155,7 +156,8 @@ public class SelectTime extends LinearLayout{
         minute.setIndex(Indexminute);
     }
 
-    public void setIndex (Calendar calendar) {
+    public void setIndex (Calendar calendar1) {
+        Calendar calendar = (Calendar) calendar1.clone();
         year.setIndex(calendar.get(Calendar.YEAR) + "");
         month.setIndex((calendar.get(Calendar.MONTH) + 1) + "");
         day.setIndex(calendar.get(Calendar.DATE) + "");
@@ -163,7 +165,8 @@ public class SelectTime extends LinearLayout{
         minute.setIndex(calendar.get(Calendar.MINUTE) + "");
     }
 
-    public void setIndexAfterNew (Calendar calendar) {
+    public void setIndexAfterNew (Calendar calendar1) {
+        Calendar calendar = (Calendar) calendar1.clone();
         year.setIndexAfterNew(calendar.get(Calendar.YEAR) + "");
         month.setIndexAfterNew((calendar.get(Calendar.MONTH) + 1) + "");
         day.setIndexAfterNew(calendar.get(Calendar.DATE) + "");
@@ -187,7 +190,7 @@ public class SelectTime extends LinearLayout{
         calendar.set(Calendar.DATE,Integer.valueOf(day.getIndexText()));
         calendar.set(Calendar.HOUR_OF_DAY,Integer.valueOf(hour.getIndexText()));
         calendar.set(Calendar.MINUTE,Integer.valueOf(minute.getIndexText()));
-        return calendar;
+        return (Calendar)calendar.clone();
     }
 
 
@@ -208,13 +211,20 @@ public class SelectTime extends LinearLayout{
         minute.setLinePadding(linePadding);
     }
 
-    public void smoothToGoal (Calendar calendar) {
+    public void smoothToGoal1 (Calendar calendar1) {
+        Calendar calendar = (Calendar) calendar1.clone();
         String yearT = calendar.get(Calendar.YEAR) + "";
         String monthT = (calendar.get(Calendar.MONTH) + 1) + "";
         String dayT = calendar.get(Calendar.DATE) + "";
         String hourT = calendar.get(Calendar.HOUR_OF_DAY) + "";
         String minuteT = calendar.get(Calendar.MINUTE) + "";
 
+      //  Log.d("月份",monthT);
+        Log.d("年",yearT);
+        Log.d("月",monthT);
+        Log.d("日",dayT);
+        Log.d("时",hourT);
+        Log.d("分",minuteT);
 
         int day2 = 28;
         String dayNow = dayT;
@@ -254,6 +264,11 @@ public class SelectTime extends LinearLayout{
         minute.smoothTo(minuteT);
 
 
+    }
+
+    public void smoothToGoal (Calendar calendar1) {
+        smoothToGoal1(calendar1);
+ //       smoothToGoal1(calendar1);
     }
 
     private void changeDate () {
