@@ -11,6 +11,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Explode;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -107,7 +108,6 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
             @Override
             public void onTextChanged(CharSequence cs, int arg1, int arg2,
                                       int arg3) {
-                scrim.setVisibility(View.VISIBLE);
                 if (cs.length() <= 0) {
                     return;
                 }
@@ -127,6 +127,7 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
                 scrim.setVisibility(View.GONE);
             }
         });
+
 
         nodeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -164,7 +165,11 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
         backImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    finishAfterTransition();
+                }else {
+                    finish();
+                }
             }
         });
     }

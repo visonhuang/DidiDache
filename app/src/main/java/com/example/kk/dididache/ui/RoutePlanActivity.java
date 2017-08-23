@@ -1,8 +1,13 @@
 package com.example.kk.dididache.ui;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.Image;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -74,6 +79,7 @@ import com.example.kk.dididache.model.netModel.request.DriveTimeInfo;
 import com.example.kk.dididache.model.netModel.request.Xy;
 import com.example.kk.dididache.model.netModel.response.DriveTime;
 import com.example.kk.dididache.util.DrivingRouteOverlay;
+import com.example.kk.dididache.util.NetUtil;
 import com.example.kk.dididache.util.OverlayManager;
 import com.orhanobut.logger.Logger;
 
@@ -127,6 +133,21 @@ public class RoutePlanActivity extends AppCompatActivity
     public static final String END_KEY = "end_key";
     public static final String KEY = "key";
 
+    private IntentFilter intentFilter;
+    private NetworkChangeReceiver receiver;
+
+    class NetworkChangeReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+            if(networkInfo != null && !networkInfo.isAvailable()){
+                Toast.makeText(RoutePlanActivity.this, "!networkInfo.isAvailable()",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +155,10 @@ public class RoutePlanActivity extends AppCompatActivity
         mLocationClient.registerLocationListener(new MyLocationListener());
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_plan_route);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.com.CONNECTIVITY_CHANGE");
+        receiver = new NetworkChangeReceiver();
+        registerReceiver(receiver, intentFilter);
 
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         greenPoint = (ImageView) findViewById(R.id.green_point);
@@ -230,7 +255,6 @@ public class RoutePlanActivity extends AppCompatActivity
                 enNode = tempNode;
                 hasChange = !hasChange;
                 if(stNode != null && enNode != null){
-                    Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
                     changeSearch();
                 }
                 break;
@@ -244,7 +268,6 @@ public class RoutePlanActivity extends AppCompatActivity
      * 发起路线规划搜索示例
      */
     public void searchButtonProcess() {
-        progressBar.setVisibility(View.VISIBLE);
         // 重置浏览节点的路线数据
         route = null;
 //        mBtnPre.setVisibility(View.INVISIBLE);
@@ -252,20 +275,32 @@ public class RoutePlanActivity extends AppCompatActivity
         mBaidumap.clear();
         // 处理搜索按钮响应
         // 设置起终点信息，对于tranist search 来说，城市名无意义
-        if(stLatLng == null){
-            Logger.d("stLatLng == null");
-        }
-        if(enLatLng == null){
-            Logger.d("enLatLng == null");
-        }
         stNode = PlanNode.withLocation(stLatLng);
         enNode = PlanNode.withLocation(enLatLng);
         changeSearch();
     }
 
     private void changeSearch(){
+        if(!NetUtil.isMobileOk() && !NetUtil.isWifiOk()){
+            Toast.makeText(this, "无可用网络", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        progressBar.setVisibility(View.VISIBLE);
         mBaidumap.clear();
-        mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode).to(enNode));
+        if(startNodeText.getText().toString().equals("我的位置")){
+            Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
+            mSearch.drivingSearch((new DrivingRoutePlanOption()).from(PlanNode.withLocation(myLatLng)).to(enNode));
+            return;
+        }
+        if(endNodeText.getText().toString().equals("我的位置")){
+            Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
+            mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode).to(PlanNode.withLocation(myLatLng)));
+            return;
+        }
+        else {
+            Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
+            mSearch.drivingSearch((new DrivingRoutePlanOption()).from(stNode).to(enNode));
+        }
     }
 
     public void nodeClick(View v){
@@ -320,13 +355,23 @@ public class RoutePlanActivity extends AppCompatActivity
             case START_REQUEST_CODE:
                 String nameBack = data.getStringExtra(ChooseAreaActivity.NAME_BACK);
                 if(nameBack.equals("我的位置")){
-                    stLatLng = myLatLng;
+                    if (endNodeText.getText().toString().equals("我的位置")){
+                        Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }else {
-                    stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
-
+                    if(enLatLng == null){
+                        stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                    }else {
+                        LatLng temp = data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                        if(temp.latitude == enLatLng.latitude || temp.longitude == enLatLng.longitude){
+                            Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                    }
                 }
                 startNodeText.setText(nameBack);
-                Logger.d(stLatLng.toString() + "");
                 if(!TextUtils.isEmpty(endNodeText.getText().toString())){
                     searchButtonProcess();
                 }
@@ -334,10 +379,21 @@ public class RoutePlanActivity extends AppCompatActivity
             case END_REQUEST_CODE:
                 String nameBack2 = data.getStringExtra(ChooseAreaActivity.NAME_BACK);
                 if(nameBack2.equals("我的位置")){
-                    enLatLng = myLatLng;
+                    if (startNodeText.getText().toString().equals("我的位置")){
+                        Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }else {
-                    enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
-
+                    if(stLatLng == null){
+                        enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                    }else {
+                        LatLng temp = data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                        if(temp.latitude == stLatLng.latitude || temp.longitude == stLatLng.longitude){
+                            Toast.makeText(this, "起点和终点不能相同", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
+                    }
                 }
                 endNodeText.setText(nameBack2);
                 if(!TextUtils.isEmpty(startNodeText.getText().toString())){
@@ -408,11 +464,16 @@ public class RoutePlanActivity extends AppCompatActivity
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getBestLine(DriveTimeEvent driveTimeEvent){
         progressBar.setVisibility(View.GONE);
-        if(driveTimeEvent == null) return;
-        DriveTime driveTime = driveTimeEvent.getDriveTime();
-        String time = driveTime.getDriveTime();
-        timeButton.setText("预测时间：" + time + "分钟");
-        int position = driveTime.getIndex();
+        String time = null;
+        int position = 0;
+        if(driveTimeEvent == null || driveTimeEvent.getDriveTime() == null || driveTimeEvent.getState() != 1){
+            timeButton.setText("无法预测时间");
+        }else {
+            DriveTime driveTime = driveTimeEvent.getDriveTime();
+            time = driveTime.getDriveTime();
+            timeButton.setText("预测时间：" + time + "分钟");
+            position = driveTime.getIndex();
+        }
         route = nowResultdrive.getRouteLines().get(position);
         DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
         mBaidumap.setOnMarkerClickListener(overlay);
@@ -474,7 +535,15 @@ public class RoutePlanActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
+        progressBar.setVisibility(View.GONE);
+        super.onStop();
+    }
+
+    @Override
     protected void onDestroy() {
+        unregisterReceiver(receiver);
         if (mSearch != null) {
             mSearch.destroy();
         }
