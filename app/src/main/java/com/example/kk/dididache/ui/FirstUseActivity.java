@@ -20,6 +20,7 @@ import com.example.kk.dididache.widget.CirclePageIndicator;
 
 public class FirstUseActivity extends AppCompatActivity{
 
+    private Button dateButton;
     private Button dialogButton;
     private ViewPager mViewPager;
     private CirclePageIndicator mPageIndicator;
@@ -38,6 +39,14 @@ public class FirstUseActivity extends AppCompatActivity{
                 Intent intent = new Intent(FirstUseActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        dateButton = findViewById(R.id.date_button);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MethodsKt.showSetTodayDialog(FirstUseActivity.this);
             }
         });
 

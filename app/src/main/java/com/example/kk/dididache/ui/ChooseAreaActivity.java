@@ -7,6 +7,7 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Explode;
@@ -17,6 +18,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -30,6 +32,7 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.example.kk.dididache.MyOverShootInterpolator;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.SearchItemAdapter;
 
@@ -48,7 +51,7 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
     public static final String NAME_BACK = "name_back";
     private ImageView onePersonImage;
     private ImageView backImage;
-    private LinearLayout myLocaLinear;
+    private CardView myLocaLinear;
     private int nodeTextLeft;
     private View scrim;
 
@@ -150,7 +153,7 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
             }
         });
 
-        myLocaLinear = (LinearLayout) findViewById(R.id.my_location);
+        myLocaLinear = (CardView) findViewById(R.id.my_location);
         myLocaLinear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -205,6 +208,8 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
 
     @Override
     protected void onResume() {
+        myLocaLinear.setTranslationX(1000F);
+        myLocaLinear.animate().translationX(0F).setInterpolator(new OvershootInterpolator()).setDuration(500).setStartDelay(200).start();
         personAnimation();
         super.onResume();
     }

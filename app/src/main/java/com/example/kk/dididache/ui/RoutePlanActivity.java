@@ -1,5 +1,6 @@
 package com.example.kk.dididache.ui;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +23,8 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -70,6 +73,7 @@ import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.example.kk.dididache.MethodsKt;
+import com.example.kk.dididache.MyOverShootInterpolator;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.SearchItemAdapter;
 import com.example.kk.dididache.model.DataKeeper;
@@ -271,9 +275,6 @@ public class RoutePlanActivity extends AppCompatActivity
     public void searchButtonProcess() {
         // 重置浏览节点的路线数据
         route = null;
-        mBtnPre.setVisibility(View.GONE);
-        mBtnNext.setVisibility(View.GONE);
-        timeCardView.setVisibility(View.GONE);
         mBaidumap.clear();
         // 处理搜索按钮响应
         // 设置起终点信息，对于tranist search 来说，城市名无意义
@@ -288,6 +289,48 @@ public class RoutePlanActivity extends AppCompatActivity
             return;
         }
         progressBar.setVisibility(View.VISIBLE);
+
+        mBtnPre.animate()
+                .translationX(-400F)
+                .alpha(0F)
+                .setDuration(100)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+
+        mBtnNext.animate()
+                .translationX(400F)
+                .alpha(0F)
+                .setDuration(100)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+
+        timeCardView.animate()
+                .translationY(400F)
+                .alpha(0F)
+                .setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                })
+                .setDuration(100)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
         mBaidumap.clear();
         if(startNodeText.getText().toString().equals("我的位置")){
             Http.getInstance().cancelCall(Http.TAG_DRIVE_TIME);
@@ -491,17 +534,46 @@ public class RoutePlanActivity extends AppCompatActivity
         overlay.zoomToSpan();
 
         mMapView.showZoomControls(false);
-        mBtnPre.setVisibility(View.VISIBLE);
-        mBtnPre.getBackground().setAlpha(10);
-        mBtnNext.setVisibility(View.VISIBLE);
-        mBtnNext.getBackground().setAlpha(10);
+        timeCardView.clearAnimation();
         timeCardView.setVisibility(View.VISIBLE);
+        timeCardView.setAlpha(100F);
+        timeCardView.setTranslationY(400F);
+        timeCardView.animate().translationY(0F).setInterpolator(new OvershootInterpolator()).setDuration(300)
+                .setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mBtnPre.clearAnimation();
+                        mBtnPre.setAlpha(100F);
+                        mBtnPre.setVisibility(View.VISIBLE);
+                        mBtnPre.setTranslationX(-400F);
+                        mBtnPre.animate().translationX(0F).setInterpolator(new MyOverShootInterpolator()).setDuration(300).start();
+                        mBtnPre.getBackground().setAlpha(10);
+                        mBtnNext.clearAnimation();
+                        mBtnNext.setAlpha(100F);
+                        mBtnNext.setVisibility(View.VISIBLE);
+                        mBtnNext.setTranslationX(400F);
+                        mBtnNext.animate().translationX(0F).setInterpolator(new MyOverShootInterpolator()).setDuration(300).start();
+                        mBtnNext.getBackground().setAlpha(10);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+                    }
+                }).start();
+
     }
 
     @Override
-    public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {
-
-    }
+    public void onGetIndoorRouteResult(IndoorRouteResult indoorRouteResult) {}
 
     @Override
     public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {

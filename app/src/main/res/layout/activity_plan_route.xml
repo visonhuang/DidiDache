@@ -157,7 +157,6 @@
             android:layout_gravity="bottom"
             android:layout_marginLeft="208dp"
             android:layout_marginBottom="62dp"
-            android:layout_toRightOf="@id/pre"
             android:layout_alignParentBottom="true"
             android:elevation="10dp"
             android:onClick="nodeClick" >
