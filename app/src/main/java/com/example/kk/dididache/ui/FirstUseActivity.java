@@ -20,6 +20,7 @@ import com.example.kk.dididache.widget.CirclePageIndicator;
 
 public class FirstUseActivity extends AppCompatActivity{
 
+    private Button updateButton;
     private Button dateButton;
     private Button dialogButton;
     private ViewPager mViewPager;
@@ -39,6 +40,14 @@ public class FirstUseActivity extends AppCompatActivity{
                 Intent intent = new Intent(FirstUseActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        updateButton = findViewById(R.id.update_button);
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MethodsKt.showSetTimeOutDialog(FirstUseActivity.this);
             }
         });
 

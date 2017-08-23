@@ -10,6 +10,7 @@ import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -129,6 +130,7 @@ public class RoutePlanActivity extends AppCompatActivity
     private ImageView changeImage;
     private ImageView bulePoint;
     private ImageView greenPoint;
+    private ConstraintLayout routeLayout;
     private ProgressBar progressBar;
     private LatLng myLatLng;
 
@@ -170,6 +172,15 @@ public class RoutePlanActivity extends AppCompatActivity
         bulePoint = (ImageView) findViewById(R.id.bule_point);
         changeImage = (ImageView) findViewById(R.id.change);
         changeImage.setOnClickListener(this);
+
+        routeLayout = findViewById(R.id.route_layout);
+
+        routeLayout.animate()
+                .translationX(-400F)
+                .alpha(0F)
+                .setDuration(100)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
 
         ImageView backImage = (ImageView) findViewById(R.id.back_image);
         backImage.setOnClickListener(new View.OnClickListener(){
