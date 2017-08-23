@@ -293,7 +293,6 @@ public class Http {
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }

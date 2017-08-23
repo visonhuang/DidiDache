@@ -147,6 +147,8 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         EventBus.getDefault().unregister(this)
         context = null//释放context
         animate(false)
+        Http.getInstance().cancelCall(Http.TAG_TAXICOUNT)
+        Http.getInstance().cancelCall(Http.TAG_USE_RATIO)
     }
 
 
@@ -194,6 +196,8 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     //发出网络请求
     fun getDate(time: Calendar, pos: LatLng) {
         val timeBound = getTimeBound(time, true)
+        Http.getInstance().cancelCall(Http.TAG_TAXICOUNT)
+        Http.getInstance().cancelCall(Http.TAG_USE_RATIO)
         when (timeManager.timeMode) {
             -1 -> {
                 Http.getInstance().doPost(Http.ADRESS.carCountChange, TaxiCountInfo(pos, timeBound.first, timeBound.second))
@@ -339,12 +343,11 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     private fun setChartOptions(combinedChart: CombinedChart, time: Calendar) {
         //设置x轴
-        val p0 = time.clone() as Calendar
-        p0.add(Calendar.MINUTE, -60)
+        val p0 = getTimeBound(time,true).first
         xAxis.clear()
-        for (i in 0..8) {
+        for (i in 0..9) {
             xAxis.add(p0.toStr("HH:mm"))
-            p0.add(Calendar.MINUTE, 15)
+            p0.add(Calendar.MINUTE, 6)
         }
         combinedChart.description.isEnabled = true//去掉注释
         combinedChart.description.text = "车流量变化图"
@@ -436,8 +439,8 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         } else {
             val end = time.clone() as Calendar
             val start = time.clone() as Calendar
-            start.add(Calendar.SECOND, -1000)
-            end.add(Calendar.SECOND, 1000)
+            start.add(Calendar.SECOND, -10)
+            end.add(Calendar.SECOND, 10)
             return Pair(start, end)
         }
 

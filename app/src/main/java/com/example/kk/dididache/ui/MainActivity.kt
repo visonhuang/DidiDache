@@ -234,13 +234,22 @@ class MainActivity : BaseActivity() {
     private fun initView() {
         timeManager = SelectTimeManager(this) {
             onSelect {
+                map.clear()
                 val timeBound = chartDialog!!.getTimeBound(timeSelected, false)
-                Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
-                Http.getInstance().doPost(Http.ADRESS.heatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+                if(timeManager!!.timeMode == -1){
+                    Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
+                    Http.getInstance().doPost(Http.ADRESS.heatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+                } else if (timeManager!!.timeMode == 1){
+                    Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
+                    Http.getInstance().doPost(Http.ADRESS.preHeatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+                }
 
-                val timeBound2 = chartDialog!!.getTimeBound(timeSelected, true)
-                Http.getInstance().cancelCall(Http.TAG_EXCEPTION)
-                Http.getInstance().doPost(Http.ADRESS.exception, ExceptionInfo(timeBound2.first.toStr(), timeBound2.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+                //过去时间才能显示异常点
+                if(timeManager!!.timeMode == -1){
+                    val timeBound2 = chartDialog!!.getTimeBound(timeSelected, true)
+                    Http.getInstance().cancelCall(Http.TAG_EXCEPTION)
+                    Http.getInstance().doPost(Http.ADRESS.exception, ExceptionInfo(timeBound2.first.toStr(), timeBound2.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
+                }
 
             }
         }
@@ -344,12 +353,12 @@ class MainActivity : BaseActivity() {
             }
 
             override fun onGetPoiResult(p0: PoiResult?) {
+                poiOverLays.map { it.remove() }
                 if (p0 == null || p0.error == SearchResult.ERRORNO.RESULT_NOT_FOUND) {
                     showToast("未找到结果")
                     return
                 }
                 if (p0.error == SearchResult.ERRORNO.NO_ERROR) {
-                    poiOverLays.map { it.remove() }
                     poiOverLays = map.addOverlays(p0.allPoi.map {
                         map.animateMapStatus(MapStatusUpdateFactory.newMapStatus(
                                 MapStatus.Builder()
@@ -416,15 +425,16 @@ class MainActivity : BaseActivity() {
     @Subscribe
     fun addHeatMap(event: HeatMapEvent) {
         if (event.list == null || event.list!!.isEmpty()) return
-        Logger.json(Gson().toJson(event))
+        Logger.d("热力点："+event.list!!.size)
         heatMap = HeatMap.Builder().weightedData(event.list!!.map { WeightedLatLng(LatLng(it.y, it.x), it.c.toDouble()) }).build()
     }
 
     @Subscribe
     fun getUnusual(event: ExceptionEvent) {
-        if (event.exceptions == null) return
+        //if (event.exceptions == null) return
         exceptions = event
         if (isUnusualShowing) {
+            showToast("isUnusualShowing")
             if (!exceptionOverLays.isEmpty()) exceptionOverLays.map { it.remove() }
             exceptionOverLays = map.addOverlays(event.exceptions!!.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
         }

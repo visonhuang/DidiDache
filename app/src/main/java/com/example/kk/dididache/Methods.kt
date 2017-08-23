@@ -92,6 +92,17 @@ fun setIpPort(ipPort: String) {
     e.apply()
 }
 
+fun getToday(): Int {
+    val p = App.instance.getSharedPreferences("Today", Context.MODE_PRIVATE)
+    return p.getInt("Today", 201)
+}
+
+fun setToday(days: Int) {
+    val e = App.instance.getSharedPreferences("Today", Context.MODE_PRIVATE).edit()
+    e.putInt("Today", days)
+    e.apply()
+}
+
 fun showSetIpPortDialog(context: Context) {
     context.alert {
         customView {
@@ -104,8 +115,20 @@ fun showSetIpPortDialog(context: Context) {
     }.show()
 }
 
+fun showSetTodayDialog(context: Context) {
+    context.alert {
+        customView {
+            val e = editText {
+                hint = getToday().toString()
+            }
+            yesButton { setToday(e.text.toString().toInt()) }
+            noButton { }
+        }
+    }.show()
+}
+
 //默认半径0.001
-fun LatLng.isInRadius(center: LatLng, radius: Double = 0.001): Boolean = latitude * latitude + longitude * longitude < radius * radius
+fun LatLng.isInRadius(center: LatLng, radius: Double = 0.001): Boolean = (latitude - center.latitude) * (latitude - center.latitude) + (longitude - center.longitude) * (longitude - center.longitude) < radius * radius
 
 //果冻回弹插值器
 class MyOverShootInterpolator(val factor: Double) : Interpolator {
