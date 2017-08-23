@@ -103,6 +103,16 @@ fun setToday(days: Int) {
     e.putInt("Today", days)
     e.apply()
 }
+fun getTimeOut(): Int {
+    val p = App.instance.getSharedPreferences("TimeOut", Context.MODE_PRIVATE)
+    return p.getInt("TimeOut", 10)
+}
+
+fun setTimeOut(timeOut: Int) {
+    val e = App.instance.getSharedPreferences("TimeOut", Context.MODE_PRIVATE).edit()
+    e.putInt("TimeOut", timeOut)
+    e.apply()
+}
 
 fun showSetIpPortDialog(context: Context) {
     context.alert {
@@ -123,6 +133,17 @@ fun showSetTodayDialog(context: Context) {
                 hint = getToday().toString()
             }
             yesButton { setToday(e.text.toString().toInt()) }
+            noButton { }
+        }
+    }.show()
+}
+fun showSetTimeOutDialog(context: Context) {
+    context.alert {
+        customView {
+            val e = editText {
+                hint = getTimeOut().toString()
+            }
+            yesButton { setTimeOut(e.text.toString().toInt()) }
             noButton { }
         }
     }.show()

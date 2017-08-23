@@ -85,7 +85,8 @@ public class Http {
 
     public static Http getInstance() {
         if (http == null) http = new Http();
-        if (http.client == null) http.client = new OkHttpClient();
+        if (http.client == null)
+            http.client = new OkHttpClient().newBuilder().readTimeout(MethodsKt.getTimeOut(), TimeUnit.SECONDS).build();
         if (http.dispatcher == null) http.dispatcher = http.client.dispatcher();
         return http;
     }
