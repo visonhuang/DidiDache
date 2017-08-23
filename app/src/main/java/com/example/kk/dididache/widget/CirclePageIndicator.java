@@ -231,6 +231,7 @@ public class CirclePageIndicator extends View implements PageIndicator {
 		final int action = ev.getAction() & MotionEventCompat.ACTION_MASK;
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
+
 			mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
 			mLastMotionX = ev.getX();
 			break;
