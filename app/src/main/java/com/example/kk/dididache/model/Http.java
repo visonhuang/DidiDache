@@ -69,8 +69,8 @@ public class Http {
         preUseRatio("estimation/useratio"),
         driveTime("estimation/drivetime");
 
-//        private String value = "http://192.168.199.56:8080/";
-        private String value = "http://192.168.1.132:10000/";
+        private String value = "http://192.168.199.56:8080/";
+//        private String value = "http://192.168.1.132:10000/";
 
         ADRESS(String value) {
             this.value += value;
@@ -91,10 +91,10 @@ public class Http {
                 getHeatPoints((HeatInfo) body, false);
                 break;
             case useRatio:
-                getUseRatio((UseRatioInfo) body,false);
+                getUseRatio((UseRatioInfo) body, false);
                 break;
             case preUseRatio:
-                getUseRatio((PreUseRatioInfo) body,true);
+                getUseRatio((PreUseRatioInfo) body, true);
                 break;
             case driveTime:
                 getRoutePlan((DriveTimeInfo) body);
@@ -106,10 +106,10 @@ public class Http {
                 getHeatPoints((HeatInfo) body, true);
                 break;
             case carCountChange:
-                getTaxiCountByTime((TaxiCountInfo) body,false);
+                getTaxiCountByTime((TaxiCountInfo) body, false);
                 break;
             case preCarCountChange:
-                getTaxiCountByTime((PreTaxiCountInfo) body,true);
+                getTaxiCountByTime((PreTaxiCountInfo) body, true);
                 break;
             case realTimeHeatMap:
                 getRealTimeHeatPoints((RealTimeHeatInfo) body);
@@ -132,7 +132,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
                     //数据处理
-                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data,feedBack.state));
+                    EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
                     MethodsKt.showToast(Http.this, "热力点出现了一些问题");
                     e.printStackTrace();
@@ -155,7 +155,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
                     //数据处理
-                    EventBus.getDefault().post(new HeatMapEvent(feedBack.data,feedBack.state));
+                    EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -164,7 +164,7 @@ public class Http {
     }
 
     //请求某个坐标下一段时间内出租车变化情况
-    private void getTaxiCountByTime(final Object info,final boolean isFuture) {
+    private void getTaxiCountByTime(final Object info, final boolean isFuture) {
 
 //        ArrayList<TaxiCount> list = new ArrayList<>();
 //        for (int i = 0; i < info.getBarCount(); i++) {
@@ -178,13 +178,13 @@ public class Http {
                 ArrayFeedBack<TaxiCount> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_TAXICOUNT, info, isFuture?ADRESS.preCarCountChange.value:ADRESS.carCountChange.value);
+                    Response response = getResponse(TAG_TAXICOUNT, info, isFuture ? ADRESS.preCarCountChange.value : ADRESS.carCountChange.value);
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
                     }.getType());
                     Logger.json(new Gson().toJson(feedBack));
                     //数据处理
-                    EventBus.getDefault().post(new TaxiCountEvent(feedBack.data,feedBack.state));
+                    EventBus.getDefault().post(new TaxiCountEvent(feedBack));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -204,14 +204,14 @@ public class Http {
                 ObjectFeedBack<UseRatio> feedBack;
                 try {
                     //接收数据
-                    Response response = getResponse(TAG_USE_RATIO, info, isFuture?ADRESS.preUseRatio.value:ADRESS.useRatio.value);
+                    Response response = getResponse(TAG_USE_RATIO, info, isFuture ? ADRESS.preUseRatio.value : ADRESS.useRatio.value);
                     //Logger.d(response.body().string());
                     com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
                     }.getType());
                     //数据处理
                     Logger.json(new Gson().toJson(feedBack));
-                    EventBus.getDefault().post(new UseRatioEvent(feedBack.data,feedBack.state));
+                    EventBus.getDefault().post(new UseRatioEvent(feedBack));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -232,7 +232,7 @@ public class Http {
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<DriveTime>>() {
                     }.getType());
                     //数据处理
-                    EventBus.getDefault().post(new DriveTimeEvent(feedBack.data,feedBack.state));
+                    EventBus.getDefault().post(new DriveTimeEvent(feedBack));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }
@@ -255,7 +255,7 @@ public class Http {
                     }.getType());
                     //数据处理
                     Logger.json(new Gson().toJson(feedBack));
-                    EventBus.getDefault().post(new ExceptionEvent(feedBack.data,feedBack.state));
+                    EventBus.getDefault().post(new ExceptionEvent(feedBack));
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 }

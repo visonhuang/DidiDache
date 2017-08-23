@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.animation.Interpolator
 import android.widget.Toast
+import com.baidu.mapapi.model.LatLng
 import java.text.SimpleDateFormat
 import java.time.Month
 import java.util.*
@@ -52,9 +53,7 @@ fun Calendar.toStr(format: String): String {
 
 fun Calendar.getTimeNow(): Calendar {
     val c = Calendar.getInstance()
-    c.add(Calendar.DATE,-200)
-    c.add(Calendar.HOUR_OF_DAY,1)
-    c.add(Calendar.MINUTE,15)
+    c.add(Calendar.DATE, -201)
     return c
 }
 
@@ -78,7 +77,8 @@ val Any.Tagg: String
         val tag = this.javaClass.name.split(".")
         return tag[tag.size - 1].replace("$", "->") + "===="
     }
-
+//默认半径0.001
+fun LatLng.isInRadius(center: LatLng, radius: Double = 0.001): Boolean = latitude * latitude + longitude * longitude < radius * radius
 
 //果冻回弹插值器
 class MyOverShootInterpolator(val factor: Double) : Interpolator {

@@ -99,10 +99,10 @@ class MainActivity : BaseActivity() {
     private var onMapClickListener: BaiduMap.OnMapClickListener = object : BaiduMap.OnMapClickListener {
         override fun onMapClick(p0: LatLng) {
             chartDialog?.show(timeManager!!.timeSelected, p0)
-            if (exceptions != null) {
+            if (exceptions != null && exceptions!!.exceptions != null) {
                 //TODO 判断该处是否有异常
-                exceptions!!.exceptions
-                        .filter { (it.x in p0.longitude - 0.0001..p0.longitude + 0.0001) && (it.y in p0.latitude - 0.0001..p0.latitude + 0.0001) }
+                exceptions!!.exceptions!!
+                        .filter { LatLng(it.y, it.x).isInRadius(p0) }
                         .forEach {
                             chartDialog?.hasException = true
                             DataKeeper.getInstance().exception = it
@@ -116,10 +116,10 @@ class MainActivity : BaseActivity() {
 
         override fun onMapPoiClick(p0: MapPoi): Boolean {
             chartDialog?.show(timeManager!!.timeSelected, p0.position)
-            if (exceptions != null) {
+            if (exceptions != null && exceptions!!.exceptions != null) {
                 //TODO 判断该处是否有异常
-                exceptions!!.exceptions
-                        .filter { (it.x in p0.position.longitude - 0.0001..p0.position.longitude + 0.0001) && (it.y in p0.position.latitude - 0.0001..p0.position.latitude + 0.0001) }
+                exceptions!!.exceptions!!
+                        .filter { LatLng(it.y, it.x).isInRadius(p0.position) }
                         .forEach {
                             chartDialog?.hasException = true
                             DataKeeper.getInstance().exception = it
@@ -257,11 +257,11 @@ class MainActivity : BaseActivity() {
                 if (isUnusualShowing) {
                     //显示异常点
                     openUnusual.unusualImageView.imageResource = R.drawable.cancel_unusual
-                    if (exceptions == null || exceptions!!.exceptions.isEmpty()) {
+                    if (exceptions == null || exceptions!!.exceptions == null || exceptions!!.exceptions!!.isEmpty()) {
                         //空不显示
                         return@onClick
                     } else {
-                        exceptionOverLays = map.addOverlays(exceptions!!.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
+                        exceptionOverLays = map.addOverlays(exceptions!!.exceptions!!.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
                     }
                 } else {
                     //去除异常点
@@ -413,17 +413,18 @@ class MainActivity : BaseActivity() {
 
     @Subscribe
     fun addHeatMap(event: HeatMapEvent) {
-        if (event.list.isEmpty()) return
+        if (event.list == null || event.list!!.isEmpty()) return
         Logger.json(Gson().toJson(event))
-        heatMap = HeatMap.Builder().weightedData(event.list.map { WeightedLatLng(LatLng(it.y, it.x), it.c.toDouble()) }).build()
+        heatMap = HeatMap.Builder().weightedData(event.list!!.map { WeightedLatLng(LatLng(it.y, it.x), it.c.toDouble()) }).build()
     }
 
     @Subscribe
     fun getUnusual(event: ExceptionEvent) {
+        if (event.exceptions == null) return
         exceptions = event
         if (isUnusualShowing) {
             if (!exceptionOverLays.isEmpty()) exceptionOverLays.map { it.remove() }
-            exceptionOverLays = map.addOverlays(event.exceptions.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
+            exceptionOverLays = map.addOverlays(event.exceptions!!.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
         }
     }
 
