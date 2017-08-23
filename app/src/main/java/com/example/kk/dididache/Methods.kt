@@ -56,7 +56,8 @@ fun Calendar.toStr(format: String): String {
 
 fun Calendar.getTimeNow(): Calendar {
     val c = Calendar.getInstance()
-    c.add(Calendar.DATE, -201)
+    val days = getToday()
+    c.add(Calendar.DATE, -days)
     return c
 }
 
