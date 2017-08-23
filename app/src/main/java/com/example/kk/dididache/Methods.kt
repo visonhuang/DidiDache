@@ -1,5 +1,7 @@
 package com.example.kk.dididache
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -7,6 +9,7 @@ import android.view.Gravity
 import android.view.animation.Interpolator
 import android.widget.Toast
 import com.baidu.mapapi.model.LatLng
+import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.time.Month
 import java.util.*
@@ -77,6 +80,30 @@ val Any.Tagg: String
         val tag = this.javaClass.name.split(".")
         return tag[tag.size - 1].replace("$", "->") + "===="
     }
+
+fun getIpPort(): String {
+    val p = App.instance.getSharedPreferences("ipPort", Context.MODE_PRIVATE)
+    return p.getString("ipPort", "0.0.0.0:0")
+}
+
+fun setIpPort(ipPort: String) {
+    val e = App.instance.getSharedPreferences("ipPort", Context.MODE_PRIVATE).edit()
+    e.putString("ipPort", ipPort)
+    e.apply()
+}
+
+fun showSetIpPortDialog(context: Context) {
+    context.alert {
+        customView {
+            val e = editText {
+                hint = getIpPort()
+            }
+            yesButton { setIpPort(e.text.toString()) }
+            noButton { }
+        }
+    }
+}
+
 //默认半径0.001
 fun LatLng.isInRadius(center: LatLng, radius: Double = 0.001): Boolean = latitude * latitude + longitude * longitude < radius * radius
 

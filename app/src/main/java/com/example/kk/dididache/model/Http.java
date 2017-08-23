@@ -22,6 +22,7 @@ import com.example.kk.dididache.model.netModel.response.TaxiCount;
 import com.example.kk.dididache.model.netModel.request.TaxiCountInfo;
 import com.example.kk.dididache.model.netModel.response.UseRatio;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.orhanobut.logger.Logger;
 
@@ -70,11 +71,14 @@ public class Http {
         preUseRatio("estimation/useratio"),
         driveTime("estimation/drivetime");
 
-        private String value = "http://192.168.199.56:8080/";
-//        private String value = "http://192.168.1.132:10000/";
+        public String value;
+
+        public String getUrl() {
+            return "http://" + MethodsKt.getIpPort() + "/" + value;
+        }
 
         ADRESS(String value) {
-            this.value += value;
+            this.value = value;
         }
     }
 
@@ -135,6 +139,7 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    showCause(e);
                     MethodsKt.showToast(Http.this, "热力点出现了一些问题");
                     e.printStackTrace();
                 }
@@ -158,6 +163,7 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    showCause(e);
                     e.printStackTrace();
                 }
             }
@@ -187,6 +193,7 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new TaxiCountEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    showCause(e);
                     e.printStackTrace();
                 }
             }
@@ -214,6 +221,7 @@ public class Http {
                     Logger.json(new Gson().toJson(feedBack));
                     EventBus.getDefault().post(new UseRatioEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    showCause(e);
                     e.printStackTrace();
                 }
             }
@@ -235,6 +243,7 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new DriveTimeEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    showCause(e);
                     ObjectFeedBack<DriveTime> errorFeedBack = new ObjectFeedBack<>();
                     errorFeedBack.state = -1;
                     EventBus.getDefault().post(new DriveTimeEvent(errorFeedBack));
@@ -261,6 +270,7 @@ public class Http {
                     Logger.json(new Gson().toJson(feedBack));
                     EventBus.getDefault().post(new ExceptionEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    showCause(e);
                     e.printStackTrace();
                 }
             }
@@ -283,7 +293,6 @@ public class Http {
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {
-//            MethodsKt.showToast(this,e.getCause().getClass());
             e.printStackTrace();
             return null;
         }
@@ -315,6 +324,14 @@ public class Http {
                     }
                 }
             }
+        }
+    }
+
+    private void showCause(java.lang.Exception e) {
+        if (e.getClass() == JsonSyntaxException.class) {
+            MethodsKt.showToast(this, "服务器返回异常");
+        } else if (e.getClass() == NullPointerException.class) {
+            MethodsKt.showToast(this, "服务器无返回");
         }
     }
 

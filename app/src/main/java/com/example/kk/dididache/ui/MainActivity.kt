@@ -44,6 +44,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sdk25.coroutines.onTouch
@@ -215,6 +216,7 @@ class MainActivity : BaseActivity() {
 
     //初始化定位
     private fun initLoc() {
+        alert {  }
         //注册定位监听器
         map.isMyLocationEnabled = true
         locClient.registerLocationListener(locationListener)

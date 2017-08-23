@@ -436,8 +436,8 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         } else {
             val end = time.clone() as Calendar
             val start = time.clone() as Calendar
-            start.add(Calendar.SECOND, -3)
-            end.add(Calendar.SECOND, 3)
+            start.add(Calendar.SECOND, -1000)
+            end.add(Calendar.SECOND, 1000)
             return Pair(start, end)
         }
 
