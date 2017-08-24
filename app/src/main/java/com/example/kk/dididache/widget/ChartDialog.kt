@@ -16,6 +16,7 @@ import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import com.baidu.mapapi.model.LatLng
 import com.example.kk.dididache.*
 import com.example.kk.dididache.control.adapter.ChartAdapter
@@ -42,6 +43,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import org.jetbrains.anko.find
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import java.util.*
@@ -60,12 +62,13 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     var viewPager = (context as MainActivity).viewPager
     var indicator = (context as MainActivity).indicator
     var contentView: View = View(context)//表容器
-    val scrim: View by lazy { (context as MainActivity).find<View>(R.id.scrim) }//遮罩
+    val scrim: View by lazy { (context as MainActivity).scrim }//遮罩
     val combinedChart: CombinedChart = CombinedChart(context)//by lazy { contentView.combinedChart }//表
     val pieChart: PieChart = PieChart(context)
-    val cancelButton: ImageView by lazy { (context as MainActivity).find<ImageView>(R.id.cancelButton) }
-    val detailButton: ImageView by lazy { (context as MainActivity).find<ImageView>(R.id.detailButton) }
+    val cancelButton: ImageView by lazy { (context as MainActivity).cancelButton }
+    val detailButton: ImageView by lazy { (context as MainActivity).detailButton }
     val underChartLinear: LinearLayout by lazy { contentView.find<LinearLayout>(R.id.underChartLinear) }
+    val loadingBar: ProgressBar by lazy { (context as MainActivity).chartProgressBar }
     var _chartClick: () -> Unit = {}//点击表
     var _dismiss: () -> Unit = {}//dialog消失
     var _detail: ChartDialog.() -> Unit = {}//点击详情
@@ -81,6 +84,10 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
                 DataKeeper.getInstance().exception = null
             }
         }
+    var isLoading = false
+        get() = !isLoadingCombinedChartDone || !isLoadingPieChartDone
+    var isLoadingCombinedChartDone = false
+    var isLoadingPieChartDone = false
 
     fun onChartClick(c: () -> Unit) {
         _chartClick = c
@@ -136,6 +143,10 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     }
 
     fun show(time: Calendar, pos: LatLng) {
+        isLoadingCombinedChartDone = false
+        isLoadingPieChartDone = false
+        combinedChart.data = null
+        pieChart.data = null
         EventBus.getDefault().register(this)
         setChartOptions(combinedChart, time)
         getDate(time, pos)//发出网络请求
@@ -153,21 +164,37 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
 
     //收到数据
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     fun setTaxiCountData(event: TaxiCountEvent) {
+
+
+        isLoadingCombinedChartDone = true
+        upDateProgressBar()
+        if (event.state != 1) {
+            showToast("折线图异常")
+            return
+        }
+
         if (event.list == null || event.list!!.isEmpty()) return
         val data = CombinedData()
         data.setData(getBarData(event.list!!))
         data.setData(getLineDate(event.list!!))
         DataKeeper.getInstance().combinedData = data//存放数据
         combinedChart.data = data
-        inUiThread { animateCombinedChart() }
+        animateCombinedChart()
 
     }
 
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     fun setUseRatioData(event: UseRatioEvent) {
+
+        isLoadingPieChartDone = true
+        upDateProgressBar()
+        if (event.state != 1) {
+            showToast("饼状图异常")
+            return
+        }
         if (event.useRatio == null) return
         val entries = mutableListOf<PieEntry>()
         val colors = mutableListOf<Int>()
@@ -190,7 +217,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         pieData.setValueTypeface(App.mTfLight)
         DataKeeper.getInstance().pieData = pieData
         pieChart.data = pieData
-        inUiThread { animatePieChart() }
+        animatePieChart()
     }
 
     //发出网络请求
@@ -344,7 +371,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     private fun setChartOptions(combinedChart: CombinedChart, time: Calendar) {
         //设置x轴
         val p0 = getTimeBound(time, true).first
-        DataKeeper.getInstance().timeStart = p0
+        DataKeeper.getInstance().timeStart = p0.clone() as Calendar
         xAxis.clear()
         for (i in 0..9) {
             xAxis.add(p0.toStr("HH:mm"))
@@ -399,6 +426,11 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         return s
     }
 
+    private fun upDateProgressBar() {
+        if (isLoading) loadingBar.visibility = View.VISIBLE
+        else loadingBar.visibility = View.GONE
+    }
+
     fun getTimeBound(time: Calendar, isAnHour: Boolean): Pair<Calendar, Calendar> {
         val a = Calendar.getInstance().getTimeNow().timeInMillis - time.timeInMillis
         if (isAnHour) {
@@ -444,7 +476,6 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
             end.add(Calendar.SECOND, 10)
             return Pair(start, end)
         }
-
 
     }
 }
