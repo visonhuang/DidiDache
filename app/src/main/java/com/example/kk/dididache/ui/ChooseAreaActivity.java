@@ -52,6 +52,7 @@ import java.util.List;
 
 public class ChooseAreaActivity extends AppCompatActivity implements OnGetSuggestionResultListener {
 
+    private List<Location> locations = new ArrayList<>();
     private List<String> mSuggest;
     private List<SuggestionResult.SuggestionInfo> infoList;
     private AutoCompleteTextView nodeText;
@@ -148,6 +149,13 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
                 intent.putExtra(LATLNG_BACK, latLng);
                 intent.putExtra(NAME_BACK, mSuggest.get(position));
                 Location location = new Location(mSuggest.get(position), latLng.latitude, latLng.longitude);
+                for(Location location2 : locations){
+                    if(location2.getLongtitude() == latLng.longitude && location2.getLatitude() == latLng.latitude){
+                        setResult(RESULT_OK, intent);
+                        finish();
+                        return;
+                    }
+                }
                 location.save();
                 setResult(RESULT_OK, intent);
                 finish();
@@ -177,7 +185,7 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
 
         Connector.getDatabase();
         List<String> nameList = new ArrayList<>();
-        List<Location> locations = DataSupport.findAll(Location.class);
+        locations = DataSupport.findAll(Location.class);
         if (locations.size() >= 2){
             onePersonImage.setVisibility(View.GONE);
             twoPersonImage.setVisibility(View.GONE);
@@ -200,6 +208,12 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
         lac.setOrder(LayoutAnimationController.ORDER_NORMAL);
         mListView.setLayoutAnimation(lac);
         mListView.setAdapter(new MySearchItemAdapter(this, nameList, locations));
+        for(String name : nameList){
+            Log.d("999", name);
+        }
+        for (Location location : locations){
+            Log.d("999", location.getLatitude() + ":" + location.getLongtitude());
+        }
     }
 
 

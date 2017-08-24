@@ -423,7 +423,7 @@ public class RoutePlanActivity extends AppCompatActivity
                         stLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
                     }else {
                         LatLng temp = data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
-                        if(temp.latitude == enLatLng.latitude || temp.longitude == enLatLng.longitude){
+                        if(temp.latitude == enLatLng.latitude || temp.longitude == enLatLng.longitude || nameBack.equals(endNodeText.getText().toString())){
                             MethodsKt.showToast(this, "起点和终点不能相同");
                             return;
                         }
@@ -448,7 +448,7 @@ public class RoutePlanActivity extends AppCompatActivity
                         enLatLng = (LatLng) data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
                     }else {
                         LatLng temp = data.getParcelableExtra(ChooseAreaActivity.LATLNG_BACK);
-                        if(temp.latitude == stLatLng.latitude || temp.longitude == stLatLng.longitude){
+                        if(temp.latitude == stLatLng.latitude || temp.longitude == stLatLng.longitude || nameBack2.equals(startNodeText.getText().toString())){
                             MethodsKt.showToast(this, "起点和终点不能相同");
                             return;
                         }
