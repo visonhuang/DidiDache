@@ -431,10 +431,9 @@ class MainActivity : BaseActivity() {
 
     @Subscribe
     fun getUnusual(event: ExceptionEvent) {
-        //if (event.exceptions == null) return
+        if (event.exceptions == null) return
         exceptions = event
         if (isUnusualShowing) {
-            showToast("isUnusualShowing")
             if (!exceptionOverLays.isEmpty()) exceptionOverLays.map { it.remove() }
             exceptionOverLays = map.addOverlays(event.exceptions!!.map { MarkerOptions().position(LatLng(it.y, it.x)).icon(exceptionIcon) })
         }

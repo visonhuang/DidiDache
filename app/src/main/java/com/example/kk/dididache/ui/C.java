@@ -20,6 +20,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.transition.Transition;
+import android.util.Log;
 import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +46,7 @@ import com.example.kk.dididache.model.Event.UseRatioEvent;
 import com.example.kk.dididache.model.netModel.response.Exception;
 import com.example.kk.dididache.widget.ChartDialog;
 import com.example.kk.dididache.widget.InkPageIndicator;
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -103,7 +105,9 @@ public class C extends AppCompatActivity {
         initView();
         setToolBar();
         initChart();
-        if (!(isLoading = DataKeeper.getInstance().isLoading())) {
+        isLoading = DataKeeper.getInstance().isLoading();
+        Log.d(MethodsKt.getTagg(this), String.valueOf(isLoading));
+        if (!isLoading) {
             getMessage();
         }
         upDateProgressBar();
@@ -367,6 +371,7 @@ public class C extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getCombinedData(TaxiCountEvent event) {
+        Log.d(MethodsKt.getTagg(this), "getCombinedData");
         isLoadingCombinedChartDone = true;
         upDateLoadingState();
         upDateProgressBar();
@@ -381,11 +386,13 @@ public class C extends AppCompatActivity {
         data.setData(MethodsKt.getBarData(event.getList()));
         data.setData(MethodsKt.getLineDate(event.getList()));
         bigChart.setData(data);
+        bigChart.animateY(1000, Easing.EasingOption.EaseInQuad);
     }
 
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void getPieData(UseRatioEvent event) {
+        Log.d(MethodsKt.getTagg(this), "getPieData");
         isLoadingPieChartDone = true;
         upDateLoadingState();
         upDateProgressBar();
@@ -395,6 +402,7 @@ public class C extends AppCompatActivity {
         }
         if (event.getUseRatio() == null) return;
         pieChart.setData(MethodsKt.getPieData(event.getUseRatio()));
+        pieChart.animateY(1000, Easing.EasingOption.EaseInQuad);
     }
 
 
