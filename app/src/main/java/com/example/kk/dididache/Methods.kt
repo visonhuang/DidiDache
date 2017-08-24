@@ -63,7 +63,6 @@ fun Calendar.getTimeNow(): Calendar {
     val c = Calendar.getInstance()
     val days = getToday()
     c.add(Calendar.DATE, -days)
-    c.add(Calendar.HOUR_OF_DAY, -5)
     return c
 }
 
