@@ -145,6 +145,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     fun show(time: Calendar, pos: LatLng) {
         isLoadingCombinedChartDone = false
         isLoadingPieChartDone = false
+        upDateProgressBar()
         combinedChart.data = null
         pieChart.data = null
         EventBus.getDefault().register(this)
