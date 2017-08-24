@@ -173,13 +173,10 @@ public class RoutePlanActivity extends AppCompatActivity
         changeImage = (ImageView) findViewById(R.id.change);
         changeImage.setOnClickListener(this);
 
-        routeLayout = findViewById(R.id.route_layout);
-
-        routeLayout.animate()
-                .translationX(-400F)
-                .alpha(0F)
-                .setDuration(100)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
+        mCardView = (CardView) findViewById(R.id.card_view);
+        mCardView.setTranslationY(-400);
+        mCardView.animate().translationY(0F).setDuration(300).setStartDelay(300)
+                .setInterpolator(new OvershootInterpolator())
                 .start();
 
         ImageView backImage = (ImageView) findViewById(R.id.back_image);
@@ -205,7 +202,6 @@ public class RoutePlanActivity extends AppCompatActivity
         mSearch = RoutePlanSearch.newInstance();
         mSearch.setOnGetRoutePlanResultListener(this);
 
-        mCardView = (CardView) findViewById(R.id.card_view);
         startNodeText = (TextView) findViewById(R.id.start_node);
         endNodeText = (TextView) findViewById(R.id.end_node);
         startNodeText.setOnClickListener(this);

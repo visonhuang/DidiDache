@@ -16,6 +16,7 @@ import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
@@ -68,6 +69,12 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
 
         nodeText = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
         nodeText.setDropDownVerticalOffset(5);
+        nodeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                scrim.setVisibility(View.GONE);
+            }
+        });
 
         ViewTreeObserver vto1 = nodeText.getViewTreeObserver();
         vto1.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -187,7 +194,7 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
         if(res == null || res.getAllSuggestions() == null){
             return;
         }
-
+        scrim.setVisibility(View.VISIBLE);
             infoList = res.getAllSuggestions();
             mSuggest = new ArrayList<>();
             for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
@@ -208,8 +215,8 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
 
     @Override
     protected void onResume() {
-        myLocaLinear.setTranslationX(1000F);
-        myLocaLinear.animate().translationX(0F).setInterpolator(new OvershootInterpolator()).setDuration(500).setStartDelay(200).start();
+        myLocaLinear.setTranslationX(500F);
+        myLocaLinear.animate().translationX(0F).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(300).setStartDelay(200).start();
         personAnimation();
         super.onResume();
     }
