@@ -153,7 +153,7 @@ fun showSetTimeOutDialog(context: Context) {
         }
     }.show()
 }
-private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
+ fun getLineDate(list: ArrayList<TaxiCount>): LineData {
     val d = LineData()
     val entries = (0 until list.size).map { Entry(it.toFloat(), (list[it].taxiCount).toFloat()) }
     val set = LineDataSet(entries, "Line")
@@ -168,7 +168,7 @@ private fun getLineDate(list: ArrayList<TaxiCount>): LineData {
     return d
 }
 
-private fun getBarData(list: ArrayList<TaxiCount>): BarData {
+ fun getBarData(list: ArrayList<TaxiCount>): BarData {
     val d = BarData()
     val entries = (0 until list.size).map { BarEntry(it.toFloat(), (list[it].taxiCount).toFloat()) }
     val set = BarDataSet(entries, "Bar")
@@ -178,7 +178,7 @@ private fun getBarData(list: ArrayList<TaxiCount>): BarData {
     return d
 }
 
-private fun getPieData(useRatio: UseRatio): PieData {
+ fun getPieData(useRatio: UseRatio): PieData {
     val entries = mutableListOf<PieEntry>()
     val colors = mutableListOf<Int>()
     val used = useRatio.taxiUse.toFloat() / useRatio.taxiSum.toFloat() * 100
