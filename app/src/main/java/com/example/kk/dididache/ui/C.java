@@ -366,7 +366,7 @@ public class C extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    private void getCombinedData(TaxiCountEvent event) {
+    public void getCombinedData(TaxiCountEvent event) {
         isLoadingCombinedChartDone = true;
         upDateLoadingState();
         upDateProgressBar();
@@ -385,7 +385,7 @@ public class C extends AppCompatActivity {
 
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    private void getPieData(UseRatioEvent event) {
+    public void getPieData(UseRatioEvent event) {
         isLoadingPieChartDone = true;
         upDateLoadingState();
         upDateProgressBar();
