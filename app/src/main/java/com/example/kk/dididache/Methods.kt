@@ -124,7 +124,7 @@ fun showSetIpPortDialog(context: Context) {
     context.alert {
         customView {
             val e = editText {
-                hint = getIpPort()
+                hint = "ip:port："+getIpPort()
             }
             yesButton { setIpPort(e.text.toString()) }
             noButton { }
@@ -143,14 +143,49 @@ fun setLocTime(locTime: Int) {
     e.apply()
 }
 
+fun getheatTime(): Int {
+    val p = App.instance.getSharedPreferences("heatTime", Context.MODE_PRIVATE)
+    return p.getInt("heatTime", 10)
+}
+
+fun setheatTime(heatTime: Int) {
+    val e = App.instance.getSharedPreferences("heatTime", Context.MODE_PRIVATE).edit()
+    e.putInt("heatTime", heatTime)
+    e.apply()
+}
+
+fun getpreHeatTime(): Int {
+    val p = App.instance.getSharedPreferences("preHeatTime", Context.MODE_PRIVATE)
+    return p.getInt("preHeatTime", 10)
+}
+
+fun setpreHeatTime(preHeatTime: Int) {
+    val e = App.instance.getSharedPreferences("preHeatTime", Context.MODE_PRIVATE).edit()
+    e.putInt("preHeatTime", preHeatTime)
+    e.apply()
+}
+
 fun showSetLocTimeDialog(context: Context) {
     context.alert {
         customView {
-            val e = editText {
-                hint = getLocTime().toString()
+            verticalLayout {
+                val loctime = editText {
+                    hint = "请求间隔(ms)："+getLocTime().toString()
+                }
+                val heatTime = editText {
+                    hint = "动态时长(s)："+ getheatTime().toString()
+                }
+                val preHeatTime = editText {
+                    hint = "静态半时长(s)："+ getpreHeatTime().toString()
+                }
+                yesButton {
+                    setLocTime(loctime.text.toString().toInt())
+                    setheatTime(heatTime.text.toString().toInt())
+                    setpreHeatTime(preHeatTime.text.toString().toInt())
+                }
+                noButton { }
             }
-            yesButton { setLocTime(e.text.toString().toInt()) }
-            noButton { }
+
         }
     }.show()
 }
@@ -159,7 +194,7 @@ fun showSetTodayDialog(context: Context) {
     context.alert {
         customView {
             val e = editText {
-                hint = getToday().toString()
+                hint = "减去天数："+getToday().toString()
             }
             yesButton { setToday(e.text.toString().toInt()) }
             noButton { }
@@ -171,7 +206,7 @@ fun showSetTimeOutDialog(context: Context) {
     context.alert {
         customView {
             val e = editText {
-                hint = getTimeOut().toString()
+                hint = "超时时长(s)："+getTimeOut().toString()
             }
             yesButton { setTimeOut(e.text.toString().toInt()) }
             noButton { }

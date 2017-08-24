@@ -54,7 +54,7 @@ import kotlin.collections.ArrayList
 
 class MainActivity : BaseActivity() {
     //定位相关
-    private val loctime = getLocTime()
+
     private val locClient by lazy { LocationClient(this) }
     private var locationListener: MyLocationListener? = MyLocationListener() //定位监听
     private var curPoint: LatLng = LatLng(0.0, 0.0)//当前经纬度
@@ -196,7 +196,7 @@ class MainActivity : BaseActivity() {
 
             /***********/
             if (timeManager!!.isNow) {
-                val info = RealTimeHeatInfo({val start = Calendar.getInstance().getTimeNow();start.add(Calendar.SECOND,-loctime);start.toStr()}(), {val end = Calendar.getInstance().getTimeNow();end.toStr()}())
+                val info = RealTimeHeatInfo({val start = Calendar.getInstance().getTimeNow();start.add(Calendar.SECOND,-getheatTime());start.toStr()}(), {val end = Calendar.getInstance().getTimeNow();end.toStr()}())
                 Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
                 Http.getInstance().doPost(Http.ADRESS.realTimeHeatMap, info)
             }
@@ -223,7 +223,7 @@ class MainActivity : BaseActivity() {
         val option = LocationClientOption()
         option.isOpenGps = true//开gps
         option.coorType = "bd09ll"//设置坐标类型
-        option.scanSpan = loctime//扫描速度
+        option.scanSpan = getLocTime()//扫描速度
         locClient.locOption = option
         Logger.i("开启定位")
         map.setMyLocationConfiguration(MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, BitmapDescriptorFactory.fromResource(R.drawable.my_location_point)))
