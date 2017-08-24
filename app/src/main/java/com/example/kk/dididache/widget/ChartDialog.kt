@@ -30,6 +30,7 @@ import com.example.kk.dididache.model.netModel.request.PreUseRatioInfo
 import com.example.kk.dididache.model.netModel.response.TaxiCount
 import com.example.kk.dididache.model.netModel.request.TaxiCountInfo
 import com.example.kk.dididache.model.netModel.request.UseRatioInfo
+import com.example.kk.dididache.model.netModel.response.UseRatio
 import com.example.kk.dididache.ui.MainActivity
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.Chart
@@ -196,25 +197,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
             return
         }
         if (event.useRatio == null) return
-        val entries = mutableListOf<PieEntry>()
-        val colors = mutableListOf<Int>()
-        val used = event.useRatio!!.taxiUse.toFloat() / event.useRatio!!.taxiSum.toFloat() * 100
-
-        entries.add(PieEntry(used, "已载客"))
-        entries.add(PieEntry(100 - used, "空 车"))
-
-        val dataSet = PieDataSet(entries, "")
-        dataSet.sliceSpace = 5F
-        dataSet.selectionShift = 5F
-
-        colors.add(0xff4da8ec.toInt())
-        colors.add(0xff85c8f3.toInt())
-        dataSet.colors = colors
-        val pieData = PieData(dataSet)
-        pieData.setValueFormatter(PercentFormatter())
-        pieData.setValueTextSize(8F)
-        pieData.setValueTextColor(Color.WHITE)
-        pieData.setValueTypeface(App.mTfLight)
+        val pieData = getPieData(event.useRatio!!)
         DataKeeper.getInstance().pieData = pieData
         pieChart.data = pieData
         animatePieChart()
@@ -261,6 +244,29 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         d.addDataSet(set)
         d.barWidth = 0.55F
         return d
+    }
+
+    private fun getPieData(useRatio: UseRatio): PieData {
+        val entries = mutableListOf<PieEntry>()
+        val colors = mutableListOf<Int>()
+        val used = useRatio.taxiUse.toFloat() / useRatio.taxiSum.toFloat() * 100
+
+        entries.add(PieEntry(used, "已载客"))
+        entries.add(PieEntry(100 - used, "空 车"))
+
+        val dataSet = PieDataSet(entries, "")
+        dataSet.sliceSpace = 5F
+        dataSet.selectionShift = 5F
+
+        colors.add(0xff4da8ec.toInt())
+        colors.add(0xff85c8f3.toInt())
+        dataSet.colors = colors
+        val pieData = PieData(dataSet)
+        pieData.setValueFormatter(PercentFormatter())
+        pieData.setValueTextSize(8F)
+        pieData.setValueTextColor(Color.WHITE)
+        pieData.setValueTypeface(App.mTfLight)
+        return pieData
     }
 
     /**
