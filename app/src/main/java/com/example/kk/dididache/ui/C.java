@@ -75,7 +75,6 @@ public class C extends AppCompatActivity {
 
     private boolean isLoadingCombinedChartDone = false;
     private boolean isLoadingPieChartDone = false;
-    private boolean isLoading = false;
 
     private CardView exceptionCardView;
     private ViewPager viewPager;
@@ -105,12 +104,16 @@ public class C extends AppCompatActivity {
         initView();
         setToolBar();
         initChart();
-        isLoading = DataKeeper.getInstance().isLoading();
-        Log.d(MethodsKt.getTagg(this), String.valueOf(isLoading));
-        if (!isLoading) {
-            getMessage();
+        isLoadingCombinedChartDone = DataKeeper.getInstance().isCombinedLodingDone;
+        isLoadingPieChartDone = DataKeeper.getInstance().isPieLoadingDone;
+        if (isLoadingCombinedChartDone) {
+            getCombinedMessage();
+            upDateProgressBar();
         }
-        upDateProgressBar();
+        if (isLoadingPieChartDone) {
+            getPieMessage();
+            upDateProgressBar();
+        }
     }
 
     /**
@@ -139,6 +142,8 @@ public class C extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 DataKeeper.getInstance().setPage(position);
+                upDateProgressBar();
+
             }
 
             @Override
@@ -200,10 +205,13 @@ public class C extends AppCompatActivity {
     /**
      * 从Intent中获得信息
      */
-    private void getMessage() {
+    private void getCombinedMessage() {
         bigChart.setData(DataKeeper.getInstance().getCombinedData());
-        pieChart.setData(DataKeeper.getInstance().getPieData());
+        setMessageForTextView();
+    }
 
+    private void getPieMessage() {
+        pieChart.setData(DataKeeper.getInstance().getPieData());
         setMessageForTextView();
     }
 
@@ -373,7 +381,6 @@ public class C extends AppCompatActivity {
     public void getCombinedData(TaxiCountEvent event) {
         Log.d(MethodsKt.getTagg(this), "getCombinedData");
         isLoadingCombinedChartDone = true;
-        upDateLoadingState();
         upDateProgressBar();
         if (event.getState() != 1) {
             MethodsKt.showToast(this, "折线图异常");
@@ -394,7 +401,6 @@ public class C extends AppCompatActivity {
     public void getPieData(UseRatioEvent event) {
         Log.d(MethodsKt.getTagg(this), "getPieData");
         isLoadingPieChartDone = true;
-        upDateLoadingState();
         upDateProgressBar();
         if (event.getState() != 1) {
             MethodsKt.showToast(this, "饼状图异常");
@@ -417,14 +423,19 @@ public class C extends AppCompatActivity {
         return s;
     }
 
-    private void upDateLoadingState() {
-        isLoading = !isLoadingCombinedChartDone || !isLoadingPieChartDone;
-    }
-
     private void upDateProgressBar() {
-        if (isLoading)
-            progressBar.setVisibility(View.VISIBLE);
-        else progressBar.setVisibility(View.GONE);
+        switch (viewPager.getCurrentItem()) {
+            case 0:
+                if (isLoadingCombinedChartDone) {
+                    progressBar.setVisibility(View.GONE);
+                } else progressBar.setVisibility(View.VISIBLE);
+                break;
+            case 1:
+                if (isLoadingPieChartDone) {
+                    progressBar.setVisibility(View.GONE);
+                } else progressBar.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 
 

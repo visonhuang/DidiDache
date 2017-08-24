@@ -18,6 +18,24 @@ public class DataKeeper {
     private Exception exception;
     private Calendar time;//传给其他活动的选中时间
     private boolean isLoading = false;
+    public boolean isCombinedLodingDone = false;
+    public boolean isPieLoadingDone = false;
+
+    public boolean isCombinedLodingDone() {
+        return isCombinedLodingDone;
+    }
+
+    public void setCombinedLodingDone(boolean combinedLodingDone) {
+        isCombinedLodingDone = combinedLodingDone;
+    }
+
+    public boolean isPieLoadingDone() {
+        return isPieLoadingDone;
+    }
+
+    public void setPieLoadingDone(boolean pieLoadingDone) {
+        isPieLoadingDone = pieLoadingDone;
+    }
 
     public boolean isLoading() {
         return isLoading;

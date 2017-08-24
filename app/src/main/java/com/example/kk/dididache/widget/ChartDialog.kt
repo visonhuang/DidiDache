@@ -88,7 +88,15 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     var isLoading = false
         get() = !isLoadingCombinedChartDone || !isLoadingPieChartDone
     var isLoadingCombinedChartDone = false
+        set(value) {
+            field = value
+            DataKeeper.getInstance().isCombinedLodingDone = value
+        }
     var isLoadingPieChartDone = false
+        set(value) {
+            field = value
+            DataKeeper.getInstance().isPieLoadingDone = value
+        }
 
     fun onChartClick(c: () -> Unit) {
         _chartClick = c
@@ -124,6 +132,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
             override fun onPageSelected(position: Int) {
                 DataKeeper.getInstance().page = position
+                upDateProgressBar()
 //                when (position) {
 //                    0 -> animateCombinedChart()
 //                    else -> animatePieChart()
@@ -433,8 +442,16 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     }
 
     private fun upDateProgressBar() {
-        if (isLoading) loadingBar.visibility = View.VISIBLE
-        else loadingBar.visibility = View.GONE
+        when (viewPager.currentItem) {
+            0 -> {
+                if (isLoadingCombinedChartDone) loadingBar.visibility = View.GONE
+                else loadingBar.visibility = View.VISIBLE
+            }
+            1 -> {
+                if (isLoadingPieChartDone) loadingBar.visibility = View.GONE
+                else loadingBar.visibility = View.VISIBLE
+            }
+        }
     }
 
     fun getTimeBound(time: Calendar, isAnHour: Boolean): Pair<Calendar, Calendar> {

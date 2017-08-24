@@ -108,6 +108,7 @@ fun setToday(days: Int) {
     e.putInt("Today", days)
     e.apply()
 }
+
 fun getTimeOut(): Int {
     val p = App.instance.getSharedPreferences("TimeOut", Context.MODE_PRIVATE)
     return p.getInt("TimeOut", 10)
@@ -131,6 +132,29 @@ fun showSetIpPortDialog(context: Context) {
     }.show()
 }
 
+fun getLocTime(): Int {
+    val p = App.instance.getSharedPreferences("LocTime", Context.MODE_PRIVATE)
+    return p.getInt("LocTime", 10)
+}
+
+fun setLocTime(locTime: Int) {
+    val e = App.instance.getSharedPreferences("LocTime", Context.MODE_PRIVATE).edit()
+    e.putInt("LocTime", locTime)
+    e.apply()
+}
+
+fun showSetLocTimeDialog(context: Context) {
+    context.alert {
+        customView {
+            val e = editText {
+                hint = getLocTime().toString()
+            }
+            yesButton { setLocTime(e.text.toString().toInt()) }
+            noButton { }
+        }
+    }.show()
+}
+
 fun showSetTodayDialog(context: Context) {
     context.alert {
         customView {
@@ -142,6 +166,7 @@ fun showSetTodayDialog(context: Context) {
         }
     }.show()
 }
+
 fun showSetTimeOutDialog(context: Context) {
     context.alert {
         customView {
@@ -153,7 +178,8 @@ fun showSetTimeOutDialog(context: Context) {
         }
     }.show()
 }
- fun getLineDate(list: ArrayList<TaxiCount>): LineData {
+
+fun getLineDate(list: ArrayList<TaxiCount>): LineData {
     val d = LineData()
     val entries = (0 until list.size).map { Entry(it.toFloat(), (list[it].taxiCount).toFloat()) }
     val set = LineDataSet(entries, "Line")
@@ -168,7 +194,7 @@ fun showSetTimeOutDialog(context: Context) {
     return d
 }
 
- fun getBarData(list: ArrayList<TaxiCount>): BarData {
+fun getBarData(list: ArrayList<TaxiCount>): BarData {
     val d = BarData()
     val entries = (0 until list.size).map { BarEntry(it.toFloat(), (list[it].taxiCount).toFloat()) }
     val set = BarDataSet(entries, "Bar")
@@ -178,7 +204,7 @@ fun showSetTimeOutDialog(context: Context) {
     return d
 }
 
- fun getPieData(useRatio: UseRatio): PieData {
+fun getPieData(useRatio: UseRatio): PieData {
     val entries = mutableListOf<PieEntry>()
     val colors = mutableListOf<Int>()
     val used = useRatio.taxiUse.toFloat() / useRatio.taxiSum.toFloat() * 100
