@@ -19,12 +19,15 @@ import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.baidu.mapapi.model.LatLng;
@@ -35,9 +38,16 @@ import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.example.kk.dididache.MyOverShootInterpolator;
 import com.example.kk.dididache.R;
+import com.example.kk.dididache.control.adapter.MySearchItemAdapter;
 import com.example.kk.dididache.control.adapter.SearchItemAdapter;
+import com.example.kk.dididache.model.Location;
+
+import org.litepal.crud.DataSupport;
+import org.litepal.tablemanager.Connector;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class ChooseAreaActivity extends AppCompatActivity implements OnGetSuggestionResultListener {
@@ -51,8 +61,10 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
     public static final String LATLNG_BACK = "latlng_back";
     public static final String NAME_BACK = "name_back";
     private ImageView onePersonImage;
+    private ImageView twoPersonImage;
     private ImageView backImage;
     private CardView myLocaLinear;
+    private ListView mListView;
     private int nodeTextLeft;
     private View scrim;
 
@@ -81,17 +93,6 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
             @Override
             public void onGlobalLayout() {
                 nodeTextLeft = nodeText.getLeft();
-            }
-        });
-
-        itemLinear = (LinearLayout) findViewById(R.id.item_linear);
-        ViewTreeObserver vto2 = itemLinear.getViewTreeObserver();
-        vto2.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                itemLinear.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                nodeText.setLeft(0);
-                Log.d("getWidth", nodeTextLeft + ":" + itemLinear.getLeft());
             }
         });
 
@@ -146,28 +147,19 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
                 Intent intent = new Intent();
                 intent.putExtra(LATLNG_BACK, latLng);
                 intent.putExtra(NAME_BACK, mSuggest.get(position));
+                Location location = new Location(mSuggest.get(position), latLng.latitude, latLng.longitude);
+                location.save();
                 setResult(RESULT_OK, intent);
                 finish();
             }
         });
 
-
+        twoPersonImage = (ImageView) findViewById(R.id.two_person_image);
         onePersonImage = (ImageView) findViewById(R.id.one_person_image);
         onePersonImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 personAnimation();
-            }
-        });
-
-        myLocaLinear = (CardView) findViewById(R.id.my_location);
-        myLocaLinear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.putExtra(NAME_BACK, "我的位置");
-                setResult(RESULT_OK, intent);
-                finish();
             }
         });
 
@@ -182,7 +174,34 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
                 }
             }
         });
+
+        Connector.getDatabase();
+        List<String> nameList = new ArrayList<>();
+        List<Location> locations = DataSupport.findAll(Location.class);
+        if (locations.size() >= 2){
+            onePersonImage.setVisibility(View.GONE);
+            twoPersonImage.setVisibility(View.GONE);
+        }
+        locations.add(new Location("我的位置", 0 ,0));
+        Collections.reverse(locations);
+        if(locations.size() > 20){
+            for(int a = 20; a < locations.size(); a++){
+                locations.remove(a);
+            }
+        }
+        for(Location location : locations){
+            nameList.add(location.getName());
+        }
+        mListView = (ListView) findViewById(R.id.list_view);
+
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.item_enter);
+        animation.setStartOffset(500);
+        LayoutAnimationController lac = new LayoutAnimationController(animation);
+        lac.setOrder(LayoutAnimationController.ORDER_NORMAL);
+        mListView.setLayoutAnimation(lac);
+        mListView.setAdapter(new MySearchItemAdapter(this, nameList, locations));
     }
+
 
     /**
      * 获取在线建议搜索结果，得到requestSuggestion返回的搜索结果
@@ -215,8 +234,6 @@ public class ChooseAreaActivity extends AppCompatActivity implements OnGetSugges
 
     @Override
     protected void onResume() {
-        myLocaLinear.setTranslationX(500F);
-        myLocaLinear.animate().translationX(0F).setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(300).setStartDelay(200).start();
         personAnimation();
         super.onResume();
     }

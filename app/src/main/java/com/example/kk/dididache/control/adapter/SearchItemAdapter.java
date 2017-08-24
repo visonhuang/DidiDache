@@ -57,7 +57,7 @@ public class SearchItemAdapter extends ArrayAdapter<String> {
         View blueLine;
 
         ViewHolder(View itemView) {
-            locationName = itemView.findViewById(R.id.suggest_location_name);
+            locationName = (TextView) itemView.findViewById(R.id.suggest_location_name);
             blueLine = itemView.findViewById(R.id.blue_line);
         }
     }

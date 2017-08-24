@@ -32,6 +32,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,6 +81,7 @@ import com.example.kk.dididache.control.adapter.SearchItemAdapter;
 import com.example.kk.dididache.model.DataKeeper;
 import com.example.kk.dididache.model.Event.DriveTimeEvent;
 import com.example.kk.dididache.model.Http;
+import com.example.kk.dididache.model.Location;
 import com.example.kk.dididache.model.netModel.request.DriveTimeInfo;
 import com.example.kk.dididache.model.netModel.request.Xy;
 import com.example.kk.dididache.model.netModel.response.DriveTime;
@@ -93,6 +95,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.Contract;
+import org.litepal.crud.DataSupport;
+import org.litepal.tablemanager.Connector;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -114,6 +118,7 @@ public class RoutePlanActivity extends AppCompatActivity
     private TextView popupText = null; //泡泡view
     MapView mMapView = null;    // 地图View
     BaiduMap mBaidumap = null;
+    ImageView backImage = null;
     RoutePlanSearch mSearch = null;
     DrivingRouteResult nowResultdrive = null;
     PlanNode stNode;
@@ -179,7 +184,7 @@ public class RoutePlanActivity extends AppCompatActivity
                 .setInterpolator(new OvershootInterpolator())
                 .start();
 
-        ImageView backImage = (ImageView) findViewById(R.id.back_image);
+        backImage = (ImageView) findViewById(R.id.back_image);
         backImage.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -209,6 +214,7 @@ public class RoutePlanActivity extends AppCompatActivity
         timeButton = (Button) findViewById(R.id.timeButton);
         timeCardView = (CardView) findViewById(R.id.time_card_view);
         requestLocation();
+
     }
 
     // 定制RouteOverly
