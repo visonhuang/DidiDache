@@ -20,6 +20,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.transition.Transition;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +37,10 @@ import com.example.kk.dididache.MethodsKt;
 import com.example.kk.dididache.MyOverShootInterpolator;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.ChartAdapter;
+import com.example.kk.dididache.control.adapter.SelectTimeManager;
 import com.example.kk.dididache.model.DataKeeper;
 import com.example.kk.dididache.model.netModel.response.Exception;
+import com.example.kk.dididache.widget.ChartDialog;
 import com.example.kk.dididache.widget.InkPageIndicator;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -280,12 +283,18 @@ public class C extends AppCompatActivity {
      */
     private void initChart() {
 
-        Calendar p0 = (Calendar) time.clone();
-        p0.add(Calendar.MINUTE, -60);
+//        Calendar p0 = (Calendar) time.clone();
+//        p0.add(Calendar.MINUTE, -60);
+//        xAxis.clear();
+//        for (int i = 0; i <= 8; i++) {
+//            xAxis.add(MethodsKt.toStr(p0, "HH.mm"));
+//            p0.add(Calendar.MINUTE, 15);
+//        }
+        Calendar p0 = (Calendar) DataKeeper.getInstance().getTimeStart().clone();
         xAxis.clear();
-        for (int i = 0; i <= 8; i++) {
-            xAxis.add(MethodsKt.toStr(p0, "HH.mm"));
-            p0.add(Calendar.MINUTE, 15);
+        for (int i = 0; i<= 9; i++) {
+            xAxis.add(MethodsKt.toStr(p0,"HH:mm"));
+            p0.add(Calendar.MINUTE, 6);
         }
         bigChart.getDescription().setText("车流量变化图");
         bigChart.getDescription().setXOffset(0f);
@@ -449,4 +458,5 @@ public class C extends AppCompatActivity {
         s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 9, s.length(), 0);
         return s;
     }
+
 }
