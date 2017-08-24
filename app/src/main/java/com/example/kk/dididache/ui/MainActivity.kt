@@ -433,7 +433,7 @@ class MainActivity : BaseActivity() {
         doAsync {
             val data = event.list!!.map { Log.d(Tagg, "in");WeightedLatLng(LatLng(it.y, it.x)) }
             Log.d(Tagg, "${data.size}")
-            val heat = HeatMap.Builder().weightedData(data).build()
+            val heat = HeatMap.Builder().gradient(Gradient(intArrayOf(Color.BLUE, Color.GREEN, Color.RED), floatArrayOf(0.005F,0.1F,1F))).weightedData(data).build()
             uiThread { heatMap = heat }
         }
 
