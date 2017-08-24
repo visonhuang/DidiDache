@@ -426,17 +426,16 @@ class MainActivity : BaseActivity() {
 
     @Subscribe
     fun addHeatMap(event: HeatMapEvent) {
+        if (event.state == 13){
+            showToast("无法生成未来热力图")
+        }
         if (event.list == null || event.list!!.isEmpty()) return
-
-        Logger.d("热力点：" + event.list!!.size)
-        Logger.json(Gson().toJson(event.list!![1]))
         doAsync {
             val data = event.list!!.map { Log.d(Tagg, "in");WeightedLatLng(LatLng(it.y, it.x)) }
-            Log.d(Tagg, "${data.size}")
-            val heat = HeatMap.Builder().gradient(Gradient(intArrayOf(Color.BLUE, Color.GREEN, Color.RED), floatArrayOf(0.005F,0.1F,1F))).weightedData(data).build()
+            data.forEach { Log.d(Tagg, it.latLng.latitude.toString()) }
+            val heat = HeatMap.Builder().gradient(Gradient(intArrayOf(Color.BLUE, Color.GREEN, Color.RED), floatArrayOf(0.005F, 0.1F, 1F))).weightedData(data).build()
             uiThread { heatMap = heat }
         }
-
     }
 
     @Subscribe

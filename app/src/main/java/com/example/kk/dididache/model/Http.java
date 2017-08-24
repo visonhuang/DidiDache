@@ -24,6 +24,7 @@ import com.example.kk.dididache.model.netModel.response.UseRatio;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import com.orhanobut.logger.Logger;
 
 import org.greenrobot.eventbus.EventBus;
@@ -130,16 +131,20 @@ public class Http {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ArrayFeedBack<CarCountInXY> feedBack;
+                ArrayFeedBack<CarCountInXY> feedBack = null;
                 try {
                     //接收数据
                     Response response = getResponse(TAG_HEAT_POINTS, info, isFuture ? ADRESS.preHeatMap.getUrl() : ADRESS.heatMap.getUrl());
-                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    JsonReader reader = new JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<CarCountInXY>>() {
                     }.getType());
                     //数据处理
                     EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
+                    if (feedBack != null)
+                        EventBus.getDefault().post(new HeatMapEvent(null, feedBack.state));
+                    else
+                        EventBus.getDefault().post(new HeatMapEvent(new ArrayFeedBack<CarCountInXY>()));
                     MethodsKt.showToast(Http.this, "热力点出现了一些问题");
                     e.printStackTrace();
                 }
@@ -181,18 +186,21 @@ public class Http {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ArrayFeedBack<TaxiCount> feedBack;
+                ArrayFeedBack<TaxiCount> feedBack = null;
                 try {
                     //接收数据
                     Response response = getResponse(TAG_TAXICOUNT, info, isFuture ? ADRESS.preCarCountChange.getUrl() : ADRESS.carCountChange.getUrl());
-                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    JsonReader reader = new JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ArrayFeedBack<TaxiCount>>() {
                     }.getType());
                     Logger.json(new Gson().toJson(feedBack));
                     //数据处理
                     EventBus.getDefault().post(new TaxiCountEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    EventBus.getDefault().post(new TaxiCountEvent(new ArrayFeedBack<TaxiCount>()));
+                    if (feedBack != null)
+                        EventBus.getDefault().post(new TaxiCountEvent(null, feedBack.state));
+                    else
+                        EventBus.getDefault().post(new TaxiCountEvent(new ArrayFeedBack<TaxiCount>()));
                     e.printStackTrace();
                 }
             }
@@ -208,19 +216,22 @@ public class Http {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ObjectFeedBack<UseRatio> feedBack;
+                ObjectFeedBack<UseRatio> feedBack = null;
                 try {
                     //接收数据
                     Response response = getResponse(TAG_USE_RATIO, info, isFuture ? ADRESS.preUseRatio.getUrl() : ADRESS.useRatio.getUrl());
                     //Logger.d(response.body().string());
-                    com.google.gson.stream.JsonReader reader = new com.google.gson.stream.JsonReader(new InputStreamReader(response.body().byteStream()));
+                    JsonReader reader = new JsonReader(new InputStreamReader(response.body().byteStream()));
                     feedBack = new Gson().fromJson(reader, new TypeToken<ObjectFeedBack<UseRatio>>() {
                     }.getType());
                     //数据处理
                     Logger.json(new Gson().toJson(feedBack));
                     EventBus.getDefault().post(new UseRatioEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    EventBus.getDefault().post(new UseRatioEvent(new ObjectFeedBack<UseRatio>()));
+                    if (feedBack != null)
+                        EventBus.getDefault().post(new UseRatioEvent(null, feedBack.state));
+                    else
+                        EventBus.getDefault().post(new UseRatioEvent(new ObjectFeedBack<UseRatio>()));
                     e.printStackTrace();
                 }
             }
@@ -295,7 +306,6 @@ public class Http {
     }
 
 
-
     //取消请求
     public void cancelCall(int tag) {
 
@@ -327,7 +337,6 @@ public class Http {
 
         }
     }
-
 
 
 }

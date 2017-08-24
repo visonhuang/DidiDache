@@ -182,6 +182,10 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         isLoadingCombinedChartDone = true
         DataKeeper.getInstance().isLoading = isLoading
         upDateProgressBar()
+        if (event.state == 13) {
+            showToast("无法预测")
+            return
+        }
         if (event.state != 1) {
             showToast("折线图异常")
             return
@@ -202,6 +206,10 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         isLoadingPieChartDone = true
         DataKeeper.getInstance().isLoading = isLoading
         upDateProgressBar()
+        if (event.state == 13) {
+            showToast("无法预测")
+            return
+        }
         if (event.state != 1) {
             showToast("饼状图异常")
             return
