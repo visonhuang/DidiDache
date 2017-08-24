@@ -343,7 +343,8 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     private fun setChartOptions(combinedChart: CombinedChart, time: Calendar) {
         //设置x轴
-        val p0 = getTimeBound(time,true).first
+        val p0 = getTimeBound(time, true).first
+        DataKeeper.getInstance().timeStart = p0
         xAxis.clear()
         for (i in 0..9) {
             xAxis.add(p0.toStr("HH:mm"))

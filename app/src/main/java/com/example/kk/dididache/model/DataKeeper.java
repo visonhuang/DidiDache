@@ -16,8 +16,19 @@ public class DataKeeper {
     private CombinedData combinedData;
     private PieData pieData;
     private Exception exception;
-    private Calendar time;
-    private int page;
+    private Calendar time;//传给其他活动的选中时间
+
+    public Calendar getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(Calendar timeStart) {
+        this.timeStart = timeStart;
+    }
+
+    private Calendar timeStart;//传给C活动图表展示开始时间
+
+    private int page; //图表展示页码
 
     public int getPage() {
         return page;
