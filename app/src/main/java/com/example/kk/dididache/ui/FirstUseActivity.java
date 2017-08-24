@@ -20,6 +20,7 @@ import com.example.kk.dididache.widget.CirclePageIndicator;
 
 public class FirstUseActivity extends AppCompatActivity{
 
+    private Button secondButton;
     private Button updateButton;
     private Button dateButton;
     private Button dialogButton;
@@ -40,6 +41,14 @@ public class FirstUseActivity extends AppCompatActivity{
                 Intent intent = new Intent(FirstUseActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        secondButton = findViewById(R.id.second_button);
+        secondButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MethodsKt.showSetLocTimeDialog(FirstUseActivity.this);
             }
         });
 
