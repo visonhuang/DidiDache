@@ -6,6 +6,7 @@ import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.RectF
 import android.os.Build
@@ -18,6 +19,7 @@ import android.support.v4.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.transition.Transition
+import android.util.Log
 import android.view.View
 import com.baidu.location.*
 import com.baidu.mapapi.map.*
@@ -42,13 +44,13 @@ import com.google.gson.internal.bind.DateTypeAdapter
 import com.orhanobut.logger.Logger
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_main.view.*
+import kotlinx.coroutines.experimental.async
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.imageResource
+import org.jetbrains.anko.*
+import org.jetbrains.anko.custom.async
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import org.jetbrains.anko.sdk25.coroutines.onTouch
-import org.jetbrains.anko.startActivity
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -196,7 +198,7 @@ class MainActivity : BaseActivity() {
 
             /***********/
             if (timeManager!!.isNow) {
-                val info = RealTimeHeatInfo({val start = Calendar.getInstance().getTimeNow();start.add(Calendar.SECOND,-getheatTime());start.toStr()}(), {val end = Calendar.getInstance().getTimeNow();end.toStr()}())
+                val info = RealTimeHeatInfo({ val start = Calendar.getInstance().getTimeNow();start.add(Calendar.SECOND, -getheatTime());start.toStr() }(), { val end = Calendar.getInstance().getTimeNow();end.toStr() }())
                 Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
                 Http.getInstance().doPost(Http.ADRESS.realTimeHeatMap, info)
             }
@@ -216,7 +218,7 @@ class MainActivity : BaseActivity() {
 
     //初始化定位
     private fun initLoc() {
-        alert {  }
+        alert { }
         //注册定位监听器
         map.isMyLocationEnabled = true
         locClient.registerLocationListener(locationListener)
@@ -236,16 +238,16 @@ class MainActivity : BaseActivity() {
             onSelect {
                 map.clear()
                 val timeBound = chartDialog!!.getTimeBound(timeSelected, false)
-                if(timeManager!!.timeMode == -1){
+                if (timeManager!!.timeMode == -1) {
                     Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
                     Http.getInstance().doPost(Http.ADRESS.heatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
-                } else if (timeManager!!.timeMode == 1){
+                } else if (timeManager!!.timeMode == 1) {
                     Http.getInstance().cancelCall(Http.TAG_HEAT_POINTS)
                     Http.getInstance().doPost(Http.ADRESS.preHeatMap, HeatInfo(timeBound.first.toStr(), timeBound.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
                 }
 
                 //过去时间才能显示异常点
-                if(timeManager!!.timeMode == -1){
+                if (timeManager!!.timeMode == -1) {
                     val timeBound2 = chartDialog!!.getTimeBound(timeSelected, true)
                     Http.getInstance().cancelCall(Http.TAG_EXCEPTION)
                     Http.getInstance().doPost(Http.ADRESS.exception, ExceptionInfo(timeBound2.first.toStr(), timeBound2.second.toStr(), map.mapStatus.bound.northeast, map.mapStatus.bound.southwest))
@@ -425,8 +427,16 @@ class MainActivity : BaseActivity() {
     @Subscribe
     fun addHeatMap(event: HeatMapEvent) {
         if (event.list == null || event.list!!.isEmpty()) return
-        Logger.d("热力点："+event.list!!.size)
-        heatMap = HeatMap.Builder().weightedData(event.list!!.map { WeightedLatLng(LatLng(it.y, it.x), it.c.toDouble()) }).build()
+
+        Logger.d("热力点：" + event.list!!.size)
+        Logger.json(Gson().toJson(event.list!![1]))
+        doAsync {
+            val data = event.list!!.map { Log.d(Tagg, "in");WeightedLatLng(LatLng(it.y, it.x)) }
+            Log.d(Tagg, "${data.size}")
+            val heat = HeatMap.Builder().weightedData(data).build()
+            uiThread { heatMap = heat }
+        }
+
     }
 
     @Subscribe

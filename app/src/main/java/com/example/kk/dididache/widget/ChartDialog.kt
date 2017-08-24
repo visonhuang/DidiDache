@@ -11,6 +11,7 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import android.util.Log
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -215,6 +216,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     //发出网络请求
     fun getDate(time: Calendar, pos: LatLng) {
         val timeBound = getTimeBound(time, true)
+        Log.d(Tagg, "time ${timeBound.first.get(Calendar.HOUR_OF_DAY)}---${timeBound.second.get(Calendar.HOUR_OF_DAY)}")
         Http.getInstance().cancelCall(Http.TAG_TAXICOUNT)
         Http.getInstance().cancelCall(Http.TAG_USE_RATIO)
         when (timeManager.timeMode) {
@@ -456,49 +458,52 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     fun getTimeBound(time: Calendar, isAnHour: Boolean): Pair<Calendar, Calendar> {
         val a = Calendar.getInstance().getTimeNow().timeInMillis - time.timeInMillis
+        var end = Calendar.getInstance().getTimeNow()
+        var start = time.clone() as Calendar
         if (isAnHour) {
             when (timeManager.timeMode) {
                 -1 -> {
                     if (a < 3600000) {
-                        val end = Calendar.getInstance().getTimeNow()
-                        val start = time.clone() as Calendar
+                        end = Calendar.getInstance().getTimeNow()
+                        start = time.clone() as Calendar
                         start.add(Calendar.MILLISECOND, (-(3600000 - a)).toInt())
-                        return Pair(start, end)
+
                     } else {
-                        val end = time.clone() as Calendar
-                        val start = time.clone() as Calendar
+                        end = time.clone() as Calendar
+                        start = time.clone() as Calendar
                         start.add(Calendar.MINUTE, -30)
                         end.add(Calendar.MINUTE, 30)
-                        return Pair(start, end)
+
                     }
                 }
                 0 -> {
-                    val end = time.clone() as Calendar
+                    end = time.clone() as Calendar
                     end.add(Calendar.MINUTE, 60)
-                    return Pair(time, end)
+
                 }
                 else -> {
                     if (a > -3600000) {
-                        val start = Calendar.getInstance().getTimeNow()
-                        val end = time.clone() as Calendar
+                        start = Calendar.getInstance().getTimeNow()
+                        end = time.clone() as Calendar
                         end.add(Calendar.MILLISECOND, (3600000 + a).toInt())
-                        return Pair(start, end)
+
                     } else {
-                        val end = time.clone() as Calendar
-                        val start = time.clone() as Calendar
+                        end = time.clone() as Calendar
+                        start = time.clone() as Calendar
                         start.add(Calendar.MINUTE, -30)
                         end.add(Calendar.MINUTE, 30)
-                        return Pair(start, end)
+
                     }
                 }
             }
         } else {
-            val end = time.clone() as Calendar
-            val start = time.clone() as Calendar
+            end = time.clone() as Calendar
+            start = time.clone() as Calendar
             start.add(Calendar.SECOND, -getpreHeatTime())
             end.add(Calendar.SECOND, getpreHeatTime())
-            return Pair(start, end)
+
         }
+        return Pair(start, end)
 
     }
 }

@@ -43,11 +43,11 @@ class SelectTimeManager(var ctx: Context, val initFun: SelectTimeManager.() -> U
         get() {
             if (isNow) {
                 val now = Calendar.getInstance().getTimeNow()
-                DataKeeper.getInstance().time = now
+                DataKeeper.getInstance().time = now.clone() as Calendar
                 return now
             }
-            DataKeeper.getInstance().time = field
-            return field
+            DataKeeper.getInstance().time = field.clone() as Calendar
+            return field.clone() as Calendar
         }
     var _select: (Calendar) -> Unit = {}
 
