@@ -538,6 +538,7 @@ public class RoutePlanActivity extends AppCompatActivity
             timeButton.setText("预测时间：" + time + "分钟");
             position = driveTime.getIndex();
         }
+        mBaidumap.clear();
         route = nowResultdrive.getRouteLines().get(position);
         DrivingRouteOverlay overlay = new MyDrivingRouteOverlay(mBaidumap);
         mBaidumap.setOnMarkerClickListener(overlay);
