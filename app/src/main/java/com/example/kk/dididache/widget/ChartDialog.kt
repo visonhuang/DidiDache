@@ -145,6 +145,7 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     fun show(time: Calendar, pos: LatLng) {
         isLoadingCombinedChartDone = false
         isLoadingPieChartDone = false
+        DataKeeper.getInstance().isLoading = isLoading
         upDateProgressBar()
         combinedChart.data = null
         pieChart.data = null
@@ -167,15 +168,13 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
     //收到数据
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun setTaxiCountData(event: TaxiCountEvent) {
-
-
         isLoadingCombinedChartDone = true
+        DataKeeper.getInstance().isLoading = isLoading
         upDateProgressBar()
         if (event.state != 1) {
             showToast("折线图异常")
             return
         }
-
         if (event.list == null || event.list!!.isEmpty()) return
         val data = CombinedData()
         data.setData(getBarData(event.list!!))
@@ -189,8 +188,8 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun setUseRatioData(event: UseRatioEvent) {
-
         isLoadingPieChartDone = true
+        DataKeeper.getInstance().isLoading = isLoading
         upDateProgressBar()
         if (event.state != 1) {
             showToast("饼状图异常")

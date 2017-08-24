@@ -17,6 +17,15 @@ public class DataKeeper {
     private PieData pieData;
     private Exception exception;
     private Calendar time;//传给其他活动的选中时间
+    private boolean isLoading = false;
+
+    public boolean isLoading() {
+        return isLoading;
+    }
+
+    public void setLoading(boolean loading) {
+        isLoading = loading;
+    }
 
     public Calendar getTimeStart() {
         return timeStart;
