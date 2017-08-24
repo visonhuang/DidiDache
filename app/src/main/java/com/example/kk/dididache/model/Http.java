@@ -140,7 +140,6 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    showCause(e);
                     MethodsKt.showToast(Http.this, "热力点出现了一些问题");
                     e.printStackTrace();
                 }
@@ -164,7 +163,6 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new HeatMapEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    showCause(e);
                     e.printStackTrace();
                 }
             }
@@ -194,7 +192,7 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new TaxiCountEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    showCause(e);
+                    EventBus.getDefault().post(new TaxiCountEvent(new ArrayFeedBack<TaxiCount>()));
                     e.printStackTrace();
                 }
             }
@@ -222,7 +220,7 @@ public class Http {
                     Logger.json(new Gson().toJson(feedBack));
                     EventBus.getDefault().post(new UseRatioEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    showCause(e);
+                    EventBus.getDefault().post(new UseRatioEvent(new ObjectFeedBack<UseRatio>()));
                     e.printStackTrace();
                 }
             }
@@ -244,7 +242,6 @@ public class Http {
                     //数据处理
                     EventBus.getDefault().post(new DriveTimeEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    showCause(e);
                     ObjectFeedBack<DriveTime> errorFeedBack = new ObjectFeedBack<>();
                     errorFeedBack.state = -1;
                     EventBus.getDefault().post(new DriveTimeEvent(errorFeedBack));
@@ -271,7 +268,6 @@ public class Http {
                     Logger.json(new Gson().toJson(feedBack));
                     EventBus.getDefault().post(new ExceptionEvent(feedBack));
                 } catch (java.lang.Exception e) {
-                    showCause(e);
                     e.printStackTrace();
                 }
             }
@@ -298,9 +294,13 @@ public class Http {
         }
     }
 
+
+
     //取消请求
     public void cancelCall(int tag) {
+
         synchronized (dispatcher) {
+
             //取消队列中带tag的call
             for (Call call : dispatcher.queuedCalls()) {
                 if (tag == (int) call.request().tag()) {
@@ -324,15 +324,10 @@ public class Http {
                     }
                 }
             }
+
         }
     }
 
-    private void showCause(java.lang.Exception e) {
-        if (e.getClass() == JsonSyntaxException.class) {
-            MethodsKt.showToast(this, "服务器返回异常");
-        } else if (e.getClass() == NullPointerException.class) {
-            MethodsKt.showToast(this, "服务器无返回");
-        }
-    }
+
 
 }

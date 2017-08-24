@@ -2,6 +2,7 @@ package com.example.kk.dididache
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -9,6 +10,10 @@ import android.view.Gravity
 import android.view.animation.Interpolator
 import android.widget.Toast
 import com.baidu.mapapi.model.LatLng
+import com.example.kk.dididache.model.netModel.response.TaxiCount
+import com.example.kk.dididache.model.netModel.response.UseRatio
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.PercentFormatter
 import org.jetbrains.anko.*
 import java.text.SimpleDateFormat
 import java.time.Month
@@ -147,6 +152,53 @@ fun showSetTimeOutDialog(context: Context) {
             noButton { }
         }
     }.show()
+}
+ fun getLineDate(list: ArrayList<TaxiCount>): LineData {
+    val d = LineData()
+    val entries = (0 until list.size).map { Entry(it.toFloat(), (list[it].taxiCount).toFloat()) }
+    val set = LineDataSet(entries, "Line")
+    set.color = 0xff00ffff.toInt()
+    set.lineWidth = 1.5f
+    set.setCircleColor(0x9900ffff.toInt())
+    set.setCircleColorHole(0xff00ffff.toInt())
+    set.circleHoleRadius = 2F
+    set.circleRadius = 4F
+    set.setDrawValues(false)
+    d.addDataSet(set)
+    return d
+}
+
+ fun getBarData(list: ArrayList<TaxiCount>): BarData {
+    val d = BarData()
+    val entries = (0 until list.size).map { BarEntry(it.toFloat(), (list[it].taxiCount).toFloat()) }
+    val set = BarDataSet(entries, "Bar")
+    set.color = 0xff3b5c9a.toInt()
+    d.addDataSet(set)
+    d.barWidth = 0.55F
+    return d
+}
+
+ fun getPieData(useRatio: UseRatio): PieData {
+    val entries = mutableListOf<PieEntry>()
+    val colors = mutableListOf<Int>()
+    val used = useRatio.taxiUse.toFloat() / useRatio.taxiSum.toFloat() * 100
+
+    entries.add(PieEntry(used, "已载客"))
+    entries.add(PieEntry(100 - used, "空 车"))
+
+    val dataSet = PieDataSet(entries, "")
+    dataSet.sliceSpace = 5F
+    dataSet.selectionShift = 5F
+
+    colors.add(0xff4da8ec.toInt())
+    colors.add(0xff85c8f3.toInt())
+    dataSet.colors = colors
+    val pieData = PieData(dataSet)
+    pieData.setValueFormatter(PercentFormatter())
+    pieData.setValueTextSize(8F)
+    pieData.setValueTextColor(Color.WHITE)
+    pieData.setValueTypeface(App.mTfLight)
+    return pieData
 }
 
 //默认半径0.001

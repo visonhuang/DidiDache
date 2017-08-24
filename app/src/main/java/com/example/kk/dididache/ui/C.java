@@ -20,6 +20,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.transition.Transition;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.kk.dididache.App;
@@ -36,17 +38,25 @@ import com.example.kk.dididache.MethodsKt;
 import com.example.kk.dididache.MyOverShootInterpolator;
 import com.example.kk.dididache.R;
 import com.example.kk.dididache.control.adapter.ChartAdapter;
+import com.example.kk.dididache.control.adapter.SelectTimeManager;
 import com.example.kk.dididache.model.DataKeeper;
+import com.example.kk.dididache.model.Event.TaxiCountEvent;
+import com.example.kk.dididache.model.Event.UseRatioEvent;
 import com.example.kk.dididache.model.netModel.response.Exception;
+import com.example.kk.dididache.widget.ChartDialog;
 import com.example.kk.dididache.widget.InkPageIndicator;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
@@ -61,53 +71,9 @@ import java.util.Map;
 
 public class C extends AppCompatActivity {
 
-//    private List<String> xAxis = new ArrayList<>();
-//    private Calendar time = Calendar.getInstance();
-//    private CombinedChart bigChart;
-//
-//    @Override
-//    protected void onCreate(@Nullable Bundle savedInstanceState) {
-//        time = (Calendar) getIntent().getSerializableExtra("time");
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_chart);
-//        bigChart = (CombinedChart) findViewById(R.id.bigChart);
-//        bigChart.setData(DataKeeper.getInstance().getCombinedData());
-//        setChartOptions();
-//        bigChart.invalidate();
-//    }
-//
-//    private void setChartOptions () {
-//        Calendar p0 = (Calendar) time.clone();
-//        p0.add(Calendar.MINUTE,-60);
-//        xAxis.clear();
-//        for (int i = 0;i <= 8;i++) {
-//            xAxis.add(toString1("HH.mm",p0));
-//            p0.add(Calendar.MINUTE,15);
-//        }
-//        bigChart.getDescription().setEnabled(false);
-//        bigChart.getLegend().setEnabled(false);
-//        bigChart.getAxisRight().setEnabled(false);
-//        bigChart.getAxisLeft().setEnabled(true);
-//        bigChart.getAxisLeft().setAxisMinimum(0F);
-//        bigChart.getAxisLeft().setGranularity(1F);
-//        bigChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-//        bigChart.getXAxis().setAxisMinimum(0F);
-//        bigChart.getXAxis().setGranularity(1F);
-//        bigChart.getXAxis().setValueFormatter(new IAxisValueFormatter() {
-//            @Override
-//            public String getFormattedValue(float value, AxisBase axis) {
-//                return xAxis.get((int)value % 9);
-//            }
-//        });
-//    }
-//
-//    private String toString1 (String format,Calendar calendar) {
-//        SimpleDateFormat sdf = new SimpleDateFormat(format);
-//        calendar.add(Calendar.MONTH,-1);
-//        String result = sdf.format(time);
-//        calendar.add(Calendar.MONTH,1);
-//        return result;
-//    }
+    private boolean isLoadingCombinedChartDone = false;
+    private boolean isLoadingPieChartDone = false;
+    private boolean isLoading = false;
 
     private CardView exceptionCardView;
     private ViewPager viewPager;
@@ -123,63 +89,24 @@ public class C extends AppCompatActivity {
     private CombinedChart bigChart;
     private PieChart pieChart;
 
+    private ProgressBar progressBar;
+
     private Calendar time = Calendar.getInstance();
     private List<String> xAxis = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        EventBus.getDefault().register(this);
         super.onCreate(savedInstanceState);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            setEnterSharedElementCallback(new SharedElementCallback() {
-//                @Override
-//                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-//                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//
-//                @Override
-//                public void onSharedElementEnd(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-//
-//                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//
-//                @Override
-//                public void onRejectSharedElements(List<View> rejectedSharedElements) {
-//                    super.onRejectSharedElements(rejectedSharedElements);
-//                }
-//
-//                @Override
-//                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-//                    super.onMapSharedElements(names, sharedElements);
-//                }
-//
-//                @Override
-//                public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix, RectF screenBounds) {
-//                    return super.onCaptureSharedElementSnapshot(sharedElement, viewToGlobalMatrix, screenBounds);
-//                }
-//
-//                @Override
-//                public View onCreateSnapshotView(Context context, Parcelable snapshot) {
-//                    return super.onCreateSnapshotView(context, snapshot);
-//                }
-//
-//                @Override
-//                public void onSharedElementsArrived(List<String> sharedElementNames, List<View> sharedElements, OnSharedElementsReadyListener listener) {
-//                    addAnimationForCardView();
-//                    super.onSharedElementsArrived(sharedElementNames, sharedElements, listener);
-//                }
-//            });
-//
-//
-//        }
         setContentView(R.layout.activity_chart);
 
         initView();
         setToolBar();
         initChart();
-        getMessage();
-        setMessageForTextView();
-
-
+        if (!(isLoading = DataKeeper.getInstance().isLoading())) {
+            getMessage();
+        }
+        upDateProgressBar();
     }
 
     /**
@@ -194,7 +121,7 @@ public class C extends AppCompatActivity {
         reason = (TextView) findViewById(R.id.text_reason);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         inkPageIndicator = (InkPageIndicator) findViewById(R.id.chart_inkPageIndicator);
-
+        progressBar = (ProgressBar) findViewById(R.id.progressBar_chart);
         bigChart = new CombinedChart(this);
         pieChart = new PieChart(this);
 
@@ -221,7 +148,7 @@ public class C extends AppCompatActivity {
             exceptionCardView.setVisibility(View.GONE);
         }
 
-        viewPager.setCurrentItem(DataKeeper.getInstance().getPage(),false);
+        viewPager.setCurrentItem(DataKeeper.getInstance().getPage(), false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setSharedElementReturnTransition(getWindow().getSharedElementEnterTransition().clone());
             getWindow().getSharedElementEnterTransition().addListener(new Transition.TransitionListener() {
@@ -263,7 +190,6 @@ public class C extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.vector_drawable_chart_back);//设置返回图标
-           // actionBar.setBackgroundDrawable();
         }
     }
 
@@ -273,6 +199,8 @@ public class C extends AppCompatActivity {
     private void getMessage() {
         bigChart.setData(DataKeeper.getInstance().getCombinedData());
         pieChart.setData(DataKeeper.getInstance().getPieData());
+
+        setMessageForTextView();
     }
 
     /**
@@ -280,12 +208,18 @@ public class C extends AppCompatActivity {
      */
     private void initChart() {
 
-        Calendar p0 = (Calendar) time.clone();
-        p0.add(Calendar.MINUTE, -60);
+//        Calendar p0 = (Calendar) time.clone();
+//        p0.add(Calendar.MINUTE, -60);
+//        xAxis.clear();
+//        for (int i = 0; i <= 8; i++) {
+//            xAxis.add(MethodsKt.toStr(p0, "HH.mm"));
+//            p0.add(Calendar.MINUTE, 15);
+//        }
+        Calendar p0 = (Calendar) DataKeeper.getInstance().getTimeStart().clone();
         xAxis.clear();
-        for (int i = 0; i <= 8; i++) {
-            xAxis.add(MethodsKt.toStr(p0, "HH.mm"));
-            p0.add(Calendar.MINUTE, 15);
+        for (int i = 0; i <= 9; i++) {
+            xAxis.add(MethodsKt.toStr(p0, "HH:mm"));
+            p0.add(Calendar.MINUTE, 6);
         }
         bigChart.getDescription().setText("车流量变化图");
         bigChart.getDescription().setXOffset(0f);
@@ -393,15 +327,15 @@ public class C extends AppCompatActivity {
      * 为CardView添加动画
      */
     private void addAnimationForCardView() {
-        TranslateAnimation translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF,0,Animation.RELATIVE_TO_SELF,0,Animation.RELATIVE_TO_SELF,0.25f,Animation.RELATIVE_TO_SELF,0);
+        TranslateAnimation translateAnimation = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, 0.25f, Animation.RELATIVE_TO_SELF, 0);
         translateAnimation.setDuration(200);
         translateAnimation.setFillAfter(true);
         //translateAnimation.setStartOffset(500);
-        AlphaAnimation alphaAnimation = new AlphaAnimation(0f,1f);
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
         alphaAnimation.setDuration(200);
         alphaAnimation.setFillAfter(true);
         //alphaAnimation.setStartOffset(500);
-        ScaleAnimation scaleAnimation = new ScaleAnimation(0.9f,1f,0.9f,1f,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        ScaleAnimation scaleAnimation = new ScaleAnimation(0.9f, 1f, 0.9f, 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         scaleAnimation.setDuration(200);
         scaleAnimation.setFillAfter(true);
         //scaleAnimation.setStartOffset(500);
@@ -431,13 +365,38 @@ public class C extends AppCompatActivity {
         return true;
     }
 
-//    private String toString1 (String format,Calendar calendar) {
-//        SimpleDateFormat sdf = new SimpleDateFormat(format);
-//        calendar.add(Calendar.MONTH,-1);
-//        String result = sdf.format(time);
-//        calendar.add(Calendar.MONTH,1);
-//        return result;
-//    }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    private void getCombinedData(TaxiCountEvent event) {
+        isLoadingCombinedChartDone = true;
+        upDateLoadingState();
+        upDateProgressBar();
+        if (event.getState() != 1) {
+            MethodsKt.showToast(this, "折线图异常");
+            return;
+        }
+        if (event.getList() == null || event.getList().isEmpty()) {
+            return;
+        }
+        CombinedData data = new CombinedData();
+        data.setData(MethodsKt.getBarData(event.getList()));
+        data.setData(MethodsKt.getLineDate(event.getList()));
+        bigChart.setData(data);
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    private void getPieData(UseRatioEvent event) {
+        isLoadingPieChartDone = true;
+        upDateLoadingState();
+        upDateProgressBar();
+        if (event.getState() != 1) {
+            MethodsKt.showToast(this, "饼状图异常");
+            return;
+        }
+        if (event.getUseRatio() == null) return;
+        pieChart.setData(MethodsKt.getPieData(event.getUseRatio()));
+    }
+
 
     private SpannableString genText() {
         SpannableString s = new SpannableString("出租车载客率\npowered by QG Studio");
@@ -448,5 +407,22 @@ public class C extends AppCompatActivity {
         s.setSpan(new StyleSpan(Typeface.ITALIC), s.length() - 9, s.length(), 0);
         s.setSpan(new ForegroundColorSpan(ColorTemplate.getHoloBlue()), s.length() - 9, s.length(), 0);
         return s;
+    }
+
+    private void upDateLoadingState() {
+        isLoading = !isLoadingCombinedChartDone || !isLoadingPieChartDone;
+    }
+
+    private void upDateProgressBar() {
+        if (isLoading)
+            progressBar.setVisibility(View.VISIBLE);
+        else progressBar.setVisibility(View.GONE);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 }
