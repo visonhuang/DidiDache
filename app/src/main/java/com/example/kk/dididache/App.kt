@@ -13,6 +13,7 @@ import com.baidu.mapapi.SDKInitializer
 import com.baidu.mapapi.map.MapView
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
+import org.litepal.LitePalApplication
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -35,6 +36,7 @@ class App : Application() {
     override fun onCreate() {
         Logger.addLogAdapter(AndroidLogAdapter())
         initMapSdk(this)
+        LitePalApplication.initialize(applicationContext)
         super.onCreate()
         instance = this
     }
