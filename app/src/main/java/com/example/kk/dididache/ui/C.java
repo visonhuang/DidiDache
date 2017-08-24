@@ -64,54 +64,6 @@ import java.util.Map;
 
 public class C extends AppCompatActivity {
 
-//    private List<String> xAxis = new ArrayList<>();
-//    private Calendar time = Calendar.getInstance();
-//    private CombinedChart bigChart;
-//
-//    @Override
-//    protected void onCreate(@Nullable Bundle savedInstanceState) {
-//        time = (Calendar) getIntent().getSerializableExtra("time");
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_chart);
-//        bigChart = (CombinedChart) findViewById(R.id.bigChart);
-//        bigChart.setData(DataKeeper.getInstance().getCombinedData());
-//        setChartOptions();
-//        bigChart.invalidate();
-//    }
-//
-//    private void setChartOptions () {
-//        Calendar p0 = (Calendar) time.clone();
-//        p0.add(Calendar.MINUTE,-60);
-//        xAxis.clear();
-//        for (int i = 0;i <= 8;i++) {
-//            xAxis.add(toString1("HH.mm",p0));
-//            p0.add(Calendar.MINUTE,15);
-//        }
-//        bigChart.getDescription().setEnabled(false);
-//        bigChart.getLegend().setEnabled(false);
-//        bigChart.getAxisRight().setEnabled(false);
-//        bigChart.getAxisLeft().setEnabled(true);
-//        bigChart.getAxisLeft().setAxisMinimum(0F);
-//        bigChart.getAxisLeft().setGranularity(1F);
-//        bigChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-//        bigChart.getXAxis().setAxisMinimum(0F);
-//        bigChart.getXAxis().setGranularity(1F);
-//        bigChart.getXAxis().setValueFormatter(new IAxisValueFormatter() {
-//            @Override
-//            public String getFormattedValue(float value, AxisBase axis) {
-//                return xAxis.get((int)value % 9);
-//            }
-//        });
-//    }
-//
-//    private String toString1 (String format,Calendar calendar) {
-//        SimpleDateFormat sdf = new SimpleDateFormat(format);
-//        calendar.add(Calendar.MONTH,-1);
-//        String result = sdf.format(time);
-//        calendar.add(Calendar.MONTH,1);
-//        return result;
-//    }
-
     private CardView exceptionCardView;
     private ViewPager viewPager;
     private TextView where;
@@ -132,48 +84,6 @@ public class C extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            setEnterSharedElementCallback(new SharedElementCallback() {
-//                @Override
-//                public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-//                    super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//
-//                @Override
-//                public void onSharedElementEnd(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
-//
-//                    super.onSharedElementEnd(sharedElementNames, sharedElements, sharedElementSnapshots);
-//                }
-//
-//                @Override
-//                public void onRejectSharedElements(List<View> rejectedSharedElements) {
-//                    super.onRejectSharedElements(rejectedSharedElements);
-//                }
-//
-//                @Override
-//                public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-//                    super.onMapSharedElements(names, sharedElements);
-//                }
-//
-//                @Override
-//                public Parcelable onCaptureSharedElementSnapshot(View sharedElement, Matrix viewToGlobalMatrix, RectF screenBounds) {
-//                    return super.onCaptureSharedElementSnapshot(sharedElement, viewToGlobalMatrix, screenBounds);
-//                }
-//
-//                @Override
-//                public View onCreateSnapshotView(Context context, Parcelable snapshot) {
-//                    return super.onCreateSnapshotView(context, snapshot);
-//                }
-//
-//                @Override
-//                public void onSharedElementsArrived(List<String> sharedElementNames, List<View> sharedElements, OnSharedElementsReadyListener listener) {
-//                    addAnimationForCardView();
-//                    super.onSharedElementsArrived(sharedElementNames, sharedElements, listener);
-//                }
-//            });
-//
-//
-//        }
         setContentView(R.layout.activity_chart);
 
         initView();
@@ -266,7 +176,6 @@ public class C extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.vector_drawable_chart_back);//设置返回图标
-           // actionBar.setBackgroundDrawable();
         }
     }
 
@@ -440,13 +349,6 @@ public class C extends AppCompatActivity {
         return true;
     }
 
-//    private String toString1 (String format,Calendar calendar) {
-//        SimpleDateFormat sdf = new SimpleDateFormat(format);
-//        calendar.add(Calendar.MONTH,-1);
-//        String result = sdf.format(time);
-//        calendar.add(Calendar.MONTH,1);
-//        return result;
-//    }
 
     private SpannableString genText() {
         SpannableString s = new SpannableString("出租车载客率\npowered by QG Studio");
