@@ -16,7 +16,7 @@ public class DataKeeper {
     private CombinedData combinedData;
     private PieData pieData;
     private Exception exception;
-    private Calendar time;//传给其他活动的选中时间
+    private static Calendar time;//传给其他活动的选中时间
     private boolean isLoading = false;
     public boolean isCombinedLodingDone = false;
     public boolean isPieLoadingDone = false;

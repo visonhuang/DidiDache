@@ -201,8 +201,10 @@ public class RoutePlanActivity extends AppCompatActivity
         mBaidumap.setMyLocationEnabled(true);
         mBtnPre = (CardView) findViewById(R.id.pre);
         mBtnNext = (CardView) findViewById(R.id.next);
+        timeCardView = (CardView) findViewById(R.id.time_card_view);
         mBtnPre.setVisibility(View.INVISIBLE);
         mBtnNext.setVisibility(View.INVISIBLE);
+        timeCardView.setVisibility(View.INVISIBLE);
         // 初始化搜索模块，注册事件监听
         mSearch = RoutePlanSearch.newInstance();
         mSearch.setOnGetRoutePlanResultListener(this);
@@ -212,7 +214,6 @@ public class RoutePlanActivity extends AppCompatActivity
         startNodeText.setOnClickListener(this);
         endNodeText.setOnClickListener(this);
         timeButton = (Button) findViewById(R.id.timeButton);
-        timeCardView = (CardView) findViewById(R.id.time_card_view);
         requestLocation();
 
     }
