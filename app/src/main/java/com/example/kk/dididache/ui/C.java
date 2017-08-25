@@ -114,6 +114,7 @@ public class C extends AppCompatActivity {
             getPieMessage();
             upDateProgressBar();
         }
+        setMessageForTextView();
     }
 
     /**
@@ -207,12 +208,12 @@ public class C extends AppCompatActivity {
      */
     private void getCombinedMessage() {
         bigChart.setData(DataKeeper.getInstance().getCombinedData());
-        setMessageForTextView();
+      //  setMessageForTextView();
     }
 
     private void getPieMessage() {
         pieChart.setData(DataKeeper.getInstance().getPieData());
-        setMessageForTextView();
+      //  setMessageForTextView();
     }
 
     /**
