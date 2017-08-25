@@ -31,13 +31,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         >
-        <!--<meta-data-->
-            <!--android:name="com.baidu.lbsapi.API_KEY"-->
-            <!--android:value="DY1hDWQqrx7Pyh4sHjGO3a0gozxZFw5u" />-->
-
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="uhNczLLpDpfuND4lXtHK45KYAPFFXT6u" />
+            android:value="DY1hDWQqrx7Pyh4sHjGO3a0gozxZFw5u" />
+
+        <!--<meta-data-->
+            <!--android:name="com.baidu.lbsapi.API_KEY"-->
+            <!--android:value="uhNczLLpDpfuND4lXtHK45KYAPFFXT6u" />-->
 
         <activity android:name=".ui.MainActivity"
             android:screenOrientation="portrait">
