@@ -89,7 +89,7 @@ val Any.Tagg: String
 
 fun getIpPort(): String {
     val p = App.instance.getSharedPreferences("ipPort", Context.MODE_PRIVATE)
-    return p.getString("ipPort", "0.0.0.0:0")
+    return p.getString("ipPort", "10.21.48.11:80")
 }
 
 fun setIpPort(ipPort: String) {

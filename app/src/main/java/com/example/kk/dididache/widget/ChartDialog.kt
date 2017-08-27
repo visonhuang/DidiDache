@@ -197,7 +197,6 @@ class ChartDialog(var context: Context?, var timeManager: SelectTimeManager) {
         DataKeeper.getInstance().combinedData = data//存放数据
         combinedChart.data = data
         animateCombinedChart()
-
     }
 
 
